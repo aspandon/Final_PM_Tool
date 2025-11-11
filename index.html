@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Development Project Management</title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS - Local -->
+    <script src="./css/tailwind.js"></script>
 
     <!-- React & ReactDOM from cdnjs -->
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 
-    <!-- Recharts - using unpkg with specific UMD path -->
-    <script src="https://unpkg.com/recharts@2.5.0/dist/Recharts.js"></script>
+    <!-- Recharts - using cdnjs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.5.0/Recharts.js"></script>
 
     <!-- SheetJS from cdnjs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <!-- Lucide Icons - using unpkg with explicit browser bundle -->
-    <script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.js"></script>
+    <!-- Lucide Icons - using cdnjs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/umd/lucide.min.js"></script>
 
     <style>
         body {
@@ -239,11 +239,29 @@
         function checkDependencies() {
             const missing = [];
 
+            // Log what's available for debugging
+            console.log('Checking dependencies...');
+            console.log('React:', typeof React);
+            console.log('ReactDOM:', typeof ReactDOM);
+            console.log('Recharts:', typeof Recharts);
+            console.log('window.Recharts:', typeof window.Recharts);
+            console.log('XLSX:', typeof XLSX);
+            console.log('lucide:', typeof lucide);
+            console.log('window.lucide:', typeof window.lucide);
+
             if (typeof React === 'undefined') missing.push('React');
             if (typeof ReactDOM === 'undefined') missing.push('ReactDOM');
-            if (typeof Recharts === 'undefined') missing.push('Recharts');
+            if (typeof Recharts === 'undefined' && typeof window.Recharts === 'undefined') missing.push('Recharts');
             if (typeof XLSX === 'undefined') missing.push('XLSX');
-            if (typeof lucide === 'undefined') missing.push('Lucide');
+            if (typeof lucide === 'undefined' && typeof window.lucide === 'undefined') missing.push('Lucide');
+
+            // Set up global references if they're on window
+            if (typeof Recharts === 'undefined' && typeof window.Recharts !== 'undefined') {
+                window.Recharts = window.Recharts;
+            }
+            if (typeof lucide === 'undefined' && typeof window.lucide !== 'undefined') {
+                window.lucide = window.lucide;
+            }
 
             return missing;
         }
