@@ -15,7 +15,11 @@ export function ProjectForm({
   phases,
   darkMode
 }) {
-  const { BarChart3, Trash2 } = LucideReact;
+  // Using unicode icons instead of lucide-react to avoid dependency issues
+  const icons = {
+    BarChart3: '📊',
+    Trash2: '🗑️'
+  };
 
   return React.createElement('div', {
     key: pIndex,
@@ -33,9 +37,9 @@ export function ProjectForm({
       React.createElement('div', {
         className: 'flex items-center gap-2'
       },
-        React.createElement(BarChart3, {
-          className: `w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex-shrink-0`
-        }),
+        React.createElement('span', {
+          className: `text-xl ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex-shrink-0`
+        }, icons.BarChart3),
         React.createElement('input', {
           type: 'text',
           value: project.name,
@@ -54,7 +58,7 @@ export function ProjectForm({
           onClick: () => deleteProject(pIndex),
           className: 'p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg transition-all',
           title: 'Delete'
-        }, React.createElement(Trash2, { className: 'w-4 h-4' }))
+        }, React.createElement('span', null, icons.Trash2))
       )
     ),
 

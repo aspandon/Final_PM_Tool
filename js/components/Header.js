@@ -14,15 +14,14 @@ export function Header({
   darkMode,
   setDarkMode
 }) {
-  // Debug: Log what's available in LucideReact
-  console.log('LucideReact:', LucideReact);
-  console.log('BarChart3:', typeof LucideReact.BarChart3);
-  console.log('Plus:', typeof LucideReact.Plus);
-  console.log('Download:', typeof LucideReact.Download);
-  console.log('Upload:', typeof LucideReact.Upload);
-  console.log('Pencil:', typeof LucideReact.Pencil);
-
-  const { BarChart3, Plus, Download, Upload, Pencil } = LucideReact;
+  // Using unicode icons instead of lucide-react to avoid dependency issues
+  const icons = {
+    BarChart3: '📊',
+    Plus: '➕',
+    Download: '⬇️',
+    Upload: '⬆️',
+    Pencil: '✏️'
+  };
 
   return React.createElement('div', {
     className: 'flex items-center justify-between mb-6'
@@ -32,9 +31,9 @@ export function Header({
       className: 'flex items-center gap-3'
     },
       React.createElement('div', {
-        className: 'p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg'
+        className: 'p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg text-2xl'
       },
-        React.createElement(BarChart3, { className: 'w-7 h-7 text-white' })
+        icons.BarChart3
       ),
       React.createElement('div', null,
         React.createElement('h1', {
@@ -56,7 +55,7 @@ export function Header({
         className: 'flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5',
         title: 'Add new project'
       },
-        React.createElement(Plus, { className: 'w-4 h-4' }),
+        React.createElement('span', null, icons.Plus),
         'Add'
       ),
 
@@ -70,7 +69,7 @@ export function Header({
         } text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5`,
         title: hideProjectFields ? 'Show project input fields' : 'Hide project input fields'
       },
-        React.createElement(Pencil, { className: 'w-4 h-4' }),
+        React.createElement('span', null, icons.Pencil),
         hideProjectFields ? 'Show Fields' : 'Hide Fields'
       ),
 
@@ -80,7 +79,7 @@ export function Header({
         className: 'flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5',
         title: 'Import projects from Excel file'
       },
-        React.createElement(Upload, { className: 'w-4 h-4' }),
+        React.createElement('span', null, icons.Upload),
         'Import'
       ),
 
@@ -90,7 +89,7 @@ export function Header({
         className: 'flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:from-emerald-600 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5',
         title: 'Export projects to Excel file'
       },
-        React.createElement(Download, { className: 'w-4 h-4' }),
+        React.createElement('span', null, icons.Download),
         'Export'
       ),
 
