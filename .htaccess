@@ -1,0 +1,15 @@
+# Force correct MIME types for JavaScript files
+AddType text/javascript .js
+AddType application/javascript .js
+
+# Enable CORS for module loading (if needed)
+<IfModule mod_headers.c>
+    <FilesMatch "\.(js|mjs)$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+</IfModule>
+
+# Disable output compression for JS modules (can cause issues)
+<FilesMatch "\.(js|mjs)$">
+    SetEnv no-gzip 1
+</FilesMatch>
