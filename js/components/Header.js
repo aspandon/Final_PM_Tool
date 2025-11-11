@@ -14,7 +14,7 @@ export function Header({
   darkMode,
   setDarkMode
 }) {
-  const { BarChart3, Plus, Download, Upload, Edit2 } = LucideReact;
+  const { BarChart3, Plus, Download, Upload, Pencil } = LucideReact;
 
   return React.createElement('div', {
     className: 'flex items-center justify-between mb-6'
@@ -62,7 +62,7 @@ export function Header({
         } text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5`,
         title: hideProjectFields ? 'Show project input fields' : 'Hide project input fields'
       },
-        React.createElement(Edit2, { className: 'w-4 h-4' }),
+        React.createElement(Pencil, { className: 'w-4 h-4' }),
         hideProjectFields ? 'Show Fields' : 'Hide Fields'
       ),
 
