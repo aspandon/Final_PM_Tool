@@ -14,6 +14,14 @@ export function Header({
   darkMode,
   setDarkMode
 }) {
+  // Debug: Log what's available in LucideReact
+  console.log('LucideReact:', LucideReact);
+  console.log('BarChart3:', typeof LucideReact.BarChart3);
+  console.log('Plus:', typeof LucideReact.Plus);
+  console.log('Download:', typeof LucideReact.Download);
+  console.log('Upload:', typeof LucideReact.Upload);
+  console.log('Pencil:', typeof LucideReact.Pencil);
+
   const { BarChart3, Plus, Download, Upload, Pencil } = LucideReact;
 
   return React.createElement('div', {
