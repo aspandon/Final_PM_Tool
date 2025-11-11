@@ -15,7 +15,7 @@ export function ProjectForm({
   phases,
   darkMode
 }) {
-  const { BarChart3, Trash2 } = lucide;
+  const { BarChart3, Trash2 } = LucideReact;
 
   return React.createElement('div', {
     key: pIndex,

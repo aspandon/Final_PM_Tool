@@ -21,8 +21,8 @@
     <!-- SheetJS from cdnjs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <!-- Lucide Icons - Local -->
-    <script src="./css/lucide.js"></script>
+    <!-- Lucide React Icons - Local (React components, not vanilla JS) -->
+    <script src="./css/lucide-react.js"></script>
 
     <style>
         body {
@@ -250,22 +250,22 @@
             console.log('Recharts:', typeof Recharts);
             console.log('window.Recharts:', typeof window.Recharts);
             console.log('XLSX:', typeof XLSX);
-            console.log('lucide:', typeof lucide);
-            console.log('window.lucide:', typeof window.lucide);
+            console.log('LucideReact:', typeof LucideReact);
+            console.log('window.LucideReact:', typeof window.LucideReact);
 
             if (typeof React === 'undefined') missing.push('React');
             if (typeof ReactDOM === 'undefined') missing.push('ReactDOM');
             if (typeof PropTypes === 'undefined') missing.push('PropTypes');
             if (typeof Recharts === 'undefined' && typeof window.Recharts === 'undefined') missing.push('Recharts');
             if (typeof XLSX === 'undefined') missing.push('XLSX');
-            if (typeof lucide === 'undefined' && typeof window.lucide === 'undefined') missing.push('Lucide');
+            if (typeof LucideReact === 'undefined' && typeof window.LucideReact === 'undefined') missing.push('LucideReact');
 
             // Set up global references if they're on window
             if (typeof Recharts === 'undefined' && typeof window.Recharts !== 'undefined') {
                 window.Recharts = window.Recharts;
             }
-            if (typeof lucide === 'undefined' && typeof window.lucide !== 'undefined') {
-                window.lucide = window.lucide;
+            if (typeof LucideReact === 'undefined' && typeof window.LucideReact !== 'undefined') {
+                window.LucideReact = window.LucideReact;
             }
 
             return missing;

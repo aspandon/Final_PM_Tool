@@ -14,7 +14,7 @@ export function Header({
   darkMode,
   setDarkMode
 }) {
-  const { BarChart3, Plus, Download, Upload, Edit2 } = lucide;
+  const { BarChart3, Plus, Download, Upload, Edit2 } = LucideReact;
 
   return React.createElement('div', {
     className: 'flex items-center justify-between mb-6'
