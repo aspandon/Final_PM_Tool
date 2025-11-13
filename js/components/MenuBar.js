@@ -14,6 +14,8 @@ export function MenuBar({
   setHideProjectFields,
   darkMode,
   setDarkMode,
+  kanbanSettings,
+  setKanbanSettings,
   saveStatus
 }) {
   const { useState } = React;
@@ -23,6 +25,7 @@ export function MenuBar({
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
+  const [showKanbanSettingsModal, setShowKanbanSettingsModal] = useState(false);
 
   // Icon components
   const ChevronDown = ({ className }) => React.createElement('svg', {
@@ -320,6 +323,35 @@ export function MenuBar({
         settingsMenuOpen && React.createElement('div', {
           className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-50`
         },
+          // Kanban Settings
+          React.createElement('button', {
+            onClick: (e) => {
+              e.stopPropagation();
+              setShowKanbanSettingsModal(true);
+              setSettingsMenuOpen(false);
+            },
+            className: menuItemClass
+          },
+            React.createElement('svg', {
+              className: 'w-4 h-4',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: 2,
+              viewBox: '0 0 24 24'
+            },
+              React.createElement('path', { d: 'M3 3h7v9H3z' }),
+              React.createElement('path', { d: 'M14 3h7v5h-7z' }),
+              React.createElement('path', { d: 'M14 12h7v9h-7z' }),
+              React.createElement('path', { d: 'M3 16h7v5H3z' })
+            ),
+            'Kanban'
+          ),
+
+          // Divider
+          React.createElement('div', {
+            className: `my-1 border-t ${darkMode ? 'border-slate-700' : 'border-gray-200'}`
+          }),
+
           // Hide/Show Fields
           React.createElement('button', {
             onClick: (e) => {
@@ -782,6 +814,163 @@ export function MenuBar({
             },
             className: 'flex-1 px-4 py-2.5 text-sm font-medium bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-md'
           }, 'Yes, Clear All')
+        )
+      )
+    ),
+
+    // Kanban Settings Modal
+    showKanbanSettingsModal && React.createElement('div', {
+      className: 'fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4',
+      onClick: () => setShowKanbanSettingsModal(false)
+    },
+      React.createElement('div', {
+        className: `${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl max-w-md w-full`,
+        onClick: (e) => e.stopPropagation()
+      },
+        // Modal Header
+        React.createElement('div', {
+          className: `flex items-center justify-between p-6 border-b ${darkMode ? 'border-slate-700' : 'border-gray-200'}`
+        },
+          React.createElement('div', {
+            className: 'flex items-center gap-3'
+          },
+            React.createElement('div', {
+              className: 'p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl'
+            },
+              React.createElement('svg', {
+                className: 'w-6 h-6 text-white',
+                fill: 'none',
+                stroke: 'currentColor',
+                strokeWidth: 2,
+                viewBox: '0 0 24 24'
+              },
+                React.createElement('path', { d: 'M3 3h7v9H3z' }),
+                React.createElement('path', { d: 'M14 3h7v5h-7z' }),
+                React.createElement('path', { d: 'M14 12h7v9h-7z' }),
+                React.createElement('path', { d: 'M3 16h7v5H3z' })
+              )
+            ),
+            React.createElement('h2', {
+              className: `text-xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+            }, 'Kanban Settings')
+          ),
+          React.createElement('button', {
+            onClick: () => setShowKanbanSettingsModal(false),
+            className: `p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`
+          },
+            React.createElement(X, { className: 'w-5 h-5' })
+          )
+        ),
+
+        // Modal Content
+        React.createElement('div', {
+          className: 'p-6 space-y-4'
+        },
+          React.createElement('p', {
+            className: `text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+          }, 'Choose which information to display on Kanban cards'),
+
+          // RAG Status Toggle
+          React.createElement('div', {
+            className: 'flex items-center justify-between'
+          },
+            React.createElement('span', {
+              className: `font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+            }, 'RAG Status'),
+            React.createElement('button', {
+              onClick: () => setKanbanSettings({...kanbanSettings, showRAG: !kanbanSettings.showRAG}),
+              className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                kanbanSettings.showRAG
+                  ? 'bg-blue-600'
+                  : darkMode ? 'bg-slate-700' : 'bg-gray-300'
+              }`
+            },
+              React.createElement('span', {
+                className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  kanbanSettings.showRAG ? 'translate-x-6' : 'translate-x-1'
+                }`
+              })
+            )
+          ),
+
+          // PM Toggle
+          React.createElement('div', {
+            className: 'flex items-center justify-between'
+          },
+            React.createElement('span', {
+              className: `font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+            }, 'Project Manager'),
+            React.createElement('button', {
+              onClick: () => setKanbanSettings({...kanbanSettings, showPM: !kanbanSettings.showPM}),
+              className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                kanbanSettings.showPM
+                  ? 'bg-blue-600'
+                  : darkMode ? 'bg-slate-700' : 'bg-gray-300'
+              }`
+            },
+              React.createElement('span', {
+                className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  kanbanSettings.showPM ? 'translate-x-6' : 'translate-x-1'
+                }`
+              })
+            )
+          ),
+
+          // BP Toggle
+          React.createElement('div', {
+            className: 'flex items-center justify-between'
+          },
+            React.createElement('span', {
+              className: `font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+            }, 'Business Partner'),
+            React.createElement('button', {
+              onClick: () => setKanbanSettings({...kanbanSettings, showBP: !kanbanSettings.showBP}),
+              className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                kanbanSettings.showBP
+                  ? 'bg-blue-600'
+                  : darkMode ? 'bg-slate-700' : 'bg-gray-300'
+              }`
+            },
+              React.createElement('span', {
+                className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  kanbanSettings.showBP ? 'translate-x-6' : 'translate-x-1'
+                }`
+              })
+            )
+          ),
+
+          // Division Toggle
+          React.createElement('div', {
+            className: 'flex items-center justify-between'
+          },
+            React.createElement('span', {
+              className: `font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+            }, 'Division'),
+            React.createElement('button', {
+              onClick: () => setKanbanSettings({...kanbanSettings, showDivision: !kanbanSettings.showDivision}),
+              className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                kanbanSettings.showDivision
+                  ? 'bg-blue-600'
+                  : darkMode ? 'bg-slate-700' : 'bg-gray-300'
+              }`
+            },
+              React.createElement('span', {
+                className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  kanbanSettings.showDivision ? 'translate-x-6' : 'translate-x-1'
+                }`
+              })
+            )
+          )
+        ),
+
+        // Modal Actions
+        React.createElement('div', {
+          className: `flex gap-3 p-6 border-t ${darkMode ? 'border-slate-700' : 'border-gray-200'}`
+        },
+          React.createElement('button', {
+            onClick: () => setShowKanbanSettingsModal(false),
+            className: 'flex-1 px-4 py-2.5 text-sm font-medium bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-md'
+          }, 'Done')
         )
       )
     )

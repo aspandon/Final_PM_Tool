@@ -3,7 +3,7 @@ import { phases, colors, divisionColors, WORKING_DAYS_PER_MONTH } from './utils/
 import * as dateUtils from './utils/dateUtils.js';
 import { exportToExcel, importFromExcel } from './utils/excelUtils.js';
 import { calculateFTEChartData } from './utils/calculations.js';
-import { saveProjects, loadProjects, saveFilters, loadFilters, clearAllData } from './utils/storage.js';
+import { saveProjects, loadProjects, saveFilters, loadFilters, clearAllData, loadSettings, saveSettings } from './utils/storage.js';
 import { Header } from './components/Header.js';
 import { MenuBar } from './components/MenuBar.js';
 import { FilterPanel } from './components/FilterPanel.js';
@@ -28,6 +28,12 @@ function GanttChart() {
   const [activeTab, setActiveTab] = useState('projects');
   const [darkMode, setDarkMode] = useState(false);
   const [saveStatus, setSaveStatus] = useState('success'); // 'success', 'error', 'saving'
+  const [kanbanSettings, setKanbanSettings] = useState({
+    showRAG: true,
+    showPM: true,
+    showBP: true,
+    showDivision: true
+  });
   
   // Filter state
   const [filterStartDate, setFilterStartDate] = useState('');
@@ -84,6 +90,34 @@ function GanttChart() {
       console.log('Loaded filters from localStorage');
     }
   }, []);
+
+  /**
+   * Load settings from localStorage on mount
+   */
+  useEffect(() => {
+    const savedSettings = loadSettings();
+    if (savedSettings) {
+      setDarkMode(savedSettings.darkMode || false);
+      setHideProjectFields(savedSettings.hideProjectFields || false);
+      if (savedSettings.kanban) {
+        setKanbanSettings(savedSettings.kanban);
+      }
+      console.log('Loaded settings from localStorage');
+    }
+  }, []);
+
+  /**
+   * Auto-save settings whenever they change
+   */
+  useEffect(() => {
+    const settings = {
+      darkMode,
+      hideProjectFields,
+      activeTab,
+      kanban: kanbanSettings
+    };
+    saveSettings(settings);
+  }, [darkMode, hideProjectFields, activeTab, kanbanSettings]);
 
   /**
    * Auto-save projects whenever they change (to Supabase and localStorage)
@@ -564,7 +598,8 @@ function GanttChart() {
     return React.createElement(KanbanBoard, {
       projects: projects,
       setProjects: setProjects,
-      darkMode: darkMode
+      darkMode: darkMode,
+      kanbanSettings: kanbanSettings
     });
   };
 
@@ -697,6 +732,8 @@ function GanttChart() {
           setHideProjectFields,
           darkMode,
           setDarkMode,
+          kanbanSettings,
+          setKanbanSettings,
           saveStatus
         }),
 

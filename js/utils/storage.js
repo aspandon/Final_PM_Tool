@@ -131,17 +131,42 @@ export const saveSettings = (settings) => {
 export const loadSettings = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-    return stored ? JSON.parse(stored) : {
+    const defaults = {
       darkMode: false,
       hideProjectFields: false,
-      activeTab: 'planner'
+      activeTab: 'planner',
+      kanban: {
+        showRAG: true,
+        showPM: true,
+        showBP: true,
+        showDivision: true
+      }
+    };
+
+    if (!stored) return defaults;
+
+    // Merge stored settings with defaults to ensure new settings exist
+    const storedSettings = JSON.parse(stored);
+    return {
+      ...defaults,
+      ...storedSettings,
+      kanban: {
+        ...defaults.kanban,
+        ...(storedSettings.kanban || {})
+      }
     };
   } catch (error) {
     console.error('Error loading settings from localStorage:', error);
     return {
       darkMode: false,
       hideProjectFields: false,
-      activeTab: 'planner'
+      activeTab: 'planner',
+      kanban: {
+        showRAG: true,
+        showPM: true,
+        showBP: true,
+        showDivision: true
+      }
     };
   }
 };

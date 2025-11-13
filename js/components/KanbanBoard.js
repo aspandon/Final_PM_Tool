@@ -127,7 +127,7 @@ const formatDate = (dateString) => {
 /**
  * KanbanCard Component
  */
-const KanbanCard = ({ project, column, darkMode, onStatusChange }) => {
+const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings }) => {
   const isOnHold = column === 'onhold';
   const isDone = column === 'done';
   const finishDate = getRelevantFinishDate(project, column);
@@ -153,23 +153,23 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange }) => {
       className: `font-semibold mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
     }, project.name || 'Untitled Project'),
 
-    // Division
-    project.division && React.createElement('div', {
+    // Division (conditional)
+    kanbanSettings.showDivision && project.division && React.createElement('div', {
       className: `text-xs mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `Division: ${project.division}`),
 
-    // Project Manager
-    project.projectManager && React.createElement('div', {
+    // Project Manager (conditional)
+    kanbanSettings.showPM && project.projectManager && React.createElement('div', {
       className: `text-xs mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `PM: ${project.projectManager}`),
 
-    // Business Partner
-    project.businessPartner && React.createElement('div', {
+    // Business Partner (conditional)
+    kanbanSettings.showBP && project.businessPartner && React.createElement('div', {
       className: `text-xs mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `BP: ${project.businessPartner}`),
 
-    // RAG Status Badge
-    React.createElement('div', {
+    // RAG Status Badge (conditional)
+    kanbanSettings.showRAG && React.createElement('div', {
       className: 'flex items-center justify-between mt-3 pt-3 border-t ' + (darkMode ? 'border-slate-600' : 'border-gray-200')
     },
       React.createElement('span', {
@@ -180,8 +180,8 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange }) => {
       }, ragStatus.label)
     ),
 
-    // Date info
-    finishDate && React.createElement('div', {
+    // Date info (conditional - show with RAG status)
+    kanbanSettings.showRAG && finishDate && React.createElement('div', {
       className: `text-xs mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `Due: ${formatDate(finishDate)}`)
   );
@@ -240,7 +240,8 @@ const KanbanColumn = ({ title, projects, column, darkMode, onDrop }) => {
               key: idx,
               project,
               column,
-              darkMode
+              darkMode,
+              kanbanSettings
             })
           )
         : React.createElement('div', {
@@ -253,7 +254,7 @@ const KanbanColumn = ({ title, projects, column, darkMode, onDrop }) => {
 /**
  * Main KanbanBoard Component
  */
-export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
+export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings }) => {
   const { useEffect, useRef } = React;
 
   // Refs for scroll synchronization
