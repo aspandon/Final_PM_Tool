@@ -198,7 +198,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings 
 /**
  * KanbanColumn Component
  */
-const KanbanColumn = ({ title, projects, column, darkMode, onDrop }) => {
+const KanbanColumn = ({ title, projects, column, darkMode, onDrop, kanbanSettings }) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragOver = (e) => {
@@ -481,7 +481,8 @@ export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings })
           projects: projectsByColumn[column.key],
           column: column.key,
           darkMode,
-          onDrop: handleDrop
+          onDrop: handleDrop,
+          kanbanSettings: settings
         })
       )
     )
