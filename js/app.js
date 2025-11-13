@@ -788,13 +788,13 @@ function GanttChart() {
           // Lock/Unlock button - only visible on Projects tab
           activeTab === 'projects' && React.createElement('button', {
             onClick: () => setIsEditLocked(!isEditLocked),
-            className: `ml-auto px-4 py-3 text-sm font-semibold rounded-t-xl transition-all transform ${
+            className: `ml-auto px-3 py-3 text-xl rounded-t-xl transition-all transform ${
               darkMode
                 ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-2 ' + (isEditLocked ? 'border-red-400' : 'border-green-400')
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-2 ' + (isEditLocked ? 'border-red-500' : 'border-green-500')
             }`,
             title: isEditLocked ? 'Unlock editing' : 'Lock editing'
-          }, isEditLocked ? '🔒 Locked' : '🔓 Unlocked')
+          }, isEditLocked ? '🔒' : '🔓')
         ),
 
         // Tab Content
