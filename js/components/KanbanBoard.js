@@ -69,8 +69,23 @@ const calculateRAGStatus = (finishDate, isOnHold = false) => {
  * Uses kanbanStatus field for manual column placement via drag-and-drop
  */
 const getProjectColumn = (project) => {
-  // Use kanbanStatus field if set, otherwise default to backlog
-  return project.kanbanStatus || 'backlog';
+  // Migration map for old column keys to new ones
+  const migrationMap = {
+    'psd-prep': 'psdpre',
+    'psd-ready': 'psdready',
+    'approved': 'invapproved',
+    'uat': 'uat',
+    'done': 'done'
+  };
+
+  let kanbanStatus = project.kanbanStatus || 'backlog';
+
+  // Migrate old column keys to new format
+  if (migrationMap[kanbanStatus]) {
+    kanbanStatus = migrationMap[kanbanStatus];
+  }
+
+  return kanbanStatus;
 };
 
 /**
@@ -210,8 +225,7 @@ const KanbanColumn = ({ title, projects, column, darkMode, onDrop }) => {
  * Main KanbanBoard Component
  */
 export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
-  // Debug logging
-  console.log('KanbanBoard rendering with', projects ? projects.length : 0, 'projects');
+  const { useEffect } = React;
 
   // Safety check: ensure projects is an array
   if (!projects || !Array.isArray(projects)) {
@@ -223,6 +237,30 @@ export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
       React.createElement('p', { className: 'text-sm' }, 'Projects data is invalid. Please refresh the page.')
     );
   }
+
+  // One-time migration: Convert old kanbanStatus values to new format
+  useEffect(() => {
+    const migrationMap = {
+      'psd-prep': 'psdpre',
+      'psd-ready': 'psdready',
+      'approved': 'invapproved'
+    };
+
+    let needsMigration = false;
+    const migratedProjects = projects.map(project => {
+      if (project.kanbanStatus && migrationMap[project.kanbanStatus]) {
+        needsMigration = true;
+        console.log(`Migrating project "${project.name}" from "${project.kanbanStatus}" to "${migrationMap[project.kanbanStatus]}"`);
+        return { ...project, kanbanStatus: migrationMap[project.kanbanStatus] };
+      }
+      return project;
+    });
+
+    if (needsMigration) {
+      console.log('Migrating old kanbanStatus values to new format...');
+      setProjects(migratedProjects);
+    }
+  }, []); // Run only once on mount
 
   const columns = [
     { key: 'backlog', title: 'Backlog' },
@@ -259,7 +297,7 @@ export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
         if (grouped[column]) {
           grouped[column].push(project);
         } else {
-          console.warn('KanbanBoard: Unknown column', column, 'for project', project.name);
+          // Unknown column - default to backlog (migration will fix this)
           grouped['backlog'].push(project);
         }
       });
