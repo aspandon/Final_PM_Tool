@@ -146,11 +146,11 @@ export function FilterPanel({
   };
 
   return React.createElement('div', {
-    className: `mb-6 p-4 rounded-xl border ${darkMode ? 'border-slate-600' : 'border-white/30'} shadow-lg backdrop-blur-md`,
-    style: { 
-      background: darkMode 
-        ? 'linear-gradient(to right, rgba(51, 65, 85, 0.85), rgba(71, 85, 105, 0.85))' 
-        : 'linear-gradient(to right, rgba(147, 197, 253, 0.85), rgba(165, 180, 252, 0.85))' 
+    className: `mb-6 p-4 rounded-xl shadow-lg ${darkMode ? 'glass-dark border-animated-dark' : 'glass border-animated'}`,
+    style: {
+      background: darkMode
+        ? 'linear-gradient(to right, rgba(51, 65, 85, 0.85), rgba(71, 85, 105, 0.85))'
+        : 'linear-gradient(to right, rgba(147, 197, 253, 0.85), rgba(165, 180, 252, 0.85))'
     }
   },
     // Header
@@ -176,7 +176,7 @@ export function FilterPanel({
         }, 'Division'),
         React.createElement('button', {
           onClick: () => setShowDivisionDropdown(!showDivisionDropdown),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded text-left flex items-center justify-between btn-modern ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white text-gray-900 input-glow'}`
         },
           React.createElement('span', { className: 'truncate' },
             filterDivisions.length === 0 
@@ -190,7 +190,7 @@ export function FilterPanel({
         
         // Division Dropdown
         showDivisionDropdown && React.createElement('div', {
-          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'} border rounded-lg shadow-xl max-h-60 overflow-y-auto`
+          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'} border rounded-lg shadow-xl max-h-60 overflow-y-auto dropdown-enter`
         },
           // Dropdown header with buttons
           React.createElement('div', {
@@ -198,11 +198,11 @@ export function FilterPanel({
           },
             React.createElement('button', {
               onClick: selectAllDivisions,
-              className: 'flex-1 px-2 py-1.5 text-xs bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all font-medium shadow-sm'
+              className: 'flex-1 px-2 py-1.5 text-xs bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 font-medium shadow-sm btn-modern ripple btn-pulse'
             }, 'Select All'),
             React.createElement('button', {
               onClick: deselectAllDivisions,
-              className: 'flex-1 px-2 py-1.5 text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all font-medium shadow-sm'
+              className: 'flex-1 px-2 py-1.5 text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 font-medium shadow-sm btn-modern ripple btn-pulse'
             }, 'Clear All')
           ),
           // Division options
@@ -234,7 +234,7 @@ export function FilterPanel({
         }, 'Business Partner'),
         React.createElement('button', {
           onClick: () => setShowBPDropdown(!showBPDropdown),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded text-left flex items-center justify-between btn-modern ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white text-gray-900 input-glow'}`
         },
           React.createElement('span', { className: 'truncate' },
             selectedBPs.length === 0 
@@ -248,7 +248,7 @@ export function FilterPanel({
         
         // BP Dropdown
         showBPDropdown && React.createElement('div', {
-          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto`
+          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`
         },
           React.createElement('div', {
             className: `sticky top-0 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-100 border-gray-300'} p-2 border-b flex gap-2`
@@ -292,7 +292,7 @@ export function FilterPanel({
         }, 'Project Manager'),
         React.createElement('button', {
           onClick: () => setShowPMDropdown(!showPMDropdown),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded text-left flex items-center justify-between btn-modern ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white text-gray-900 input-glow'}`
         },
           React.createElement('span', { className: 'truncate' }, getPMSelectionText()),
           React.createElement('span', { className: 'ml-1' }, '▼')
@@ -300,7 +300,7 @@ export function FilterPanel({
         
         // PM Dropdown
         showPMDropdown && React.createElement('div', {
-          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto`
+          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`
         },
           React.createElement('div', {
             className: `sticky top-0 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-100 border-gray-300'} p-2 border-b flex gap-2`
@@ -390,7 +390,7 @@ export function FilterPanel({
         }, 'Select Projects'),
         React.createElement('button', {
           onClick: () => setShowProjectDropdown(!showProjectDropdown),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded text-left flex items-center justify-between btn-modern ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white text-gray-900 input-glow'}`
         },
           React.createElement('span', { className: 'truncate' },
             selectedProjects.length === 0 
@@ -404,7 +404,7 @@ export function FilterPanel({
         
         // Project Dropdown
         showProjectDropdown && React.createElement('div', {
-          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto`
+          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`
         },
           React.createElement('div', {
             className: `sticky top-0 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-100 border-gray-300'} p-2 border-b flex gap-2`
@@ -451,7 +451,7 @@ export function FilterPanel({
           type: 'date',
           value: filterStartDate,
           onChange: (e) => setFilterStartDate(e.target.value),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white text-gray-900 input-glow'}`
         })
       ),
 
@@ -466,7 +466,7 @@ export function FilterPanel({
           type: 'date',
           value: filterEndDate,
           onChange: (e) => setFilterEndDate(e.target.value),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white text-gray-900 input-glow'}`
         })
       )
     ),
@@ -493,7 +493,7 @@ export function FilterPanel({
             step: '0.1',
             value: pmBAU,
             onChange: (e) => setPmBAU(e.target.value),
-            className: `w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`,
+            className: `w-full px-3 py-2 text-sm border rounded-lg shadow-sm ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white text-gray-900 input-glow'}`,
             placeholder: 'e.g., 0.5'
           })
         ),
@@ -512,7 +512,7 @@ export function FilterPanel({
             step: '0.1',
             value: bpBAU,
             onChange: (e) => setBpBAU(e.target.value),
-            className: `w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`,
+            className: `w-full px-3 py-2 text-sm border rounded-lg shadow-sm ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white text-gray-900 input-glow'}`,
             placeholder: 'e.g., 0.5'
           })
         )
@@ -568,13 +568,13 @@ export function FilterPanel({
           // Apply Button
           React.createElement('button', {
             onClick: applyFilter,
-            className: 'px-4 py-2 text-xs bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
+            className: 'px-4 py-2 text-xs bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-medium shadow-md btn-modern btn-gradient-flow btn-pulse ripple'
           }, 'Apply'),
 
           // Clear Button
           React.createElement('button', {
             onClick: clearFilter,
-            className: 'px-4 py-2 text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
+            className: 'px-4 py-2 text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 font-medium shadow-md btn-modern btn-pulse ripple'
           }, 'Clear')
         ),
 

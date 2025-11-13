@@ -18,6 +18,119 @@ const { useState, useRef, useMemo, useEffect } = React;
 const { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
 
 function GanttChart() {
+  // Modern Icon Components
+  const FolderKanban = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z' }),
+    React.createElement('path', { d: 'M8 10v4' }),
+    React.createElement('path', { d: 'M12 10v2' }),
+    React.createElement('path', { d: 'M16 10v6' })
+  );
+
+  const Calendar = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('rect', { width: '18', height: '18', x: '3', y: '4', rx: '2', ry: '2' }),
+    React.createElement('line', { x1: '16', x2: '16', y1: '2', y2: '6' }),
+    React.createElement('line', { x1: '8', x2: '8', y1: '2', y2: '6' }),
+    React.createElement('line', { x1: '3', x2: '21', y1: '10', y2: '10' })
+  );
+
+  const LayoutDashboard = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('rect', { width: '7', height: '9', x: '3', y: '3', rx: '1' }),
+    React.createElement('rect', { width: '7', height: '5', x: '14', y: '3', rx: '1' }),
+    React.createElement('rect', { width: '7', height: '9', x: '14', y: '12', rx: '1' }),
+    React.createElement('rect', { width: '7', height: '5', x: '3', y: '16', rx: '1' })
+  );
+
+  const Users = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' }),
+    React.createElement('circle', { cx: '9', cy: '7', r: '4' }),
+    React.createElement('path', { d: 'M22 21v-2a4 4 0 0 0-3-3.87' }),
+    React.createElement('path', { d: 'M16 3.13a4 4 0 0 1 0 7.75' })
+  );
+
+  const PieChart = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M21.21 15.89A10 10 0 1 1 8 2.83' }),
+    React.createElement('path', { d: 'M22 12A10 10 0 0 0 12 2v10z' })
+  );
+
+  const TrendingUp = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('polyline', { points: '22 7 13.5 15.5 8.5 10.5 2 17' }),
+    React.createElement('polyline', { points: '16 7 22 7 22 13' })
+  );
+
+  const Lock = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('rect', { width: '18', height: '11', x: '3', y: '11', rx: '2', ry: '2' }),
+    React.createElement('path', { d: 'M7 11V7a5 5 0 0 1 10 0v4' })
+  );
+
+  const Unlock = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('rect', { width: '18', height: '11', x: '3', y: '11', rx: '2', ry: '2' }),
+    React.createElement('path', { d: 'M7 11V7a5 5 0 0 1 9.9-1' })
+  );
+
   // ===== STATE DECLARATIONS =====
   
   // Projects state
@@ -544,23 +657,24 @@ function GanttChart() {
   /**
    * Render tab button
    */
-  const renderTabButton = (tabName, label, emoji) => {
+  const renderTabButton = (tabName, label, IconComponent) => {
     const isActive = activeTab === tabName;
     return React.createElement('button', {
       key: tabName,
       onClick: () => setActiveTab(tabName),
-      className: `px-3 py-1 text-sm font-semibold rounded-t-lg transition-all transform shadow-md ${
+      className: `px-4 py-2 text-base font-semibold rounded-t-lg tab-button ripple flex items-center gap-2 ${
+        isActive ? 'active' : ''
+      } ${
         isActive
           ? darkMode
-            ? 'bg-gradient-to-br from-slate-800 to-slate-700 text-blue-400 border-b-4 border-blue-400 shadow-xl scale-105'
-            : 'bg-gradient-to-br from-white to-blue-50 text-blue-700 border-b-4 border-blue-600 shadow-xl scale-105'
+            ? 'bg-gradient-to-br from-slate-800 to-slate-700 text-blue-400 border-b-4 border-blue-400 shadow-xl glow'
+            : 'bg-gradient-to-br from-white to-blue-50 text-blue-700 border-b-4 border-blue-600 shadow-xl glow'
           : darkMode
-            ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 hover:scale-102'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-102'
+            ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
       }`
     },
-      React.createElement('span', { className: 'inline-block w-4 text-center' }, emoji),
-      ' ',
+      React.createElement(IconComponent, { className: 'w-5 h-5' }),
       label
     );
   };
@@ -709,13 +823,13 @@ function GanttChart() {
   // ===== MAIN RENDER =====
   
   return React.createElement('div', {
-    className: `min-h-screen ${darkMode ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'} transition-colors duration-300`
+    className: `min-h-screen theme-transition ${darkMode ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`
   },
     React.createElement('div', {
       className: 'max-w-[1800px] mx-auto p-6'
     },
       React.createElement('div', {
-        className: `${darkMode ? 'bg-slate-800/90' : 'bg-white/80'} backdrop-blur-xl rounded-2xl shadow-2xl border ${darkMode ? 'border-slate-700' : 'border-white/50'} p-6`
+        className: `${darkMode ? 'bg-slate-800/90' : 'bg-white/80'} backdrop-blur-xl rounded-2xl shadow-2xl border ${darkMode ? 'border-slate-700' : 'border-white/50'} p-6 theme-transition`
       },
         // Back to Hub button
         React.createElement('div', {
@@ -809,27 +923,25 @@ function GanttChart() {
         React.createElement('div', {
           className: 'flex gap-2 mb-6 border-b-2 ' + (darkMode ? 'border-slate-700' : 'border-gray-200')
         },
-          renderTabButton('projects', 'Projects', '📋'),
-          renderTabButton('planner', 'Planner', '📅'),
-          renderTabButton('kanban', 'Kanban', '📋'),
-          renderTabButton('resources', 'Resources', '👥'),
-          renderTabButton('overview', 'Divisions', '📊'),
-          renderTabButton('actuals', 'Actuals Comparison', '📈'),
+          renderTabButton('projects', 'Projects', FolderKanban),
+          renderTabButton('planner', 'Planner', Calendar),
+          renderTabButton('kanban', 'Kanban', LayoutDashboard),
+          renderTabButton('resources', 'Resources', Users),
+          renderTabButton('overview', 'Divisions', PieChart),
+          renderTabButton('actuals', 'Actuals', TrendingUp),
 
           // Lock/Unlock button - only visible on Projects tab
           activeTab === 'projects' && React.createElement('button', {
-            onClick: () => {
-              const newLockState = !isEditLocked;
-              alert(`Lock state changing to: ${newLockState ? 'LOCKED' : 'UNLOCKED'}`);
-              setIsEditLocked(newLockState);
-            },
-            className: `ml-auto px-3 py-1 text-sm rounded-t-lg transition-all transform shadow-md ${
+            onClick: () => setIsEditLocked(!isEditLocked),
+            className: `ml-auto px-4 py-2 text-base rounded-t-lg lock-button btn-modern flex items-center gap-2 ${
               darkMode
-                ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-4 ' + (isEditLocked ? 'border-red-400' : 'border-green-400')
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-4 ' + (isEditLocked ? 'border-red-500' : 'border-green-500')
+                ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-4 ' + (isEditLocked ? 'border-red-400 glow-red' : 'border-green-400 glow-green')
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-4 ' + (isEditLocked ? 'border-red-500 glow-red' : 'border-green-500 glow-green')
             }`,
             title: isEditLocked ? 'Unlock editing' : 'Lock editing'
-          }, React.createElement('span', { className: 'inline-block w-4 text-center' }, isEditLocked ? '🔒' : '🔓'))
+          },
+            React.createElement(isEditLocked ? Lock : Unlock, { className: 'w-5 h-5' })
+          )
         ),
 
         // Tab Content

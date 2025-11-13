@@ -16,13 +16,27 @@ export function ProjectForm({
   darkMode,
   isEditLocked = false
 }) {
+  // Modern Icon Component for Project
+  const Briefcase = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('rect', { width: '20', height: '14', x: '2', y: '7', rx: '2', ry: '2' }),
+    React.createElement('path', { d: 'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16' })
+  );
+
   return React.createElement('div', {
     key: pIndex,
-    className: `relative border-4 ${
+    className: `relative border-4 card-modern card-glow ${
       isEditLocked
-        ? 'border-red-500'
+        ? 'border-red-500 glow-red'
         : darkMode ? 'border-slate-600' : 'border-gray-200'
-    } ${darkMode ? 'bg-slate-800 hover:border-blue-500' : 'bg-white hover:border-blue-300'} rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all`,
+    } ${darkMode ? 'bg-slate-800 hover:border-blue-500' : 'bg-white hover:border-blue-300'} rounded-xl overflow-hidden shadow-md`,
     style: isEditLocked ? { pointerEvents: 'none', opacity: 0.6 } : {}
   },
     // Compact Header
@@ -37,14 +51,14 @@ export function ProjectForm({
       React.createElement('div', {
         className: 'flex items-center gap-2'
       },
-        React.createElement('span', {
-          className: 'text-lg flex-shrink-0'
-        }, '📊'),
+        React.createElement(Briefcase, {
+          className: 'w-6 h-6 flex-shrink-0 text-blue-500'
+        }),
         React.createElement('input', {
           type: 'text',
           value: project.name,
           onChange: (e) => updateProject(pIndex, 'name', e.target.value),
-          className: `flex-1 text-base font-bold px-3 py-1.5 border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg focus:ring-1 focus:ring-blue-500 placeholder-gray-400 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+          className: `flex-1 text-base font-bold px-3 py-1.5 border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white input-glow'} rounded-lg placeholder-gray-400 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
           placeholder: 'Project Name',
           disabled: isEditLocked
         }),
@@ -52,13 +66,13 @@ export function ProjectForm({
           type: 'text',
           value: project.division,
           onChange: (e) => updateProject(pIndex, 'division', e.target.value),
-          className: `w-36 text-sm font-semibold px-3 py-1.5 border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg focus:ring-1 focus:ring-blue-500 placeholder-gray-400 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+          className: `w-36 text-sm font-semibold px-3 py-1.5 border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white input-glow'} rounded-lg placeholder-gray-400 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
           placeholder: 'Division',
           disabled: isEditLocked
         }),
         React.createElement('button', {
           onClick: () => deleteProject(pIndex),
-          className: `p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg transition-all ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+          className: `p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
           title: isEditLocked ? 'Locked - Cannot delete' : 'Delete',
           disabled: isEditLocked
         }, React.createElement('span', { className: 'text-sm' }, '🗑️'))
@@ -99,7 +113,7 @@ export function ProjectForm({
                 type: 'text',
                 value: project.projectManager,
                 onChange: (e) => updateProject(pIndex, 'projectManager', e.target.value),
-                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-blue-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
                 placeholder: 'Name',
                 disabled: isEditLocked
               })
@@ -114,7 +128,7 @@ export function ProjectForm({
                 step: '0.1',
                 value: project.pmAllocation,
                 onChange: (e) => updateProject(pIndex, 'pmAllocation', e.target.value),
-                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-blue-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
                 placeholder: '0.5',
                 disabled: isEditLocked
               })
@@ -128,7 +142,7 @@ export function ProjectForm({
                 type: 'text',
                 value: project.businessPartner,
                 onChange: (e) => updateProject(pIndex, 'businessPartner', e.target.value),
-                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-blue-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
                 placeholder: 'Name',
                 disabled: isEditLocked
               })
@@ -143,7 +157,7 @@ export function ProjectForm({
                 step: '0.1',
                 value: project.bpAllocation,
                 onChange: (e) => updateProject(pIndex, 'bpAllocation', e.target.value),
-                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-blue-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
                 placeholder: '0.5',
                 disabled: isEditLocked
               })
@@ -167,14 +181,14 @@ export function ProjectForm({
                   type: 'date',
                   value: project.bpImplementation.start,
                   onChange: (e) => updatePhase(pIndex, 'bpImplementation', 'start', e.target.value),
-                  className: `w-full px-1.5 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+                  className: `w-full px-1.5 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-blue-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
                   disabled: isEditLocked
                 }),
                 React.createElement('input', {
                   type: 'date',
                   value: project.bpImplementation.finish,
                   onChange: (e) => updatePhase(pIndex, 'bpImplementation', 'finish', e.target.value),
-                  className: `w-full px-1.5 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+                  className: `w-full px-1.5 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-blue-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
                   disabled: isEditLocked
                 })
               ),
@@ -187,7 +201,7 @@ export function ProjectForm({
                   step: '0.1',
                   value: project.bpImplementationAllocation,
                   onChange: (e) => updateProject(pIndex, 'bpImplementationAllocation', e.target.value),
-                  className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+                  className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-blue-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
                   placeholder: '0.5',
                   disabled: isEditLocked
                 })
@@ -214,7 +228,7 @@ export function ProjectForm({
                   step: '0.1',
                   value: project.pmExternalAllocation,
                   onChange: (e) => updateProject(pIndex, 'pmExternalAllocation', e.target.value),
-                  className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+                  className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-blue-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
                   placeholder: '0.5',
                   disabled: isEditLocked
                 })
@@ -228,7 +242,7 @@ export function ProjectForm({
                   step: '0.1',
                   value: project.qaExternalAllocation,
                   onChange: (e) => updateProject(pIndex, 'qaExternalAllocation', e.target.value),
-                  className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+                  className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-blue-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
                   placeholder: '0.5',
                   disabled: isEditLocked
                 })
