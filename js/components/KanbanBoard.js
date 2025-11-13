@@ -210,6 +210,20 @@ const KanbanColumn = ({ title, projects, column, darkMode, onDrop }) => {
  * Main KanbanBoard Component
  */
 export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
+  // Debug logging
+  console.log('KanbanBoard rendering with', projects ? projects.length : 0, 'projects');
+
+  // Safety check: ensure projects is an array
+  if (!projects || !Array.isArray(projects)) {
+    console.warn('KanbanBoard: projects is not an array', projects);
+    return React.createElement('div', {
+      className: `text-center py-12 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+    },
+      React.createElement('p', { className: 'text-lg mb-2' }, '⚠️ Unable to load Kanban board'),
+      React.createElement('p', { className: 'text-sm' }, 'Projects data is invalid. Please refresh the page.')
+    );
+  }
+
   const columns = [
     { key: 'backlog', title: 'Backlog' },
     { key: 'onhold', title: 'On Hold' },
@@ -236,15 +250,22 @@ export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
       done: []
     };
 
-    projects.forEach(project => {
-      const column = getProjectColumn(project);
-      // Safety check: if column doesn't exist in grouped, default to backlog
-      if (grouped[column]) {
-        grouped[column].push(project);
-      } else {
-        grouped['backlog'].push(project);
-      }
-    });
+    try {
+      projects.forEach(project => {
+        if (!project) return; // Skip null/undefined projects
+
+        const column = getProjectColumn(project);
+        // Safety check: if column doesn't exist in grouped, default to backlog
+        if (grouped[column]) {
+          grouped[column].push(project);
+        } else {
+          console.warn('KanbanBoard: Unknown column', column, 'for project', project.name);
+          grouped['backlog'].push(project);
+        }
+      });
+    } catch (error) {
+      console.error('KanbanBoard: Error grouping projects', error);
+    }
 
     return grouped;
   }, [projects]);
