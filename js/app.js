@@ -547,7 +547,7 @@ function GanttChart() {
           ? filteredProjects.map((project, pIndex) => {
               const actualIndex = projects.indexOf(project);
               return React.createElement(ProjectForm, {
-                key: actualIndex,
+                key: `${actualIndex}-${isEditLocked ? 'locked' : 'unlocked'}`,
                 project,
                 pIndex: actualIndex,
                 updateProject,
