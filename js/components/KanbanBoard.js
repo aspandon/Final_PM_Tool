@@ -238,7 +238,12 @@ export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
 
     projects.forEach(project => {
       const column = getProjectColumn(project);
-      grouped[column].push(project);
+      // Safety check: if column doesn't exist in grouped, default to backlog
+      if (grouped[column]) {
+        grouped[column].push(project);
+      } else {
+        grouped['backlog'].push(project);
+      }
     });
 
     return grouped;
