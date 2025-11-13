@@ -19,14 +19,14 @@ const calculateRAGStatus = (finishDate, isOnHold = false, projectName = '') => {
     };
   }
 
-  // If no finish date, return neutral
+  // If no finish date, return Green (no urgency)
   if (!finishDate) {
-    console.log(`RAG [${projectName}]: No finish date - N/A`);
+    console.log(`RAG [${projectName}]: No finish date - Green`);
     return {
-      color: 'bg-gray-400',
-      label: 'N/A',
-      textColor: 'text-gray-700',
-      borderColor: 'border-gray-400'
+      color: 'bg-green-500',
+      label: 'Green',
+      textColor: 'text-green-700',
+      borderColor: 'border-green-500'
     };
   }
 
