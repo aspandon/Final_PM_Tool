@@ -549,7 +549,7 @@ function GanttChart() {
     return React.createElement('button', {
       key: tabName,
       onClick: () => setActiveTab(tabName),
-      className: `px-3 py-1.5 text-sm font-semibold rounded-t-lg transition-all transform shadow-md ${
+      className: `px-3 py-1 text-sm font-semibold rounded-t-lg transition-all transform shadow-md ${
         isActive
           ? darkMode
             ? 'bg-gradient-to-br from-slate-800 to-slate-700 text-blue-400 border-b-4 border-blue-400 shadow-xl scale-105'
