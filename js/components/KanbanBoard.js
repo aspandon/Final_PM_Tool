@@ -155,8 +155,18 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange }) => {
 
     // Division
     project.division && React.createElement('div', {
-      className: `text-xs mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+      className: `text-xs mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `Division: ${project.division}`),
+
+    // Project Manager
+    project.projectManager && React.createElement('div', {
+      className: `text-xs mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+    }, `PM: ${project.projectManager}`),
+
+    // Business Partner
+    project.businessPartner && React.createElement('div', {
+      className: `text-xs mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+    }, `BP: ${project.businessPartner}`),
 
     // RAG Status Badge
     React.createElement('div', {
