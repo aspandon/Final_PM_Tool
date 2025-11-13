@@ -15,7 +15,7 @@ export function Header({
   setDarkMode
 }) {
   return React.createElement('div', {
-    className: 'mb-6 flex justify-center'
+    className: 'mb-6 w-full flex justify-center'
   },
     // Logo, Title, and Subtitle - Centered group with icon on left
     React.createElement('div', {
