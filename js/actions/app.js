@@ -39,6 +39,33 @@ function ActionItemsApp() {
   }, []);
 
   /**
+   * Auto-refresh: Periodically fetch latest data from Supabase
+   * Runs every 45 seconds to check for updates from other users
+   */
+  useEffect(() => {
+    const refreshInterval = setInterval(async () => {
+      try {
+        const latestActions = await loadActions();
+        if (latestActions && latestActions.length > 0) {
+          // Check if data has actually changed by comparing JSON strings
+          const currentJSON = JSON.stringify(actions);
+          const latestJSON = JSON.stringify(latestActions);
+
+          if (currentJSON !== latestJSON) {
+            console.log('🔄 Auto-refresh: New data detected from Supabase');
+            setActions(latestActions);
+          }
+        }
+      } catch (error) {
+        console.error('Error during auto-refresh:', error);
+      }
+    }, 45000); // Refresh every 45 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(refreshInterval);
+  }, [actions]);
+
+  /**
    * Auto-save actions whenever they change (to Supabase and localStorage)
    */
   useEffect(() => {

@@ -72,6 +72,33 @@ function GanttChart() {
   }, []);
 
   /**
+   * Auto-refresh: Periodically fetch latest data from Supabase
+   * Runs every 45 seconds to check for updates from other users
+   */
+  useEffect(() => {
+    const refreshInterval = setInterval(async () => {
+      try {
+        const latestProjects = await loadProjects();
+        if (latestProjects && latestProjects.length > 0) {
+          // Check if data has actually changed by comparing JSON strings
+          const currentJSON = JSON.stringify(projects);
+          const latestJSON = JSON.stringify(latestProjects);
+
+          if (currentJSON !== latestJSON) {
+            console.log('🔄 Auto-refresh: New data detected from Supabase');
+            setProjects(latestProjects);
+          }
+        }
+      } catch (error) {
+        console.error('Error during auto-refresh:', error);
+      }
+    }, 45000); // Refresh every 45 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(refreshInterval);
+  }, [projects]);
+
+  /**
    * Load filters from localStorage on mount
    */
   useEffect(() => {
