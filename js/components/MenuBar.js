@@ -659,6 +659,9 @@ export function MenuBar({
                   React.createElement('li', null, 'BP Implementation'),
                   React.createElement('li', null, 'Planned Investment Rec.')
                 )
+              ),
+              React.createElement('p', { className: 'mt-3' },
+                'Use the Lock/Unlock button (🔒/🔓) in the tab bar to prevent accidental edits to project data when reviewing or presenting.'
               )
             ),
 
@@ -670,11 +673,20 @@ export function MenuBar({
               )
             ),
 
-            // Divisions Tab
+            // Kanban Tab
             React.createElement('div', { className: 'mb-4' },
-              React.createElement('h4', { className: 'font-bold text-lg mb-2' }, '📊 Divisions'),
-              React.createElement('p', null,
-                'Consolidated view showing FTE (Full-Time Equivalent) distribution across divisions over time. Visualize resource allocation by department using stacked bar charts.'
+              React.createElement('h4', { className: 'font-bold text-lg mb-2' }, '📋 Kanban'),
+              React.createElement('p', { className: 'mb-2' },
+                'Board view organizing projects into columns based on their phase status. Provides a visual workflow management system where projects can be moved between different phase stages.'
+              ),
+              React.createElement('p', { className: 'mb-2' },
+                'Features customizable card display options (configure via Settings > Kanban):'
+              ),
+              React.createElement('ul', { className: 'list-disc list-inside ml-4 space-y-1' },
+                React.createElement('li', null, 'RAG Status - Red/Amber/Green project health indicators'),
+                React.createElement('li', null, 'Project Manager - Show/hide PM assignments'),
+                React.createElement('li', null, 'Business Partner - Show/hide BP assignments'),
+                React.createElement('li', null, 'Division - Show/hide division labels')
               )
             ),
 
@@ -689,6 +701,14 @@ export function MenuBar({
                 React.createElement('li', null, 'Consolidated totals (Total PM, Total BP)'),
                 React.createElement('li', null, 'External resource tracking (PM External, QA External)'),
                 React.createElement('li', null, 'BAU (Business As Usual) allocation overlay')
+              )
+            ),
+
+            // Divisions Tab
+            React.createElement('div', { className: 'mb-4' },
+              React.createElement('h4', { className: 'font-bold text-lg mb-2' }, '📊 Divisions'),
+              React.createElement('p', null,
+                'Consolidated view showing FTE (Full-Time Equivalent) distribution across divisions over time. Visualize resource allocation by department using stacked bar charts.'
               )
             ),
 
