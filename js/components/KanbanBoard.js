@@ -402,19 +402,24 @@ export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
       )
     ),
 
-    // Kanban Columns
+    // Kanban Columns - Outer wrapper for top scrollbar
     React.createElement('div', {
-      className: 'flex gap-4 overflow-x-auto pb-4'
+      style: { transform: 'rotateX(180deg)' }
     },
-      columns.map(column =>
-        React.createElement(KanbanColumn, {
-          key: column.key,
-          title: column.title,
-          projects: projectsByColumn[column.key],
-          column: column.key,
-          darkMode,
-          onDrop: handleDrop
-        })
+      React.createElement('div', {
+        className: 'flex gap-4 overflow-x-auto pb-4',
+        style: { transform: 'rotateX(180deg)' }
+      },
+        columns.map(column =>
+          React.createElement(KanbanColumn, {
+            key: column.key,
+            title: column.title,
+            projects: projectsByColumn[column.key],
+            column: column.key,
+            darkMode,
+            onDrop: handleDrop
+          })
+        )
       )
     )
   );
