@@ -22,6 +22,7 @@ function GanttChart() {
   
   // UI state
   const [hideProjectFields, setHideProjectFields] = useState(false);
+  const [isEditLocked, setIsEditLocked] = useState(false);
   const [activeTab, setActiveTab] = useState('planner');
   const [darkMode, setDarkMode] = useState(false);
   
@@ -355,7 +356,7 @@ function GanttChart() {
       !hideProjectFields && React.createElement('div', {
         className: 'mb-6 space-y-4'
       },
-        filteredProjects.length > 0 
+        filteredProjects.length > 0
           ? filteredProjects.map((project, pIndex) => {
               const actualIndex = projects.indexOf(project);
               return React.createElement(ProjectForm, {
@@ -366,7 +367,8 @@ function GanttChart() {
                 updatePhase,
                 deleteProject,
                 phases,
-                darkMode
+                darkMode,
+                isEditLocked
               });
             })
           : React.createElement('div', {
@@ -624,7 +626,18 @@ function GanttChart() {
           renderTabButton('planner', 'Projects & Planner', '📋'),
           renderTabButton('resources', 'Resources', '👥'),
           renderTabButton('overview', 'Overview', '📊'),
-          renderTabButton('actuals', 'Actuals Comparison', '📈')
+          renderTabButton('actuals', 'Actuals Comparison', '📈'),
+
+          // Lock/Unlock button - only visible on Projects tab
+          activeTab === 'planner' && React.createElement('button', {
+            onClick: () => setIsEditLocked(!isEditLocked),
+            className: `ml-auto px-4 py-3 text-sm font-semibold rounded-t-xl transition-all transform ${
+              darkMode
+                ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-2 ' + (isEditLocked ? 'border-red-400' : 'border-green-400')
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-2 ' + (isEditLocked ? 'border-red-500' : 'border-green-500')
+            }`,
+            title: isEditLocked ? 'Unlock editing' : 'Lock editing'
+          }, isEditLocked ? '🔒 Locked' : '🔓 Unlocked')
         ),
 
         // Tab Content
