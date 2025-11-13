@@ -789,7 +789,7 @@ function GanttChart() {
           activeTab === 'projects' && React.createElement('button', {
             onClick: () => {
               const newLockState = !isEditLocked;
-              console.log('Lock button clicked. New state:', newLockState);
+              alert(`Lock state changing to: ${newLockState ? 'LOCKED' : 'UNLOCKED'}`);
               setIsEditLocked(newLockState);
             },
             className: `ml-auto px-3 py-3 text-xl rounded-t-xl transition-all transform ${

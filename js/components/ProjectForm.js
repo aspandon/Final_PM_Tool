@@ -18,12 +18,13 @@ export function ProjectForm({
 }) {
   const { BarChart3, Trash2 } = lucide;
 
-  // Debug logging
-  console.log(`ProjectForm ${pIndex}: isEditLocked =`, isEditLocked);
-
   return React.createElement('div', {
     key: pIndex,
-    className: `relative border-2 ${darkMode ? 'border-slate-600 bg-slate-800 hover:border-blue-500' : 'border-gray-200 bg-white hover:border-blue-300'} rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all`
+    className: `relative border-4 ${
+      isEditLocked
+        ? 'border-red-500'
+        : darkMode ? 'border-slate-600' : 'border-gray-200'
+    } ${darkMode ? 'bg-slate-800 hover:border-blue-500' : 'bg-white hover:border-blue-300'} rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all`
   },
     // Compact Header
     React.createElement('div', {
