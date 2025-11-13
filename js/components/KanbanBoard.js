@@ -109,6 +109,18 @@ const getRelevantFinishDate = (project, column) => {
 };
 
 /**
+ * Format date as DD/MM/YYYY
+ */
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+/**
  * KanbanCard Component
  */
 const KanbanCard = ({ project, column, darkMode, onStatusChange }) => {
@@ -154,7 +166,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange }) => {
     // Date info
     finishDate && React.createElement('div', {
       className: `text-xs mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-    }, `Due: ${new Date(finishDate).toLocaleDateString()}`)
+    }, `Due: ${formatDate(finishDate)}`)
   );
 };
 
