@@ -549,14 +549,16 @@ function GanttChart() {
     return React.createElement('button', {
       key: tabName,
       onClick: () => setActiveTab(tabName),
-      className: `px-3 py-1 text-sm font-semibold rounded-t-lg transition-all transform shadow-md ${
+      className: `px-3 py-1 text-sm font-semibold rounded-t-lg tab-button ripple ${
+        isActive ? 'active' : ''
+      } ${
         isActive
           ? darkMode
-            ? 'bg-gradient-to-br from-slate-800 to-slate-700 text-blue-400 border-b-4 border-blue-400 shadow-xl scale-105'
-            : 'bg-gradient-to-br from-white to-blue-50 text-blue-700 border-b-4 border-blue-600 shadow-xl scale-105'
+            ? 'bg-gradient-to-br from-slate-800 to-slate-700 text-blue-400 border-b-4 border-blue-400 shadow-xl glow'
+            : 'bg-gradient-to-br from-white to-blue-50 text-blue-700 border-b-4 border-blue-600 shadow-xl glow'
           : darkMode
-            ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 hover:scale-102'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-102'
+            ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
       }`
     },
       React.createElement('span', { className: 'inline-block w-4 text-center' }, emoji),
@@ -709,13 +711,13 @@ function GanttChart() {
   // ===== MAIN RENDER =====
   
   return React.createElement('div', {
-    className: `min-h-screen ${darkMode ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'} transition-colors duration-300`
+    className: `min-h-screen theme-transition ${darkMode ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`
   },
     React.createElement('div', {
       className: 'max-w-[1800px] mx-auto p-6'
     },
       React.createElement('div', {
-        className: `${darkMode ? 'bg-slate-800/90' : 'bg-white/80'} backdrop-blur-xl rounded-2xl shadow-2xl border ${darkMode ? 'border-slate-700' : 'border-white/50'} p-6`
+        className: `${darkMode ? 'bg-slate-800/90' : 'bg-white/80'} backdrop-blur-xl rounded-2xl shadow-2xl border ${darkMode ? 'border-slate-700' : 'border-white/50'} p-6 theme-transition`
       },
         // Back to Hub button
         React.createElement('div', {
@@ -823,13 +825,13 @@ function GanttChart() {
               alert(`Lock state changing to: ${newLockState ? 'LOCKED' : 'UNLOCKED'}`);
               setIsEditLocked(newLockState);
             },
-            className: `ml-auto px-3 py-1 text-sm rounded-t-lg transition-all transform shadow-md ${
+            className: `ml-auto px-3 py-1 text-sm rounded-t-lg lock-button btn-modern ${
               darkMode
-                ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-4 ' + (isEditLocked ? 'border-red-400' : 'border-green-400')
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-4 ' + (isEditLocked ? 'border-red-500' : 'border-green-500')
+                ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-4 ' + (isEditLocked ? 'border-red-400 glow-red' : 'border-green-400 glow-green')
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-4 ' + (isEditLocked ? 'border-red-500 glow-red' : 'border-green-500 glow-green')
             }`,
             title: isEditLocked ? 'Unlock editing' : 'Lock editing'
-          }, React.createElement('span', { className: 'inline-block w-4 text-center' }, isEditLocked ? '🔒' : '🔓'))
+          }, React.createElement('span', { className: 'inline-block w-4 text-center lock-button' }, isEditLocked ? '🔒' : '🔓'))
         ),
 
         // Tab Content

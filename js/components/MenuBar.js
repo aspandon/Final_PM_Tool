@@ -213,13 +213,13 @@ export function MenuBar({
     };
   }, [filesMenuOpen, settingsMenuOpen, helpMenuOpen]);
 
-  const menuButtonClass = `flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition-all ${
+  const menuButtonClass = `flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition-all btn-modern ripple ${
     darkMode
       ? 'text-gray-100 hover:bg-slate-600'
       : 'text-gray-800 hover:bg-gray-200'
   }`;
 
-  const menuItemClass = `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+  const menuItemClass = `flex items-center gap-3 px-4 py-2.5 text-sm dropdown-item ${
     darkMode
       ? 'text-gray-200 hover:bg-slate-600'
       : 'text-gray-700 hover:bg-gray-100'
@@ -230,9 +230,9 @@ export function MenuBar({
     React.createElement('div', {
       className: `mb-4 flex gap-2 shadow-md ${
         darkMode
-          ? 'bg-gradient-to-r from-slate-800 to-slate-700 border-slate-600'
-          : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-gray-300'
-      } py-1 px-2 rounded-lg border`
+          ? 'glass-dark border-animated-dark'
+          : 'glass border-animated'
+      } py-1 px-2 rounded-lg`
     },
       // Files Menu
       React.createElement('div', {
@@ -253,7 +253,7 @@ export function MenuBar({
 
         // Files Dropdown
         filesMenuOpen && React.createElement('div', {
-          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-50`
+          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-50 dropdown-enter`
         },
           // Add Project
           React.createElement('button', {
@@ -333,7 +333,7 @@ export function MenuBar({
 
         // Settings Dropdown
         settingsMenuOpen && React.createElement('div', {
-          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-50`
+          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-50 dropdown-enter`
         },
           // Kanban Settings (with sub-menu)
           React.createElement('div', {
@@ -368,7 +368,7 @@ export function MenuBar({
 
             // Kanban Sub-menu
             kanbanSubMenuOpen && React.createElement('div', {
-              className: `absolute left-full top-0 ml-1 w-64 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} p-4 z-50`,
+              className: `absolute left-full top-0 ml-1 w-64 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} p-4 z-50 dropdown-enter`,
               onClick: (e) => e.stopPropagation()
             },
               React.createElement('div', {
@@ -519,7 +519,7 @@ export function MenuBar({
 
         // Help Dropdown
         helpMenuOpen && React.createElement('div', {
-          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-50`
+          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-50 dropdown-enter`
         },
           React.createElement('button', {
             onClick: (e) => {
@@ -537,16 +537,16 @@ export function MenuBar({
 
       // Auto-Save Status Indicator
       React.createElement('div', {
-        className: 'ml-auto flex items-center gap-2 px-3 py-1.5'
+        className: 'ml-auto flex items-center gap-2 px-3 py-1.5 save-indicator'
       },
         // Status dot
         React.createElement('div', {
           className: `w-2.5 h-2.5 rounded-full ${
             saveStatus === 'success'
-              ? 'bg-green-500'
+              ? 'bg-green-500 save-success glow-green'
               : saveStatus === 'error'
-              ? 'bg-red-500'
-              : 'bg-yellow-500 animate-pulse'
+              ? 'bg-red-500 glow-red'
+              : 'bg-yellow-500 pulse-dot'
           }`
         }),
         // Status text
