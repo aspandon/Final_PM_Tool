@@ -14,7 +14,20 @@ export function Header({
   darkMode,
   setDarkMode
 }) {
-  const { BarChart3, Plus, Download, Upload, Edit2 } = lucide;
+  const { BarChart3, Plus, Download, Upload, Settings } = lucide;
+  const [showSettingsMenu, setShowSettingsMenu] = React.useState(false);
+
+  // Close settings menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showSettingsMenu && !event.target.closest('.settings-dropdown-container')) {
+        setShowSettingsMenu(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showSettingsMenu]);
 
   return (
     <div className="flex items-center justify-between mb-6">
@@ -45,19 +58,84 @@ export function Header({
           Add
         </button>
 
-        {/* Hide/Show Fields Button */}
-        <button
-          onClick={() => setHideProjectFields(!hideProjectFields)}
-          className={`flex items-center gap-2 ${
-            hideProjectFields 
-              ? 'bg-gradient-to-r from-gray-500 to-gray-600' 
-              : 'bg-gradient-to-r from-purple-500 to-purple-600'
-          } text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5`}
-          title={hideProjectFields ? "Show project input fields" : "Hide project input fields"}
-        >
-          {React.createElement(Edit2, { className: "w-4 h-4" })}
-          {hideProjectFields ? 'Show Fields' : 'Hide Fields'}
-        </button>
+        {/* Settings Button with Dropdown */}
+        <div className="relative settings-dropdown-container">
+          <button
+            onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            title="Settings"
+          >
+            {React.createElement(Settings, { className: "w-4 h-4" })}
+            Settings
+          </button>
+
+          {/* Settings Dropdown Menu */}
+          {showSettingsMenu && React.createElement('div', {
+            className: `absolute right-0 mt-2 w-72 ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} rounded-xl shadow-2xl border z-50`
+          },
+            // Menu Header
+            React.createElement('div', {
+              className: `px-4 py-3 border-b ${darkMode ? 'border-slate-700 bg-slate-700/50' : 'border-gray-200 bg-gray-50'} rounded-t-xl`
+            },
+              React.createElement('h3', {
+                className: `text-sm font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+              }, '⚙️ Settings')
+            ),
+
+            // Settings Content
+            React.createElement('div', {
+              className: 'p-4 space-y-4'
+            },
+              // Projects Section
+              React.createElement('div', null,
+                React.createElement('h4', {
+                  className: `text-xs font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'} mb-2 flex items-center gap-1`
+                },
+                  React.createElement('div', {
+                    className: 'w-1 h-3 bg-blue-600 rounded'
+                  }),
+                  'Projects'
+                ),
+                React.createElement('div', {
+                  className: `${darkMode ? 'bg-slate-700/50' : 'bg-gray-50'} rounded-lg p-3`
+                },
+                  React.createElement('label', {
+                    className: `flex items-center gap-3 cursor-pointer ${darkMode ? 'text-gray-200' : 'text-gray-700'}`
+                  },
+                    React.createElement('input', {
+                      type: 'checkbox',
+                      checked: hideProjectFields,
+                      onChange: (e) => setHideProjectFields(e.target.checked),
+                      className: 'w-4 h-4 rounded accent-purple-600 cursor-pointer'
+                    }),
+                    React.createElement('div', null,
+                      React.createElement('div', {
+                        className: 'text-sm font-medium'
+                      }, 'Hide Project Fields'),
+                      React.createElement('div', {
+                        className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-0.5`
+                      }, 'Hide project input forms from view')
+                    )
+                  )
+                )
+              )
+            ),
+
+            // Close Button
+            React.createElement('div', {
+              className: `px-4 py-3 border-t ${darkMode ? 'border-slate-700 bg-slate-700/50' : 'border-gray-200 bg-gray-50'} rounded-b-xl`
+            },
+              React.createElement('button', {
+                onClick: () => setShowSettingsMenu(false),
+                className: `w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                  darkMode
+                    ? 'bg-slate-600 hover:bg-slate-500 text-gray-200'
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`
+              }, 'Close')
+            )
+          )}
+        </div>
 
         {/* Import Button */}
         <button
