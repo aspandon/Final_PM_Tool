@@ -45,6 +45,9 @@ function GanttChart() {
   // Ref for file input
   const fileInputRef = useRef(null);
 
+  // Ref to track previous project count for data loss detection
+  const previousProjectCount = useRef(0);
+
   // ===== AUTO-SAVE & PERSISTENCE =====
 
   /**
@@ -84,9 +87,37 @@ function GanttChart() {
 
   /**
    * Auto-save projects whenever they change (to Supabase and localStorage)
+   * Includes data loss prevention: won't save if project count drops dramatically
    */
   useEffect(() => {
     if (projects.length > 0) {
+      // Data loss prevention check
+      const prevCount = previousProjectCount.current;
+      const currentCount = projects.length;
+
+      // If this is the first load, just set the count and save
+      if (prevCount === 0) {
+        previousProjectCount.current = currentCount;
+      } else {
+        // Check if project count dropped dramatically (more than 50% AND by more than 10 projects)
+        const percentageRemaining = (currentCount / prevCount) * 100;
+        const projectsLost = prevCount - currentCount;
+
+        if (percentageRemaining < 50 && projectsLost > 10) {
+          // CRITICAL: Potential data loss detected!
+          console.error('🚨 DATA LOSS PREVENTION: Refusing to save!');
+          console.error(`Previous count: ${prevCount}, Current count: ${currentCount}`);
+          console.error(`This would delete ${projectsLost} projects (${(100 - percentageRemaining).toFixed(1)}% loss)`);
+
+          setSaveStatus('error');
+          alert(`⚠️ DATA LOSS PREVENTED!\n\nYour project count dropped from ${prevCount} to ${currentCount}.\nAuto-save has been blocked to prevent data loss.\n\nPlease refresh the page and try again.`);
+          return; // Don't save!
+        }
+
+        // Update the count for next time
+        previousProjectCount.current = currentCount;
+      }
+
       const saveData = async () => {
         try {
           setSaveStatus('saving');
