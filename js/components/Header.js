@@ -14,7 +14,7 @@ export function Header({
   darkMode,
   setDarkMode
 }) {
-  const { BarChart3, Plus, Download, Upload, Settings } = lucide;
+  const { BarChart3, Plus, Download, Upload, Settings, ArrowLeft } = lucide;
   const [showSettingsMenu, setShowSettingsMenu] = React.useState(false);
 
   // Close settings menu when clicking outside
@@ -31,17 +31,37 @@ export function Header({
 
   return (
     <div className="flex items-center justify-between mb-6">
-      {/* Left side - Logo and Title */}
-      <div className="flex items-center gap-3">
+      {/* Left side - Back to Hub and Title */}
+      <div className="flex items-center gap-4">
+        {/* Back to Hub Link */}
+        <a
+          href="index.html"
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+            darkMode
+              ? 'text-gray-300 hover:text-blue-400 hover:bg-slate-700'
+              : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+          }`}
+          title="Back to Hub"
+        >
+          {React.createElement(ArrowLeft, { className: "w-5 h-5" })}
+          <span className="text-sm font-medium">Back to Hub</span>
+        </a>
+
+        {/* Vertical Divider */}
+        <div className={`w-px h-8 ${darkMode ? 'bg-slate-600' : 'bg-gray-300'}`}></div>
+
+        {/* Logo */}
         <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-          {React.createElement(BarChart3, { className: "w-7 h-7 text-white" })}
+          {React.createElement(BarChart3, { className: "w-6 h-6 text-white" })}
         </div>
-        <div>
-          <h1 className={`text-3xl font-bold bg-gradient-to-r ${darkMode ? 'from-blue-400 to-indigo-400' : 'from-blue-600 to-indigo-600'} bg-clip-text text-transparent`}>
+
+        {/* Title and Subtitle - Now inline */}
+        <div className="flex items-baseline gap-3">
+          <h1 className={`text-2xl font-bold bg-gradient-to-r ${darkMode ? 'from-blue-400 to-indigo-400' : 'from-blue-600 to-indigo-600'} bg-clip-text text-transparent`}>
             Digital Development Project Management
           </h1>
-          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-0.5`}>
-            Project planning and resource management • Version 1.0
+          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            Project planning and resource management • Version 1.1
           </p>
         </div>
       </div>
