@@ -531,7 +531,7 @@ function GanttChart() {
    */
   const renderKanbanView = () => {
     return React.createElement(KanbanBoard, {
-      projects: filteredProjects,
+      projects: projects,
       setProjects: setProjects,
       darkMode: darkMode
     });
