@@ -12,6 +12,7 @@ import { GanttTimeline } from './components/GanttTimeline.js';
 import { DivisionsChart } from './components/DivisionsChart.js';
 import { ResourcesChart } from './components/ResourcesChart.js';
 import { ActualsTimeline } from './components/ActualsTimeline.js';
+import { KanbanBoard } from './components/KanbanBoard.js';
 
 const { useState, useRef, useMemo, useEffect } = React;
 const { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
@@ -529,133 +530,11 @@ function GanttChart() {
    * Render Kanban board view
    */
   const renderKanbanView = () => {
-    if (filteredProjects.length === 0) {
-      return React.createElement('div', {
-        className: `text-center py-12 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
-      },
-        React.createElement('p', { className: 'text-lg mb-2' }, '📋 No Projects to Display'),
-        React.createElement('p', { className: 'text-sm' }, 'Add projects to see them in Kanban board view')
-      );
-    }
-
-    // Kanban columns based on project phases
-    const kanbanColumns = [
-      { id: 'backlog', title: 'Backlog', emoji: '📝', color: 'slate' },
-      { id: 'psd-prep', title: 'PSD & Inv. Prop Pre', emoji: '📋', color: 'blue' },
-      { id: 'psd-ready', title: 'PSD & Inv. Prop. Ready', emoji: '✅', color: 'cyan' },
-      { id: 'approved', title: 'Inv. Prop. Approved', emoji: '👍', color: 'green' },
-      { id: 'procurement', title: 'Procurement', emoji: '🛒', color: 'yellow' },
-      { id: 'implementation', title: 'Implementation', emoji: '⚡', color: 'orange' },
-      { id: 'uat', title: 'UAT', emoji: '🧪', color: 'purple' },
-      { id: 'done', title: 'Done', emoji: '🎉', color: 'emerald' }
-    ];
-
-    // Get kanban status for a project (default to 'backlog' if not set)
-    const getProjectStatus = (project) => {
-      return project.kanbanStatus || 'backlog';
-    };
-
-    // Handle drag start
-    const handleDragStart = (e, project, projectIndex) => {
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', projectIndex.toString());
-    };
-
-    // Handle drag over
-    const handleDragOver = (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    };
-
-    // Handle drop
-    const handleDrop = (e, columnId) => {
-      e.preventDefault();
-      const projectIndex = parseInt(e.dataTransfer.getData('text/plain'));
-
-      // Update the project's kanban status
-      updateProject(projectIndex, 'kanbanStatus', columnId);
-    };
-
-    const projectsByColumn = {};
-    kanbanColumns.forEach(col => {
-      projectsByColumn[col.id] = filteredProjects.filter(p => getProjectStatus(p) === col.id);
+    return React.createElement(KanbanBoard, {
+      projects: filteredProjects,
+      setProjects: setProjects,
+      darkMode: darkMode
     });
-
-    return React.createElement('div', {
-      className: 'overflow-x-auto'
-    },
-      React.createElement('div', {
-        className: 'flex gap-4 min-w-max pb-4'
-      },
-        kanbanColumns.map(column => {
-          const columnProjects = projectsByColumn[column.id] || [];
-          const colorClasses = {
-            slate: darkMode ? 'border-slate-500 bg-slate-900/20' : 'border-slate-400 bg-slate-50',
-            blue: darkMode ? 'border-blue-500 bg-blue-900/20' : 'border-blue-400 bg-blue-50',
-            cyan: darkMode ? 'border-cyan-500 bg-cyan-900/20' : 'border-cyan-400 bg-cyan-50',
-            green: darkMode ? 'border-green-500 bg-green-900/20' : 'border-green-400 bg-green-50',
-            yellow: darkMode ? 'border-yellow-500 bg-yellow-900/20' : 'border-yellow-400 bg-yellow-50',
-            orange: darkMode ? 'border-orange-500 bg-orange-900/20' : 'border-orange-400 bg-orange-50',
-            purple: darkMode ? 'border-purple-500 bg-purple-900/20' : 'border-purple-400 bg-purple-50',
-            emerald: darkMode ? 'border-emerald-500 bg-emerald-900/20' : 'border-emerald-400 bg-emerald-50'
-          };
-
-          return React.createElement('div', {
-            key: column.id,
-            className: `flex-shrink-0 w-80 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-xl shadow-lg border-2 ${darkMode ? 'border-slate-700' : 'border-gray-200'}`,
-            onDragOver: handleDragOver,
-            onDrop: (e) => handleDrop(e, column.id)
-          },
-            // Column Header
-            React.createElement('div', {
-              className: `p-4 border-b-2 ${colorClasses[column.color]}`
-            },
-              React.createElement('div', {
-                className: 'flex items-center justify-between'
-              },
-                React.createElement('h3', {
-                  className: `text-base font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-                }, `${column.emoji} ${column.title}`),
-                React.createElement('span', {
-                  className: `px-2 py-1 text-xs font-bold rounded-full ${darkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`
-                }, columnProjects.length)
-              )
-            ),
-            // Column Content
-            React.createElement('div', {
-              className: 'p-3 space-y-3 min-h-[200px] max-h-[600px] overflow-y-auto'
-            },
-              columnProjects.length > 0
-                ? columnProjects.map((project, idx) => {
-                    const projectIndex = projects.indexOf(project);
-                    return React.createElement('div', {
-                      key: idx,
-                      draggable: true,
-                      onDragStart: (e) => handleDragStart(e, project, projectIndex),
-                      className: `p-3 rounded-lg border ${darkMode ? 'bg-slate-700 border-slate-600 hover:border-blue-500' : 'bg-white border-gray-200 hover:border-blue-400'} cursor-move transition-all shadow-sm hover:shadow-md`
-                    },
-                      React.createElement('div', {
-                        className: `font-bold text-sm mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-                      }, project.name || 'Untitled Project'),
-                      React.createElement('div', {
-                        className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`
-                      }, project.division || 'No Division'),
-                      React.createElement('div', {
-                        className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} flex gap-3`
-                      },
-                        project.projectManager && React.createElement('span', null, `PM: ${project.projectManager}`),
-                        project.businessPartner && React.createElement('span', null, `BP: ${project.businessPartner}`)
-                      )
-                    );
-                  })
-                : React.createElement('div', {
-                    className: `text-center py-8 text-sm ${darkMode ? 'text-gray-500' : 'text-gray-400'}`
-                  }, 'No projects')
-            )
-          );
-        })
-      )
-    );
   };
 
   /**
