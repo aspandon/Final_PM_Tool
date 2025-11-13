@@ -549,7 +549,7 @@ function GanttChart() {
     return React.createElement('button', {
       key: tabName,
       onClick: () => setActiveTab(tabName),
-      className: `px-4 py-2 text-sm font-semibold rounded-t-lg transition-all transform shadow-md ${
+      className: `px-3 py-1.5 text-sm font-semibold rounded-t-lg transition-all transform shadow-md ${
         isActive
           ? darkMode
             ? 'bg-gradient-to-br from-slate-800 to-slate-700 text-blue-400 border-b-4 border-blue-400 shadow-xl scale-105'
@@ -558,7 +558,11 @@ function GanttChart() {
             ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 hover:scale-102'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-102'
       }`
-    }, `${emoji} ${label}`);
+    },
+      React.createElement('span', { className: 'inline-block w-4 text-center' }, emoji),
+      ' ',
+      label
+    );
   };
 
   /**
