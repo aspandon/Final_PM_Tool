@@ -16,6 +16,20 @@ export function ProjectForm({
   darkMode,
   isEditLocked = false
 }) {
+  // Modern Icon Component for Project
+  const Briefcase = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('rect', { width: '20', height: '14', x: '2', y: '7', rx: '2', ry: '2' }),
+    React.createElement('path', { d: 'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16' })
+  );
+
   return React.createElement('div', {
     key: pIndex,
     className: `relative border-4 card-modern card-glow ${
@@ -37,9 +51,9 @@ export function ProjectForm({
       React.createElement('div', {
         className: 'flex items-center gap-2'
       },
-        React.createElement('span', {
-          className: 'text-lg flex-shrink-0'
-        }, '📊'),
+        React.createElement(Briefcase, {
+          className: 'w-6 h-6 flex-shrink-0 text-blue-500'
+        }),
         React.createElement('input', {
           type: 'text',
           value: project.name,
