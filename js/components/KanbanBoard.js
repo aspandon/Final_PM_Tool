@@ -128,6 +128,14 @@ const formatDate = (dateString) => {
  * KanbanCard Component
  */
 const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings }) => {
+  // Default kanban settings if not provided
+  const settings = kanbanSettings || {
+    showRAG: true,
+    showPM: true,
+    showBP: true,
+    showDivision: true
+  };
+
   const isOnHold = column === 'onhold';
   const isDone = column === 'done';
   const finishDate = getRelevantFinishDate(project, column);
@@ -154,22 +162,22 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings 
     }, project.name || 'Untitled Project'),
 
     // Division (conditional)
-    kanbanSettings.showDivision && project.division && React.createElement('div', {
+    settings.showDivision && project.division && React.createElement('div', {
       className: `text-xs mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `Division: ${project.division}`),
 
     // Project Manager (conditional)
-    kanbanSettings.showPM && project.projectManager && React.createElement('div', {
+    settings.showPM && project.projectManager && React.createElement('div', {
       className: `text-xs mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `PM: ${project.projectManager}`),
 
     // Business Partner (conditional)
-    kanbanSettings.showBP && project.businessPartner && React.createElement('div', {
+    settings.showBP && project.businessPartner && React.createElement('div', {
       className: `text-xs mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `BP: ${project.businessPartner}`),
 
     // RAG Status Badge (conditional)
-    kanbanSettings.showRAG && React.createElement('div', {
+    settings.showRAG && React.createElement('div', {
       className: 'flex items-center justify-between mt-3 pt-3 border-t ' + (darkMode ? 'border-slate-600' : 'border-gray-200')
     },
       React.createElement('span', {
@@ -181,7 +189,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings 
     ),
 
     // Date info (conditional - show with RAG status)
-    kanbanSettings.showRAG && finishDate && React.createElement('div', {
+    settings.showRAG && finishDate && React.createElement('div', {
       className: `text-xs mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `Due: ${formatDate(finishDate)}`)
   );
@@ -260,6 +268,14 @@ export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings })
   // Refs for scroll synchronization
   const topScrollRef = useRef(null);
   const contentScrollRef = useRef(null);
+
+  // Default kanban settings if not provided
+  const settings = kanbanSettings || {
+    showRAG: true,
+    showPM: true,
+    showBP: true,
+    showDivision: true
+  };
 
   // Safety check: ensure projects is an array
   if (!projects || !Array.isArray(projects)) {
