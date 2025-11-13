@@ -66,45 +66,11 @@ const calculateRAGStatus = (finishDate, isOnHold = false) => {
 
 /**
  * Determine which column a project belongs to
- * Projects progress through columns in order:
- * Backlog -> On Hold (if set) -> PSD Pre -> PSD Ready -> Inv Approved -> Procurement -> Implementation
+ * Uses kanbanStatus field for manual column placement via drag-and-drop
  */
 const getProjectColumn = (project) => {
-  // Check if project has status field (for On Hold) - this takes precedence
-  if (project.status === 'onhold') {
-    return 'onhold';
-  }
-
-  // Check phases in reverse order (most advanced phase determines column)
-  // This ensures a project appears in its current/most advanced stage
-
-  // If implementation has started, it's in Implementation
-  if (project.implementation?.start && project.implementation.start !== '') {
-    return 'implementation';
-  }
-
-  // If procurement has started (and implementation hasn't), it's in Procurement
-  if (project.procurement?.start && project.procurement.start !== '') {
-    return 'procurement';
-  }
-
-  // If investment is approved/finished (and procurement hasn't started), it's in Inv Approved
-  if (project.investment?.finish && project.investment.finish !== '') {
-    return 'invapproved';
-  }
-
-  // If PSD is finished (and investment hasn't finished), it's in PSD Ready
-  if (project.psd?.finish && project.psd.finish !== '') {
-    return 'psdready';
-  }
-
-  // If PSD has started (but not finished), it's in PSD Pre
-  if (project.psd?.start && project.psd.start !== '') {
-    return 'psdpre';
-  }
-
-  // Default to backlog if no phases have started
-  return 'backlog';
+  // Use kanbanStatus field if set, otherwise default to backlog
+  return project.kanbanStatus || 'backlog';
 };
 
 /**
@@ -120,6 +86,7 @@ const getRelevantFinishDate = (project, column) => {
     case 'procurement':
       return project.procurement?.finish;
     case 'implementation':
+    case 'uat':
       return project.implementation?.finish;
     default:
       return null;
@@ -131,8 +98,13 @@ const getRelevantFinishDate = (project, column) => {
  */
 const KanbanCard = ({ project, column, darkMode, onStatusChange }) => {
   const isOnHold = column === 'onhold';
+  const isDone = column === 'done';
   const finishDate = getRelevantFinishDate(project, column);
-  const ragStatus = calculateRAGStatus(finishDate, isOnHold);
+
+  // Done projects don't need RAG status, or can show N/A
+  const ragStatus = isDone
+    ? { color: 'bg-gray-400', label: 'N/A', textColor: 'text-gray-700', borderColor: 'border-gray-400' }
+    : calculateRAGStatus(finishDate, isOnHold);
 
   return React.createElement('div', {
     className: `${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border-l-4 ${ragStatus.borderColor} hover:shadow-md transition-shadow cursor-move`,
@@ -245,7 +217,9 @@ export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
     { key: 'psdready', title: 'PSD & Inv. Prop. Ready' },
     { key: 'invapproved', title: 'Inv. Prop. Approved' },
     { key: 'procurement', title: 'Procurement' },
-    { key: 'implementation', title: 'Implementation and UAT' }
+    { key: 'implementation', title: 'Implementation' },
+    { key: 'uat', title: 'UAT' },
+    { key: 'done', title: 'Done' }
   ];
 
   // Group projects by column
@@ -257,7 +231,9 @@ export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
       psdready: [],
       invapproved: [],
       procurement: [],
-      implementation: []
+      implementation: [],
+      uat: [],
+      done: []
     };
 
     projects.forEach(project => {
@@ -272,14 +248,8 @@ export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
   const handleDrop = (projectName, toColumn) => {
     const updatedProjects = projects.map(project => {
       if (project.name === projectName) {
-        // Update project status based on target column
-        if (toColumn === 'onhold') {
-          return { ...project, status: 'onhold' };
-        } else {
-          // Remove onhold status if moving to another column
-          const { status, ...rest } = project;
-          return rest;
-        }
+        // Update project's kanbanStatus to the new column
+        return { ...project, kanbanStatus: toColumn };
       }
       return project;
     });
