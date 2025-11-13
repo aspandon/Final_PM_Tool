@@ -831,7 +831,7 @@ function GanttChart() {
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-4 ' + (isEditLocked ? 'border-red-500 glow-red' : 'border-green-500 glow-green')
             }`,
             title: isEditLocked ? 'Unlock editing' : 'Lock editing'
-          }, React.createElement('span', { className: 'inline-block w-4 text-center lock-button' }, isEditLocked ? '🔒' : '🔓'))
+          }, React.createElement('span', { className: 'inline-block w-4 text-center' }, isEditLocked ? '🔒' : '🔓'))
         ),
 
         // Tab Content
