@@ -176,7 +176,7 @@ export function FilterPanel({
         }, 'Division'),
         React.createElement('button', {
           onClick: () => setShowDivisionDropdown(!showDivisionDropdown),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
         },
           React.createElement('span', { className: 'truncate' },
             filterDivisions.length === 0 
@@ -234,7 +234,7 @@ export function FilterPanel({
         }, 'Business Partner'),
         React.createElement('button', {
           onClick: () => setShowBPDropdown(!showBPDropdown),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
         },
           React.createElement('span', { className: 'truncate' },
             selectedBPs.length === 0 
@@ -292,7 +292,7 @@ export function FilterPanel({
         }, 'Project Manager'),
         React.createElement('button', {
           onClick: () => setShowPMDropdown(!showPMDropdown),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
         },
           React.createElement('span', { className: 'truncate' }, getPMSelectionText()),
           React.createElement('span', { className: 'ml-1' }, '▼')
@@ -390,7 +390,7 @@ export function FilterPanel({
         }, 'Select Projects'),
         React.createElement('button', {
           onClick: () => setShowProjectDropdown(!showProjectDropdown),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
         },
           React.createElement('span', { className: 'truncate' },
             selectedProjects.length === 0 
@@ -451,7 +451,7 @@ export function FilterPanel({
           type: 'date',
           value: filterStartDate,
           onChange: (e) => setFilterStartDate(e.target.value),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
         })
       ),
 
@@ -466,7 +466,7 @@ export function FilterPanel({
           type: 'date',
           value: filterEndDate,
           onChange: (e) => setFilterEndDate(e.target.value),
-          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
+          className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
         })
       )
     ),
@@ -493,7 +493,7 @@ export function FilterPanel({
             step: '0.1',
             value: pmBAU,
             onChange: (e) => setPmBAU(e.target.value),
-            className: `w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`,
+            className: `w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`,
             placeholder: 'e.g., 0.5'
           })
         ),
@@ -512,14 +512,14 @@ export function FilterPanel({
             step: '0.1',
             value: bpBAU,
             onChange: (e) => setBpBAU(e.target.value),
-            className: `w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`,
+            className: `w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`,
             placeholder: 'e.g., 0.5'
           })
         )
       ),
       // BAU Note
       React.createElement('div', {
-        className: `mt-2 text-xs ${darkMode ? 'text-gray-300 bg-slate-700' : 'text-gray-600 bg-blue-50'} p-2 rounded-lg`
+        className: `mt-2 text-xs ${darkMode ? 'text-gray-300 bg-slate-800' : 'text-gray-600 bg-blue-50'} p-2 rounded-lg`
       },
         React.createElement('strong', null, 'Note:'),
         ' BAU allocation in FTE (Full-Time Equivalent) is added to each team member for every month within the filtered date range. If no date filter is active, BAU is applied across the entire project timeline. 1 FTE = 22 working days per month.'

@@ -72,6 +72,33 @@ function GanttChart() {
   }, []);
 
   /**
+   * Auto-refresh: Periodically fetch latest data from Supabase
+   * Runs every 45 seconds to check for updates from other users
+   */
+  useEffect(() => {
+    const refreshInterval = setInterval(async () => {
+      try {
+        const latestProjects = await loadProjects();
+        if (latestProjects && latestProjects.length > 0) {
+          // Check if data has actually changed by comparing JSON strings
+          const currentJSON = JSON.stringify(projects);
+          const latestJSON = JSON.stringify(latestProjects);
+
+          if (currentJSON !== latestJSON) {
+            console.log('🔄 Auto-refresh: New data detected from Supabase');
+            setProjects(latestProjects);
+          }
+        }
+      } catch (error) {
+        console.error('Error during auto-refresh:', error);
+      }
+    }, 45000); // Refresh every 45 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(refreshInterval);
+  }, [projects]);
+
+  /**
    * Load filters from localStorage on mount
    */
   useEffect(() => {
@@ -522,7 +549,7 @@ function GanttChart() {
     return React.createElement('button', {
       key: tabName,
       onClick: () => setActiveTab(tabName),
-      className: `px-8 py-4 text-base font-bold rounded-t-xl transition-all transform shadow-md ${
+      className: `px-3 py-1 text-sm font-semibold rounded-t-lg transition-all transform shadow-md ${
         isActive
           ? darkMode
             ? 'bg-gradient-to-br from-slate-800 to-slate-700 text-blue-400 border-b-4 border-blue-400 shadow-xl scale-105'
@@ -531,7 +558,11 @@ function GanttChart() {
             ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 hover:scale-102'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-102'
       }`
-    }, `${emoji} ${label}`);
+    },
+      React.createElement('span', { className: 'inline-block w-4 text-center' }, emoji),
+      ' ',
+      label
+    );
   };
 
   /**
@@ -792,13 +823,13 @@ function GanttChart() {
               alert(`Lock state changing to: ${newLockState ? 'LOCKED' : 'UNLOCKED'}`);
               setIsEditLocked(newLockState);
             },
-            className: `ml-auto px-3 py-3 text-xl rounded-t-xl transition-all transform ${
+            className: `ml-auto px-3 py-1 text-sm rounded-t-lg transition-all transform shadow-md ${
               darkMode
-                ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-2 ' + (isEditLocked ? 'border-red-400' : 'border-green-400')
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-2 ' + (isEditLocked ? 'border-red-500' : 'border-green-500')
+                ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-4 ' + (isEditLocked ? 'border-red-400' : 'border-green-400')
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-4 ' + (isEditLocked ? 'border-red-500' : 'border-green-500')
             }`,
             title: isEditLocked ? 'Unlock editing' : 'Lock editing'
-          }, isEditLocked ? '🔒' : '🔓')
+          }, React.createElement('span', { className: 'inline-block w-4 text-center' }, isEditLocked ? '🔒' : '🔓'))
         ),
 
         // Tab Content

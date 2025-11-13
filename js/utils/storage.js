@@ -13,12 +13,12 @@ const STORAGE_KEYS = {
   ACTIONS: 'action_items_actions'
 };
 
-const SUPABASE_ID_KEY = 'supabase_data_id'; // Store the ID of the Supabase record
+const SHARED_RECORD_KEY = 'shared_record_id'; // Track the shared record ID
 
 // ===== PROJECTS STORAGE =====
 
 /**
- * Save projects to Supabase and localStorage
+ * Save projects to Supabase and localStorage (shared record for all users)
  * @param {Array} projects - Array of project objects
  */
 export const saveProjects = async (projects) => {
@@ -26,38 +26,52 @@ export const saveProjects = async (projects) => {
     // Save to localStorage as cache
     localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
 
-    // Get existing Supabase record ID if any
-    const existingId = localStorage.getItem(`${STORAGE_KEYS.PROJECTS}_${SUPABASE_ID_KEY}`);
+    // Get or find the shared record
+    let sharedRecordId = localStorage.getItem(SHARED_RECORD_KEY);
 
-    if (existingId) {
-      // Update existing record
+    // If we don't have the shared record ID, try to find it
+    if (!sharedRecordId) {
+      const { data: existingRecords } = await supabase
+        .from('projects')
+        .select('id')
+        .order('created_at', { ascending: true })
+        .limit(1);
+
+      if (existingRecords && existingRecords.length > 0) {
+        sharedRecordId = existingRecords[0].id;
+        localStorage.setItem(SHARED_RECORD_KEY, sharedRecordId);
+      }
+    }
+
+    if (sharedRecordId) {
+      // Update the shared record
       const { data, error } = await supabase
         .from('projects')
         .update({ data: projects })
-        .eq('id', existingId)
+        .eq('id', sharedRecordId)
         .select();
 
       if (error) {
-        console.error('Error updating projects in Supabase:', error);
+        console.error('Error updating shared projects record in Supabase:', error);
         return true; // Still return true since localStorage worked
       }
-      console.log('Projects updated in Supabase');
+      console.log('Shared projects record updated in Supabase');
     } else {
-      // Create new record
+      // Create the shared record (first time)
       const { data, error } = await supabase
         .from('projects')
         .insert([{ data: projects }])
         .select();
 
       if (error) {
-        console.error('Error inserting projects into Supabase:', error);
+        console.error('Error creating shared projects record in Supabase:', error);
         return true; // Still return true since localStorage worked
       }
 
-      // Store the ID for future updates
+      // Store the shared record ID
       if (data && data[0]) {
-        localStorage.setItem(`${STORAGE_KEYS.PROJECTS}_${SUPABASE_ID_KEY}`, data[0].id);
-        console.log('Projects saved to Supabase with ID:', data[0].id);
+        localStorage.setItem(SHARED_RECORD_KEY, data[0].id);
+        console.log('Shared projects record created in Supabase with ID:', data[0].id);
       }
     }
 
@@ -69,20 +83,20 @@ export const saveProjects = async (projects) => {
 };
 
 /**
- * Load projects from Supabase (or localStorage fallback)
+ * Load projects from Supabase shared record (or localStorage fallback)
  * @returns {Array} Array of project objects or empty array
  */
 export const loadProjects = async () => {
   try {
-    // Try to load from Supabase first
+    // Load the shared record (oldest record = first created)
     const { data, error } = await supabase
       .from('projects')
       .select('*')
-      .order('updated_at', { ascending: false })
+      .order('created_at', { ascending: true }) // Get oldest first (shared record)
       .limit(1);
 
     if (error) {
-      console.error('Error loading projects from Supabase:', error);
+      console.error('Error loading shared projects record from Supabase:', error);
       // Fallback to localStorage
       const stored = localStorage.getItem(STORAGE_KEYS.PROJECTS);
       return stored ? JSON.parse(stored) : [];
@@ -90,10 +104,11 @@ export const loadProjects = async () => {
 
     if (data && data.length > 0) {
       const projects = data[0].data;
-      // Cache in localStorage
+      // Cache the shared record ID
+      localStorage.setItem(SHARED_RECORD_KEY, data[0].id);
+      // Cache projects in localStorage
       localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
-      localStorage.setItem(`${STORAGE_KEYS.PROJECTS}_${SUPABASE_ID_KEY}`, data[0].id);
-      console.log('Projects loaded from Supabase');
+      console.log('Shared projects record loaded from Supabase (ID:', data[0].id, ')');
       return projects;
     }
 
@@ -232,9 +247,9 @@ export const loadFilters = () => {
  */
 export const clearAllData = async () => {
   try {
-    // Get Supabase ID
-    const projectsId = localStorage.getItem(`${STORAGE_KEYS.PROJECTS}_${SUPABASE_ID_KEY}`);
-    const actionsId = localStorage.getItem(`${STORAGE_KEYS.ACTIONS}_${SUPABASE_ID_KEY}`);
+    // Get shared record IDs
+    const projectsId = localStorage.getItem(SHARED_RECORD_KEY);
+    const actionsId = localStorage.getItem(`${SHARED_RECORD_KEY}_actions`);
 
     // Delete from Supabase if exists
     if (projectsId) {
@@ -247,8 +262,9 @@ export const clearAllData = async () => {
     // Clear localStorage
     Object.values(STORAGE_KEYS).forEach(key => {
       localStorage.removeItem(key);
-      localStorage.removeItem(`${key}_${SUPABASE_ID_KEY}`);
     });
+    localStorage.removeItem(SHARED_RECORD_KEY);
+    localStorage.removeItem(`${SHARED_RECORD_KEY}_actions`);
 
     console.log('All data cleared from Supabase and localStorage');
     return true;
@@ -289,7 +305,7 @@ export const getStorageInfo = () => {
 // ===== ACTION ITEMS STORAGE =====
 
 /**
- * Save actions to Supabase and localStorage
+ * Save actions to Supabase and localStorage (shared record for all users)
  * @param {Array} actions - Array of action objects
  */
 export const saveActions = async (actions) => {
@@ -297,38 +313,52 @@ export const saveActions = async (actions) => {
     // Save to localStorage as cache
     localStorage.setItem(STORAGE_KEYS.ACTIONS, JSON.stringify(actions));
 
-    // Get existing Supabase record ID if any
-    const existingId = localStorage.getItem(`${STORAGE_KEYS.ACTIONS}_${SUPABASE_ID_KEY}`);
+    // Get or find the shared record
+    let sharedRecordId = localStorage.getItem(`${SHARED_RECORD_KEY}_actions`);
 
-    if (existingId) {
-      // Update existing record
+    // If we don't have the shared record ID, try to find it
+    if (!sharedRecordId) {
+      const { data: existingRecords } = await supabase
+        .from('actions')
+        .select('id')
+        .order('created_at', { ascending: true })
+        .limit(1);
+
+      if (existingRecords && existingRecords.length > 0) {
+        sharedRecordId = existingRecords[0].id;
+        localStorage.setItem(`${SHARED_RECORD_KEY}_actions`, sharedRecordId);
+      }
+    }
+
+    if (sharedRecordId) {
+      // Update the shared record
       const { data, error } = await supabase
         .from('actions')
         .update({ data: actions })
-        .eq('id', existingId)
+        .eq('id', sharedRecordId)
         .select();
 
       if (error) {
-        console.error('Error updating actions in Supabase:', error);
+        console.error('Error updating shared actions record in Supabase:', error);
         return true; // Still return true since localStorage worked
       }
-      console.log('Actions updated in Supabase');
+      console.log('Shared actions record updated in Supabase');
     } else {
-      // Create new record
+      // Create the shared record (first time)
       const { data, error } = await supabase
         .from('actions')
         .insert([{ data: actions }])
         .select();
 
       if (error) {
-        console.error('Error inserting actions into Supabase:', error);
+        console.error('Error creating shared actions record in Supabase:', error);
         return true; // Still return true since localStorage worked
       }
 
-      // Store the ID for future updates
+      // Store the shared record ID
       if (data && data[0]) {
-        localStorage.setItem(`${STORAGE_KEYS.ACTIONS}_${SUPABASE_ID_KEY}`, data[0].id);
-        console.log('Actions saved to Supabase with ID:', data[0].id);
+        localStorage.setItem(`${SHARED_RECORD_KEY}_actions`, data[0].id);
+        console.log('Shared actions record created in Supabase with ID:', data[0].id);
       }
     }
 
@@ -340,20 +370,20 @@ export const saveActions = async (actions) => {
 };
 
 /**
- * Load actions from Supabase (or localStorage fallback)
+ * Load actions from Supabase shared record (or localStorage fallback)
  * @returns {Array} Array of action objects or empty array
  */
 export const loadActions = async () => {
   try {
-    // Try to load from Supabase first
+    // Load the shared record (oldest record = first created)
     const { data, error } = await supabase
       .from('actions')
       .select('*')
-      .order('updated_at', { ascending: false })
+      .order('created_at', { ascending: true }) // Get oldest first (shared record)
       .limit(1);
 
     if (error) {
-      console.error('Error loading actions from Supabase:', error);
+      console.error('Error loading shared actions record from Supabase:', error);
       // Fallback to localStorage
       const stored = localStorage.getItem(STORAGE_KEYS.ACTIONS);
       return stored ? JSON.parse(stored) : [];
@@ -361,10 +391,11 @@ export const loadActions = async () => {
 
     if (data && data.length > 0) {
       const actions = data[0].data;
-      // Cache in localStorage
+      // Cache the shared record ID
+      localStorage.setItem(`${SHARED_RECORD_KEY}_actions`, data[0].id);
+      // Cache actions in localStorage
       localStorage.setItem(STORAGE_KEYS.ACTIONS, JSON.stringify(actions));
-      localStorage.setItem(`${STORAGE_KEYS.ACTIONS}_${SUPABASE_ID_KEY}`, data[0].id);
-      console.log('Actions loaded from Supabase');
+      console.log('Shared actions record loaded from Supabase (ID:', data[0].id, ')');
       return actions;
     }
 
@@ -385,7 +416,7 @@ export const loadActions = async () => {
 export const clearAllActions = async () => {
   try {
     // Get Supabase ID
-    const actionsId = localStorage.getItem(`${STORAGE_KEYS.ACTIONS}_${SUPABASE_ID_KEY}`);
+    const actionsId = localStorage.getItem(`${SHARED_RECORD_KEY}_actions`);
 
     // Delete from Supabase if exists
     if (actionsId) {
@@ -394,7 +425,7 @@ export const clearAllActions = async () => {
 
     // Clear localStorage
     localStorage.removeItem(STORAGE_KEYS.ACTIONS);
-    localStorage.removeItem(`${STORAGE_KEYS.ACTIONS}_${SUPABASE_ID_KEY}`);
+    localStorage.removeItem(`${SHARED_RECORD_KEY}_actions`);
 
     console.log('Actions cleared from Supabase and localStorage');
     return true;
