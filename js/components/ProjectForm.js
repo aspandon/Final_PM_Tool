@@ -24,7 +24,8 @@ export function ProjectForm({
       isEditLocked
         ? 'border-red-500'
         : darkMode ? 'border-slate-600' : 'border-gray-200'
-    } ${darkMode ? 'bg-slate-800 hover:border-blue-500' : 'bg-white hover:border-blue-300'} rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all`
+    } ${darkMode ? 'bg-slate-800 hover:border-blue-500' : 'bg-white hover:border-blue-300'} rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all`,
+    style: isEditLocked ? { pointerEvents: 'none', opacity: 0.6 } : {}
   },
     // Compact Header
     React.createElement('div', {
