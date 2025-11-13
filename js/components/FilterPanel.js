@@ -468,19 +468,7 @@ export function FilterPanel({
           onChange: (e) => setFilterEndDate(e.target.value),
           className: `w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-900'}`
         })
-      ),
-
-      // Apply Button
-      React.createElement('button', {
-        onClick: applyFilter,
-        className: 'px-5 py-2.5 text-sm bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
-      }, 'Apply'),
-
-      // Clear Button
-      React.createElement('button', {
-        onClick: clearFilter,
-        className: 'px-5 py-2.5 text-sm bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
-      }, 'Clear')
+      )
     ),
 
     // BAU Allocation Section
@@ -572,8 +560,26 @@ export function FilterPanel({
             }, phase.label)
           )
         ),
+
+        // Apply and Clear buttons
+        React.createElement('div', {
+          className: `flex gap-2 ${hideProjectFields && projects.length > 0 ? '' : 'ml-auto'}`
+        },
+          // Apply Button
+          React.createElement('button', {
+            onClick: applyFilter,
+            className: 'px-4 py-2 text-xs bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
+          }, 'Apply'),
+
+          // Clear Button
+          React.createElement('button', {
+            onClick: clearFilter,
+            className: 'px-4 py-2 text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
+          }, 'Clear')
+        ),
+
         hideProjectFields && projects.length > 0 && React.createElement('div', {
-          className: `border ${darkMode ? 'border-slate-600 bg-slate-700' : 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50'} rounded-lg px-4 py-2 shadow-sm ml-auto`
+          className: `border ${darkMode ? 'border-slate-600 bg-slate-700' : 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50'} rounded-lg px-4 py-2 shadow-sm`
         },
           React.createElement('p', {
             className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-800'} flex items-center justify-center gap-1.5 whitespace-nowrap`
