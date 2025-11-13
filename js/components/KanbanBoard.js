@@ -128,9 +128,58 @@ const formatDate = (dateString) => {
  * NotesModal Component
  * Modal for viewing and editing project notes
  */
-const NotesModal = ({ project, darkMode, onClose, onSave }) => {
+const NotesModal = ({ project, darkMode, onClose, onSave, position }) => {
   const [notes, setNotes] = useState(project.notes || '');
   const textareaRef = useRef(null);
+  const modalRef = useRef(null);
+  const [modalStyle, setModalStyle] = useState({});
+
+  // Calculate modal position based on click position
+  React.useEffect(() => {
+    if (modalRef.current && position) {
+      const modal = modalRef.current;
+      const modalRect = modal.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Modal dimensions
+      const modalWidth = 600; // max-w-2xl is approximately 600px
+      const modalHeight = Math.min(modalRect.height, viewportHeight * 0.8);
+
+      // Calculate position
+      let left = position.x + 20; // 20px offset from click
+      let top = position.y;
+
+      // Adjust if modal would go off right edge
+      if (left + modalWidth > viewportWidth - 20) {
+        left = position.x - modalWidth - 20; // Place on left side
+      }
+
+      // Adjust if modal would go off left edge
+      if (left < 20) {
+        left = 20;
+      }
+
+      // Adjust if modal would go off bottom edge
+      if (top + modalHeight > viewportHeight - 20) {
+        top = viewportHeight - modalHeight - 20;
+      }
+
+      // Adjust if modal would go off top edge
+      if (top < 20) {
+        top = 20;
+      }
+
+      setModalStyle({
+        position: 'fixed',
+        left: `${left}px`,
+        top: `${top}px`,
+        maxWidth: '600px',
+        width: 'calc(100% - 40px)',
+        maxHeight: '80vh'
+      });
+    }
+  }, [position]);
 
   // Focus textarea when modal opens
   React.useEffect(() => {
@@ -152,11 +201,13 @@ const NotesModal = ({ project, darkMode, onClose, onSave }) => {
   };
 
   return React.createElement('div', {
-    className: 'fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4',
+    className: 'fixed inset-0 bg-black/30 z-[100]',
     onClick: onClose
   },
     React.createElement('div', {
-      className: `${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col`,
+      ref: modalRef,
+      className: `${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl overflow-hidden flex flex-col`,
+      style: modalStyle,
       onClick: (e) => e.stopPropagation()
     },
       // Modal Header
@@ -291,7 +342,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
     React.createElement('button', {
       onClick: (e) => {
         e.stopPropagation();
-        onOpenNotes(project);
+        onOpenNotes(project, e);
       },
       className: `absolute top-2 right-2 p-1.5 rounded-lg transition-all ${
         hasNotes
@@ -438,6 +489,7 @@ export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings })
 
   // Modal state for notes
   const [notesModalProject, setNotesModalProject] = useState(null);
+  const [notesModalPosition, setNotesModalPosition] = useState(null);
 
   // Default kanban settings if not provided
   const settings = kanbanSettings || {
@@ -448,13 +500,20 @@ export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings })
   };
 
   // Handle opening notes modal
-  const handleOpenNotes = (project) => {
+  const handleOpenNotes = (project, event) => {
+    // Get the button's position
+    const rect = event.currentTarget.getBoundingClientRect();
+    setNotesModalPosition({
+      x: rect.right,
+      y: rect.top
+    });
     setNotesModalProject(project);
   };
 
   // Handle closing notes modal
   const handleCloseNotes = () => {
     setNotesModalProject(null);
+    setNotesModalPosition(null);
   };
 
   // Handle saving notes
@@ -686,7 +745,8 @@ export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings })
       project: notesModalProject,
       darkMode,
       onClose: handleCloseNotes,
-      onSave: handleSaveNotes
+      onSave: handleSaveNotes,
+      position: notesModalPosition
     })
   );
 };
