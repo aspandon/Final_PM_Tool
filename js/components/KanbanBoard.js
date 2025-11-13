@@ -244,7 +244,11 @@ const KanbanColumn = ({ title, projects, column, darkMode, onDrop }) => {
  * Main KanbanBoard Component
  */
 export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
-  const { useEffect } = React;
+  const { useEffect, useRef } = React;
+
+  // Refs for scroll synchronization
+  const topScrollRef = useRef(null);
+  const contentScrollRef = useRef(null);
 
   // Safety check: ensure projects is an array
   if (!projects || !Array.isArray(projects)) {
@@ -280,6 +284,30 @@ export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
       setProjects(migratedProjects);
     }
   }, []); // Run only once on mount
+
+  // Sync scrollbars between top scroller and content
+  useEffect(() => {
+    const topScroll = topScrollRef.current;
+    const contentScroll = contentScrollRef.current;
+
+    if (!topScroll || !contentScroll) return;
+
+    const syncTopToContent = (e) => {
+      contentScroll.scrollLeft = e.target.scrollLeft;
+    };
+
+    const syncContentToTop = (e) => {
+      topScroll.scrollLeft = e.target.scrollLeft;
+    };
+
+    topScroll.addEventListener('scroll', syncTopToContent);
+    contentScroll.addEventListener('scroll', syncContentToTop);
+
+    return () => {
+      topScroll.removeEventListener('scroll', syncTopToContent);
+      contentScroll.removeEventListener('scroll', syncContentToTop);
+    };
+  }, [projects.length]); // Re-sync when projects change
 
   const columns = [
     { key: 'backlog', title: 'Backlog' },
@@ -402,24 +430,32 @@ export const KanbanBoard = ({ projects, setProjects, darkMode }) => {
       )
     ),
 
-    // Kanban Columns - Outer wrapper for top scrollbar
+    // Top scrollbar wrapper
     React.createElement('div', {
-      style: { transform: 'rotateX(180deg)' }
+      ref: topScrollRef,
+      className: 'overflow-x-auto mb-2',
+      style: { overflowY: 'hidden', height: '20px' }
     },
       React.createElement('div', {
-        className: 'flex gap-4 overflow-x-auto pb-4',
-        style: { transform: 'rotateX(180deg)' }
-      },
-        columns.map(column =>
-          React.createElement(KanbanColumn, {
-            key: column.key,
-            title: column.title,
-            projects: projectsByColumn[column.key],
-            column: column.key,
-            darkMode,
-            onDrop: handleDrop
-          })
-        )
+        style: { width: `${columns.length * 320 + (columns.length - 1) * 16}px`, height: '1px' }
+      })
+    ),
+
+    // Kanban Columns
+    React.createElement('div', {
+      ref: contentScrollRef,
+      className: 'flex gap-4 overflow-x-auto',
+      style: { overflowY: 'hidden' }
+    },
+      columns.map(column =>
+        React.createElement(KanbanColumn, {
+          key: column.key,
+          title: column.title,
+          projects: projectsByColumn[column.key],
+          column: column.key,
+          darkMode,
+          onDrop: handleDrop
+        })
       )
     )
   );
