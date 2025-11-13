@@ -5,9 +5,10 @@ const { useState, useMemo } = React;
  * Calculate RAG status based on finish date
  * @param {string} finishDate - The finish date to check
  * @param {boolean} isOnHold - Whether the project is on hold
+ * @param {string} projectName - Project name for debugging
  * @returns {object} RAG status with color and label
  */
-const calculateRAGStatus = (finishDate, isOnHold = false) => {
+const calculateRAGStatus = (finishDate, isOnHold = false, projectName = '') => {
   // On Hold always gets Amber status
   if (isOnHold) {
     return {
@@ -20,6 +21,7 @@ const calculateRAGStatus = (finishDate, isOnHold = false) => {
 
   // If no finish date, return neutral
   if (!finishDate) {
+    console.log(`RAG [${projectName}]: No finish date - N/A`);
     return {
       color: 'bg-gray-400',
       label: 'N/A',
@@ -36,6 +38,8 @@ const calculateRAGStatus = (finishDate, isOnHold = false) => {
 
   const diffTime = finish - currentDate;
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  console.log(`RAG [${projectName}]: finishDate=${finishDate}, diffDays=${diffDays}`);
 
   if (diffDays < 0) {
     // Past due - Red
@@ -128,10 +132,13 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange }) => {
   const isDone = column === 'done';
   const finishDate = getRelevantFinishDate(project, column);
 
+  // Log what column and dates we're using
+  console.log(`Card [${project.name}] in column [${column}]: finishDate=${finishDate}, project.psd?.finish=${project.psd?.finish}, project.investment?.finish=${project.investment?.finish}`);
+
   // Done projects don't need RAG status, or can show N/A
   const ragStatus = isDone
     ? { color: 'bg-gray-400', label: 'N/A', textColor: 'text-gray-700', borderColor: 'border-gray-400' }
-    : calculateRAGStatus(finishDate, isOnHold);
+    : calculateRAGStatus(finishDate, isOnHold, project.name);
 
   return React.createElement('div', {
     className: `${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border-l-4 ${ragStatus.borderColor} hover:shadow-md transition-shadow cursor-move`,
