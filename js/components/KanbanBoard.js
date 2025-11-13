@@ -1,5 +1,5 @@
 // js/components/KanbanBoard.js
-const { useState, useMemo } = React;
+const { useState, useMemo, useRef } = React;
 
 /**
  * Calculate RAG status based on finish date
@@ -125,9 +125,203 @@ const formatDate = (dateString) => {
 };
 
 /**
+ * NotesModal Component
+ * Modal for viewing and editing project notes
+ */
+const NotesModal = ({ project, darkMode, onClose, onSave, position }) => {
+  const [notes, setNotes] = useState(project.notes || '');
+  const textareaRef = useRef(null);
+  const modalRef = useRef(null);
+  const [modalStyle, setModalStyle] = useState({});
+
+  // Calculate modal position based on click position
+  React.useEffect(() => {
+    if (modalRef.current && position) {
+      const modal = modalRef.current;
+      const modalRect = modal.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Modal dimensions
+      const modalWidth = 600; // max-w-2xl is approximately 600px
+      const modalHeight = Math.min(modalRect.height, viewportHeight * 0.8);
+
+      // Center the modal in the viewport, but try to keep it near the click position
+      let left = position.x + 20; // Start 20px to the right of click
+      let top = position.y;
+
+      // If modal would go off right edge, position it to the left of click
+      if (left + modalWidth > viewportWidth - 20) {
+        left = position.x - modalWidth - 20;
+      }
+
+      // If still off screen on the left, center it horizontally
+      if (left < 20) {
+        left = Math.max(20, (viewportWidth - modalWidth) / 2);
+      }
+
+      // Adjust vertical position to keep modal in viewport
+      // Try to center it vertically in the viewport
+      const idealTop = (viewportHeight - modalHeight) / 2;
+
+      // But if the click was near the top or bottom, adjust accordingly
+      if (position.y < viewportHeight / 3) {
+        // Click was in top third - position modal below
+        top = Math.min(position.y, idealTop);
+      } else if (position.y > (viewportHeight * 2) / 3) {
+        // Click was in bottom third - position modal above
+        top = Math.max(position.y - modalHeight, idealTop);
+      } else {
+        // Click was in middle - center the modal
+        top = idealTop;
+      }
+
+      // Final boundary checks
+      if (top < 20) {
+        top = 20;
+      }
+      if (top + modalHeight > viewportHeight - 20) {
+        top = viewportHeight - modalHeight - 20;
+      }
+
+      setModalStyle({
+        position: 'fixed',
+        left: `${left}px`,
+        top: `${top}px`,
+        maxWidth: '600px',
+        width: 'calc(100% - 40px)',
+        maxHeight: '80vh'
+      });
+    }
+  }, [position]);
+
+  // Focus textarea when modal opens
+  React.useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
+
+  const handleSave = () => {
+    onSave(notes);
+    onClose();
+  };
+
+  const handleKeyDown = (e) => {
+    // Save on Ctrl+Enter or Cmd+Enter
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      handleSave();
+    }
+  };
+
+  return React.createElement('div', {
+    className: 'fixed inset-0 bg-black/30 z-[100]',
+    onClick: onClose
+  },
+    React.createElement('div', {
+      ref: modalRef,
+      className: `${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl overflow-hidden flex flex-col`,
+      style: modalStyle,
+      onClick: (e) => e.stopPropagation()
+    },
+      // Modal Header
+      React.createElement('div', {
+        className: `flex items-center justify-between p-6 border-b ${darkMode ? 'border-slate-700' : 'border-gray-200'}`
+      },
+        React.createElement('div', {
+          className: 'flex items-center gap-3'
+        },
+          React.createElement('div', {
+            className: 'p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl'
+          },
+            React.createElement('svg', {
+              className: 'w-6 h-6 text-white',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: 2,
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round',
+              viewBox: '0 0 24 24'
+            },
+              React.createElement('path', { d: 'M12 20h9' }),
+              React.createElement('path', { d: 'M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' })
+            )
+          ),
+          React.createElement('div', null,
+            React.createElement('h2', {
+              className: `text-xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+            }, 'Project Notes'),
+            React.createElement('p', {
+              className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+            }, project.name)
+          )
+        ),
+        React.createElement('button', {
+          onClick: onClose,
+          className: `p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`
+        },
+          React.createElement('svg', {
+            className: 'w-5 h-5',
+            fill: 'none',
+            stroke: 'currentColor',
+            strokeWidth: 2,
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+            viewBox: '0 0 24 24'
+          },
+            React.createElement('path', { d: 'M18 6 6 18' }),
+            React.createElement('path', { d: 'm6 6 12 12' })
+          )
+        )
+      ),
+
+      // Modal Content
+      React.createElement('div', {
+        className: `p-6 flex-1 overflow-y-auto ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+      },
+        React.createElement('textarea', {
+          ref: textareaRef,
+          value: notes,
+          onChange: (e) => setNotes(e.target.value),
+          onKeyDown: handleKeyDown,
+          placeholder: 'Add notes about this project...\n\nTip: Press Ctrl+Enter to save',
+          className: `w-full h-64 px-4 py-3 rounded-lg border ${
+            darkMode
+              ? 'bg-slate-700 border-slate-600 text-gray-200 placeholder-gray-500'
+              : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+          } focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none font-mono text-sm`,
+          style: { minHeight: '300px' }
+        }),
+        React.createElement('p', {
+          className: `text-xs mt-2 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+        }, `${notes.length} characters`)
+      ),
+
+      // Modal Actions
+      React.createElement('div', {
+        className: `flex gap-3 p-6 border-t ${darkMode ? 'border-slate-700' : 'border-gray-200'}`
+      },
+        React.createElement('button', {
+          onClick: onClose,
+          className: `flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
+            darkMode
+              ? 'bg-slate-700 text-gray-200 hover:bg-slate-600'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`
+        }, 'Cancel'),
+        React.createElement('button', {
+          onClick: handleSave,
+          className: 'flex-1 px-4 py-2.5 text-sm font-medium bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-md'
+        }, 'Save Notes')
+      )
+    )
+  );
+};
+
+/**
  * KanbanCard Component
  */
-const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings }) => {
+const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings, onOpenNotes }) => {
   // Default kanban settings if not provided
   const settings = kanbanSettings || {
     showRAG: true,
@@ -148,17 +342,56 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings 
     ? { color: 'bg-gray-400', label: 'N/A', textColor: 'text-gray-700', borderColor: 'border-gray-400' }
     : calculateRAGStatus(finishDate, isOnHold, project.name);
 
+  const hasNotes = project.notes && project.notes.trim().length > 0;
+
   return React.createElement('div', {
-    className: `${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border-l-4 ${ragStatus.borderColor} hover:shadow-md transition-shadow cursor-move`,
+    className: `${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border-l-4 ${ragStatus.borderColor} hover:shadow-md transition-shadow cursor-move relative`,
     draggable: true,
     onDragStart: (e) => {
       e.dataTransfer.setData('projectName', project.name);
       e.dataTransfer.setData('fromColumn', column);
     }
   },
+    // Notes Icon Button (top-right corner)
+    React.createElement('button', {
+      type: 'button',
+      onClick: (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onOpenNotes(project, e);
+      },
+      className: `absolute top-2 right-2 p-1.5 rounded-lg transition-all ${
+        hasNotes
+          ? darkMode
+            ? 'bg-blue-600 text-white hover:bg-blue-700'
+            : 'bg-blue-500 text-white hover:bg-blue-600'
+          : darkMode
+            ? 'bg-slate-600 text-gray-400 hover:bg-slate-500 hover:text-gray-300'
+            : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
+      }`,
+      title: hasNotes ? 'View/Edit Notes' : 'Add Notes'
+    },
+      React.createElement('svg', {
+        className: 'w-4 h-4',
+        fill: 'none',
+        stroke: 'currentColor',
+        strokeWidth: 2,
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        viewBox: '0 0 24 24'
+      },
+        React.createElement('path', { d: 'M12 20h9' }),
+        React.createElement('path', { d: 'M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' })
+      ),
+      // Badge indicator when notes exist
+      hasNotes && React.createElement('span', {
+        className: 'absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border-2 border-white'
+      })
+    ),
+
     // Project Name
     React.createElement('div', {
-      className: `font-semibold mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+      className: `font-semibold mb-2 pr-8 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
     }, project.name || 'Untitled Project'),
 
     // Division (conditional)
@@ -198,7 +431,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings 
 /**
  * KanbanColumn Component
  */
-const KanbanColumn = ({ title, projects, column, darkMode, onDrop, kanbanSettings }) => {
+const KanbanColumn = ({ title, projects, column, darkMode, onDrop, kanbanSettings, onOpenNotes }) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragOver = (e) => {
@@ -249,7 +482,8 @@ const KanbanColumn = ({ title, projects, column, darkMode, onDrop, kanbanSetting
               project,
               column,
               darkMode,
-              kanbanSettings
+              kanbanSettings,
+              onOpenNotes
             })
           )
         : React.createElement('div', {
@@ -269,12 +503,46 @@ export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings })
   const topScrollRef = useRef(null);
   const contentScrollRef = useRef(null);
 
+  // Modal state for notes
+  const [notesModalProject, setNotesModalProject] = useState(null);
+  const [notesModalPosition, setNotesModalPosition] = useState(null);
+
   // Default kanban settings if not provided
   const settings = kanbanSettings || {
     showRAG: true,
     showPM: true,
     showBP: true,
     showDivision: true
+  };
+
+  // Handle opening notes modal
+  const handleOpenNotes = (project, event) => {
+    // Get the button's position
+    const rect = event.currentTarget.getBoundingClientRect();
+    setNotesModalPosition({
+      x: rect.right,
+      y: rect.top
+    });
+    setNotesModalProject(project);
+  };
+
+  // Handle closing notes modal
+  const handleCloseNotes = () => {
+    setNotesModalProject(null);
+    setNotesModalPosition(null);
+  };
+
+  // Handle saving notes
+  const handleSaveNotes = (notes) => {
+    if (!notesModalProject) return;
+
+    const updatedProjects = projects.map(project => {
+      if (project.name === notesModalProject.name) {
+        return { ...project, notes };
+      }
+      return project;
+    });
+    setProjects(updatedProjects);
   };
 
   // Safety check: ensure projects is an array
@@ -482,9 +750,19 @@ export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings })
           column: column.key,
           darkMode,
           onDrop: handleDrop,
-          kanbanSettings: settings
+          kanbanSettings: settings,
+          onOpenNotes: handleOpenNotes
         })
       )
-    )
+    ),
+
+    // Notes Modal
+    notesModalProject && React.createElement(NotesModal, {
+      project: notesModalProject,
+      darkMode,
+      onClose: handleCloseNotes,
+      onSave: handleSaveNotes,
+      position: notesModalPosition
+    })
   );
 };

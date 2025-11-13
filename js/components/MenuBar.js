@@ -659,6 +659,9 @@ export function MenuBar({
                   React.createElement('li', null, 'BP Implementation'),
                   React.createElement('li', null, 'Planned Investment Rec.')
                 )
+              ),
+              React.createElement('p', { className: 'mt-3' },
+                'Use the Lock/Unlock button (🔒/🔓) in the tab bar to prevent accidental edits to project data when reviewing or presenting.'
               )
             ),
 
@@ -670,11 +673,29 @@ export function MenuBar({
               )
             ),
 
-            // Divisions Tab
+            // Kanban Tab
             React.createElement('div', { className: 'mb-4' },
-              React.createElement('h4', { className: 'font-bold text-lg mb-2' }, '📊 Divisions'),
-              React.createElement('p', null,
-                'Consolidated view showing FTE (Full-Time Equivalent) distribution across divisions over time. Visualize resource allocation by department using stacked bar charts.'
+              React.createElement('h4', { className: 'font-bold text-lg mb-2' }, '📋 Kanban'),
+              React.createElement('p', { className: 'mb-2' },
+                'Board view organizing projects into columns based on their phase status. Provides a visual workflow management system where projects can be moved between different phase stages.'
+              ),
+              React.createElement('p', { className: 'mb-2' },
+                'Features customizable card display options (configure via Settings > Kanban):'
+              ),
+              React.createElement('ul', { className: 'list-disc list-inside ml-4 space-y-1' },
+                React.createElement('li', null, 'RAG Status - Red/Amber/Green project health indicators'),
+                React.createElement('li', null, 'Project Manager - Show/hide PM assignments'),
+                React.createElement('li', null, 'Business Partner - Show/hide BP assignments'),
+                React.createElement('li', null, 'Division - Show/hide division labels')
+              ),
+              React.createElement('p', { className: 'mt-3 mb-2' },
+                'Each card includes a notes icon (📝) in the top-right corner:'
+              ),
+              React.createElement('ul', { className: 'list-disc list-inside ml-4 space-y-1' },
+                React.createElement('li', null, 'Gray icon - No notes yet'),
+                React.createElement('li', null, 'Blue icon with green badge - Notes exist'),
+                React.createElement('li', null, 'Click to open modal editor for adding/editing project notes'),
+                React.createElement('li', null, 'Notes saved automatically with project data')
               )
             ),
 
@@ -689,6 +710,14 @@ export function MenuBar({
                 React.createElement('li', null, 'Consolidated totals (Total PM, Total BP)'),
                 React.createElement('li', null, 'External resource tracking (PM External, QA External)'),
                 React.createElement('li', null, 'BAU (Business As Usual) allocation overlay')
+              )
+            ),
+
+            // Divisions Tab
+            React.createElement('div', { className: 'mb-4' },
+              React.createElement('h4', { className: 'font-bold text-lg mb-2' }, '📊 Divisions'),
+              React.createElement('p', null,
+                'Consolidated view showing FTE (Full-Time Equivalent) distribution across divisions over time. Visualize resource allocation by department using stacked bar charts.'
               )
             ),
 
@@ -748,6 +777,19 @@ export function MenuBar({
                 ),
                 React.createElement('p', null,
                   'Monitor the auto-save status in the top-right corner of the menu bar: Green indicator = "Auto-Save Active", Red indicator = "Save Error - Check Connection", Yellow pulsing = "Saving..."'
+                )
+              ),
+              React.createElement('div', null,
+                React.createElement('h4', { className: 'font-bold mb-1' }, '📝 Kanban Card Notes'),
+                React.createElement('p', { className: 'mb-2' },
+                  'Add detailed notes to any project directly from the Kanban board without cluttering the card layout. Each card displays a small notes icon in the top-right corner.'
+                ),
+                React.createElement('ul', { className: 'list-disc list-inside ml-4 space-y-1' },
+                  React.createElement('li', null, 'Click the notes icon to open a full-featured editor modal'),
+                  React.createElement('li', null, 'Visual indicators: Gray = no notes, Blue with green badge = notes exist'),
+                  React.createElement('li', null, 'Modal appears near the clicked card for contextual editing'),
+                  React.createElement('li', null, 'Keyboard shortcut: Ctrl+Enter (Cmd+Enter on Mac) to save quickly'),
+                  React.createElement('li', null, 'Notes persist with project data and sync via auto-save')
                 )
               ),
               React.createElement('div', null,
