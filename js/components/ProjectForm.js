@@ -16,8 +16,6 @@ export function ProjectForm({
   darkMode,
   isEditLocked = false
 }) {
-  const { BarChart3, Trash2 } = lucide;
-
   return React.createElement('div', {
     key: pIndex,
     className: `relative border-4 ${
@@ -39,9 +37,9 @@ export function ProjectForm({
       React.createElement('div', {
         className: 'flex items-center gap-2'
       },
-        React.createElement(BarChart3, {
-          className: `w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex-shrink-0`
-        }),
+        React.createElement('span', {
+          className: 'text-lg flex-shrink-0'
+        }, '📊'),
         React.createElement('input', {
           type: 'text',
           value: project.name,
@@ -63,7 +61,7 @@ export function ProjectForm({
           className: `p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg transition-all ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
           title: isEditLocked ? 'Locked - Cannot delete' : 'Delete',
           disabled: isEditLocked
-        }, React.createElement(Trash2, { className: 'w-4 h-4' }))
+        }, React.createElement('span', { className: 'text-sm' }, '🗑️'))
       )
     ),
 
