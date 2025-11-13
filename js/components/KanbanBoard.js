@@ -146,28 +146,42 @@ const NotesModal = ({ project, darkMode, onClose, onSave, position }) => {
       const modalWidth = 600; // max-w-2xl is approximately 600px
       const modalHeight = Math.min(modalRect.height, viewportHeight * 0.8);
 
-      // Calculate position
-      let left = position.x + 20; // 20px offset from click
+      // Center the modal in the viewport, but try to keep it near the click position
+      let left = position.x + 20; // Start 20px to the right of click
       let top = position.y;
 
-      // Adjust if modal would go off right edge
+      // If modal would go off right edge, position it to the left of click
       if (left + modalWidth > viewportWidth - 20) {
-        left = position.x - modalWidth - 20; // Place on left side
+        left = position.x - modalWidth - 20;
       }
 
-      // Adjust if modal would go off left edge
+      // If still off screen on the left, center it horizontally
       if (left < 20) {
-        left = 20;
+        left = Math.max(20, (viewportWidth - modalWidth) / 2);
       }
 
-      // Adjust if modal would go off bottom edge
-      if (top + modalHeight > viewportHeight - 20) {
-        top = viewportHeight - modalHeight - 20;
+      // Adjust vertical position to keep modal in viewport
+      // Try to center it vertically in the viewport
+      const idealTop = (viewportHeight - modalHeight) / 2;
+
+      // But if the click was near the top or bottom, adjust accordingly
+      if (position.y < viewportHeight / 3) {
+        // Click was in top third - position modal below
+        top = Math.min(position.y, idealTop);
+      } else if (position.y > (viewportHeight * 2) / 3) {
+        // Click was in bottom third - position modal above
+        top = Math.max(position.y - modalHeight, idealTop);
+      } else {
+        // Click was in middle - center the modal
+        top = idealTop;
       }
 
-      // Adjust if modal would go off top edge
+      // Final boundary checks
       if (top < 20) {
         top = 20;
+      }
+      if (top + modalHeight > viewportHeight - 20) {
+        top = viewportHeight - modalHeight - 20;
       }
 
       setModalStyle({
@@ -340,7 +354,9 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
   },
     // Notes Icon Button (top-right corner)
     React.createElement('button', {
+      type: 'button',
       onClick: (e) => {
+        e.preventDefault();
         e.stopPropagation();
         onOpenNotes(project, e);
       },
