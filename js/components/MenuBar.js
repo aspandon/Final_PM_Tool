@@ -228,7 +228,7 @@ export function MenuBar({
   return React.createElement('div', null,
     // Menu Bar
     React.createElement('div', {
-      className: `mb-4 flex gap-2 shadow-md ${
+      className: `mb-4 flex gap-2 shadow-md relative z-50 ${
         darkMode
           ? 'glass-dark border-animated-dark'
           : 'glass border-animated'
@@ -253,7 +253,7 @@ export function MenuBar({
 
         // Files Dropdown
         filesMenuOpen && React.createElement('div', {
-          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-50 dropdown-enter`
+          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-[100] dropdown-enter`
         },
           // Add Project
           React.createElement('button', {
@@ -333,7 +333,7 @@ export function MenuBar({
 
         // Settings Dropdown
         settingsMenuOpen && React.createElement('div', {
-          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-50 dropdown-enter`
+          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-[100] dropdown-enter`
         },
           // Kanban Settings (with sub-menu)
           React.createElement('div', {
@@ -368,7 +368,7 @@ export function MenuBar({
 
             // Kanban Sub-menu
             kanbanSubMenuOpen && React.createElement('div', {
-              className: `absolute left-full top-0 ml-1 w-64 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} p-4 z-50 dropdown-enter`,
+              className: `absolute left-full top-0 ml-1 w-64 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} p-4 z-[110] dropdown-enter`,
               onClick: (e) => e.stopPropagation()
             },
               React.createElement('div', {
@@ -519,7 +519,7 @@ export function MenuBar({
 
         // Help Dropdown
         helpMenuOpen && React.createElement('div', {
-          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-50 dropdown-enter`
+          className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-[100] dropdown-enter`
         },
           React.createElement('button', {
             onClick: (e) => {

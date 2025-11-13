@@ -820,11 +820,7 @@ function GanttChart() {
 
           // Lock/Unlock button - only visible on Projects tab
           activeTab === 'projects' && React.createElement('button', {
-            onClick: () => {
-              const newLockState = !isEditLocked;
-              alert(`Lock state changing to: ${newLockState ? 'LOCKED' : 'UNLOCKED'}`);
-              setIsEditLocked(newLockState);
-            },
+            onClick: () => setIsEditLocked(!isEditLocked),
             className: `ml-auto px-3 py-1 text-sm rounded-t-lg lock-button btn-modern ${
               darkMode
                 ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-4 ' + (isEditLocked ? 'border-red-400 glow-red' : 'border-green-400 glow-green')
