@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Action Items - Digital Development Hub</title>
+
+    <!-- Tailwind CSS -->
+    <script src="./css/tailwind.js"></script>
+
+    <!-- React 18 Development (with detailed error messages) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        code {
+            font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+        }
+
+        /* Loading screen styles */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        /* Rich text content styles for lists */
+        .rich-text-content ul,
+        .rich-text-content ol {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+        }
+
+        .rich-text-content ul {
+            list-style-type: disc;
+        }
+
+        .rich-text-content ol {
+            list-style-type: decimal;
+        }
+
+        .rich-text-content li {
+            margin: 0.25em 0;
+            display: list-item;
+        }
+
+        .rich-text-content ul ul {
+            list-style-type: circle;
+        }
+
+        .rich-text-content ul ul ul {
+            list-style-type: square;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h2 style="font-size: 24px; margin: 0 0 10px 0;">Loading Action Items</h2>
+            <p style="font-size: 14px; opacity: 0.9;">Please wait...</p>
+        </div>
+    </div>
+
+    <!-- React Root -->
+    <div id="root"></div>
+
+    <!-- Error Display -->
+    <div id="error-display" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #fee; border: 2px solid #c33; padding: 20px; border-radius: 8px; max-width: 600px; z-index: 10000;">
+        <h3 style="margin: 0 0 10px 0; color: #c33;">Application Error</h3>
+        <div id="error-message" style="font-family: monospace; font-size: 12px; white-space: pre-wrap;"></div>
+    </div>
+
+    <script>
+        // Global error handler
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error('Global error:', { message, source, lineno, colno, error });
+            const errorDisplay = document.getElementById('error-display');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = `${message}\n\nFile: ${source}\nLine: ${lineno}\nColumn: ${colno}\n\nStack: ${error ? error.stack : 'N/A'}`;
+            errorDisplay.style.display = 'block';
+
+            // Hide loading screen
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.classList.add('fade-out');
+            }
+
+            return false;
+        };
+
+        // Check if dependencies are loaded
+        function checkDependencies() {
+            const deps = {
+                'React': typeof React !== 'undefined',
+                'ReactDOM': typeof ReactDOM !== 'undefined'
+            };
+
+            const missing = Object.keys(deps).filter(key => !deps[key]);
+
+            if (missing.length > 0) {
+                console.error('Missing dependencies:', missing);
+                throw new Error(`Failed to load dependencies: ${missing.join(', ')}`);
+            }
+
+            console.log('All dependencies loaded successfully');
+            return true;
+        }
+
+        // Wait for all dependencies to load
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                try {
+                    // Check dependencies
+                    checkDependencies();
+
+                    console.log('Starting Action Items application...');
+
+                    // Hide loading screen after app loads
+                    setTimeout(function() {
+                        const loadingScreen = document.getElementById('loading-screen');
+                        if (loadingScreen) {
+                            loadingScreen.classList.add('fade-out');
+                            setTimeout(function() {
+                                loadingScreen.remove();
+                            }, 500);
+                        }
+                    }, 500);
+
+                } catch (error) {
+                    console.error('Initialization error:', error);
+                    const errorDisplay = document.getElementById('error-display');
+                    const errorMessage = document.getElementById('error-message');
+                    errorMessage.textContent = error.message + '\n\n' + (error.stack || '');
+                    errorDisplay.style.display = 'block';
+
+                    // Hide loading screen
+                    const loadingScreen = document.getElementById('loading-screen');
+                    if (loadingScreen) {
+                        loadingScreen.classList.add('fade-out');
+                    }
+                }
+            }, 100);
+        });
+    </script>
+
+    <!-- Authentication Check -->
+    <script type="module">
+        import { requireAuth } from './js/utils/auth.js';
+
+        // Check authentication before loading app
+        (async () => {
+            const isAuth = await requireAuth();
+            if (!isAuth) {
+                // User will be redirected by requireAuth
+                return;
+            }
+        })();
+    </script>
+
+    <!-- Load application -->
+    <script type="module" src="./js/actions/app.js"></script>
+</body>
+</html>

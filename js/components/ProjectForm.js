@@ -1,0 +1,385 @@
+// js/components/ProjectForm.js
+
+/**
+ * ProjectForm Component
+ * Displays a comprehensive form for entering and editing project data including
+ * team members, phases, allocations, and timelines
+ */
+
+export function ProjectForm({
+  project,
+  pIndex,
+  updateProject,
+  updatePhase,
+  deleteProject,
+  phases,
+  darkMode
+}) {
+  // Kanban status mapping
+  const kanbanStatusMap = {
+    'backlog': 'Backlog',
+    'psd-prep': 'PSD & Inv. Prop Pre',
+    'psd-ready': 'PSD & Inv. Prop. Ready',
+    'approved': 'Inv. Prop. Approved',
+    'procurement': 'Procurement',
+    'implementation': 'Implementation',
+    'uat': 'UAT',
+    'done': 'Done'
+  };
+
+  const getStatusDisplay = () => {
+    const status = project.kanbanStatus || 'backlog';
+    return kanbanStatusMap[status] || 'Backlog';
+  };
+
+  // Inline SVG icon components (matching lucide style)
+  const BarChart3 = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M3 3v18h18' }),
+    React.createElement('path', { d: 'M18 17V9' }),
+    React.createElement('path', { d: 'M13 17V5' }),
+    React.createElement('path', { d: 'M8 17v-3' })
+  );
+
+  const Trash2 = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M3 6h18' }),
+    React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
+    React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' }),
+    React.createElement('line', { x1: '10', x2: '10', y1: '11', y2: '17' }),
+    React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
+  );
+
+  return React.createElement('div', {
+    key: pIndex,
+    className: `relative border-2 ${darkMode ? 'border-slate-600 bg-slate-800 hover:border-blue-500' : 'border-gray-200 bg-white hover:border-blue-300'} rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all`
+  },
+    // Compact Header
+    React.createElement('div', {
+      className: 'px-3 py-2',
+      style: { 
+        background: darkMode 
+          ? 'linear-gradient(to right, rgba(51, 65, 85, 0.85), rgba(71, 85, 105, 0.85))' 
+          : 'linear-gradient(to right, rgba(147, 197, 253, 0.85), rgba(165, 180, 252, 0.85))' 
+      }
+    },
+      React.createElement('div', {
+        className: 'flex items-center gap-2'
+      },
+        React.createElement(BarChart3, {
+          className: `w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex-shrink-0`
+        }),
+        React.createElement('input', {
+          type: 'text',
+          value: project.name,
+          onChange: (e) => updateProject(pIndex, 'name', e.target.value),
+          className: `flex-1 min-w-0 text-base font-bold px-3 py-1.5 border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg focus:ring-1 focus:ring-blue-500 placeholder-gray-400`,
+          placeholder: 'Project Name'
+        }),
+        React.createElement('input', {
+          type: 'text',
+          value: getStatusDisplay(),
+          readOnly: true,
+          className: `w-44 text-sm font-semibold px-3 py-1.5 border ${darkMode ? 'border-slate-600 bg-slate-700/50 text-indigo-400' : 'border-indigo-300 bg-indigo-50 text-indigo-700'} rounded-lg cursor-default`,
+          placeholder: 'Status'
+        }),
+        React.createElement('input', {
+          type: 'text',
+          value: project.division,
+          onChange: (e) => updateProject(pIndex, 'division', e.target.value),
+          className: `w-40 text-sm font-semibold px-3 py-1.5 border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg focus:ring-1 focus:ring-blue-500 placeholder-gray-400`,
+          placeholder: 'Division'
+        }),
+        React.createElement('button', {
+          onClick: () => deleteProject(pIndex),
+          className: 'p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg transition-all',
+          title: 'Delete'
+        }, React.createElement(Trash2, { className: 'w-4 h-4' }))
+      )
+    ),
+
+    // Ultra Compact Content Grid
+    React.createElement('div', {
+      className: 'p-3 grid grid-cols-2 gap-2'
+    },
+      // Left Column - Team Section
+      React.createElement('div', {
+        className: 'space-y-2'
+      },
+        React.createElement('div', {
+          className: `rounded-lg border ${darkMode ? 'border-slate-600 bg-slate-700/50' : 'border-blue-200 bg-blue-50/50'} p-2`
+        },
+          // Team Header
+          React.createElement('div', {
+            className: `text-sm font-bold ${darkMode ? 'text-blue-300' : 'text-blue-900'} mb-1.5 flex items-center gap-1`
+          },
+            React.createElement('div', {
+              className: 'w-0.5 h-3 bg-blue-600 rounded'
+            }),
+            '👥 Team'
+          ),
+
+          // Team 2x2 Grid
+          React.createElement('div', {
+            className: 'grid grid-cols-2 gap-1.5 mb-2'
+          },
+            // Project Manager Name
+            React.createElement('div', null,
+              React.createElement('label', {
+                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
+              }, '👤 Project Manager'),
+              React.createElement('input', {
+                type: 'text',
+                value: project.projectManager,
+                onChange: (e) => updateProject(pIndex, 'projectManager', e.target.value),
+                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500`,
+                placeholder: 'Name'
+              })
+            ),
+            // PM Allocation
+            React.createElement('div', null,
+              React.createElement('label', {
+                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
+              }, '⚡ FTE Effort (Implementation Phase)'),
+              React.createElement('input', {
+                type: 'number',
+                step: '0.1',
+                value: project.pmAllocation,
+                onChange: (e) => updateProject(pIndex, 'pmAllocation', e.target.value),
+                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500`,
+                placeholder: '0.5'
+              })
+            ),
+            // Business Partner Name
+            React.createElement('div', null,
+              React.createElement('label', {
+                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
+              }, '👤 Business Partner'),
+              React.createElement('input', {
+                type: 'text',
+                value: project.businessPartner,
+                onChange: (e) => updateProject(pIndex, 'businessPartner', e.target.value),
+                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500`,
+                placeholder: 'Name'
+              })
+            ),
+            // BP Allocation
+            React.createElement('div', null,
+              React.createElement('label', {
+                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
+              }, '⚡ FTE Effort (PSD & Inv. Prop. Preparation)'),
+              React.createElement('input', {
+                type: 'number',
+                step: '0.1',
+                value: project.bpAllocation,
+                onChange: (e) => updateProject(pIndex, 'bpAllocation', e.target.value),
+                className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500`,
+                placeholder: '0.5'
+              })
+            )
+          ),
+
+          // BP Implementation Section
+          React.createElement('div', {
+            className: `pt-2 border-t ${darkMode ? 'border-slate-600' : 'border-blue-300'}`
+          },
+            React.createElement('div', {
+              className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} mb-1.5`
+            }, 'BP Implementation'),
+            React.createElement('div', {
+              className: 'grid grid-cols-2 gap-1.5'
+            },
+              React.createElement('div', {
+                className: 'space-y-1.5'
+              },
+                React.createElement('input', {
+                  type: 'date',
+                  value: project.bpImplementation.start,
+                  onChange: (e) => updatePhase(pIndex, 'bpImplementation', 'start', e.target.value),
+                  className: `w-full px-1.5 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500`
+                }),
+                React.createElement('input', {
+                  type: 'date',
+                  value: project.bpImplementation.finish,
+                  onChange: (e) => updatePhase(pIndex, 'bpImplementation', 'finish', e.target.value),
+                  className: `w-full px-1.5 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500`
+                })
+              ),
+              React.createElement('div', null,
+                React.createElement('label', {
+                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
+                }, '⚡ FTE Effort (Implementation Phase)'),
+                React.createElement('input', {
+                  type: 'number',
+                  step: '0.1',
+                  value: project.bpImplementationAllocation,
+                  onChange: (e) => updateProject(pIndex, 'bpImplementationAllocation', e.target.value),
+                  className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500`,
+                  placeholder: '0.5'
+                })
+              )
+            )
+          ),
+
+          // External Resources Section
+          React.createElement('div', {
+            className: `pt-2 mt-2 border-t ${darkMode ? 'border-slate-600' : 'border-blue-300'}`
+          },
+            React.createElement('div', {
+              className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} mb-1.5`
+            }, 'External Resources'),
+            React.createElement('div', {
+              className: 'grid grid-cols-2 gap-1.5'
+            },
+              React.createElement('div', null,
+                React.createElement('label', {
+                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
+                }, '⚡ FTE Effort (PM External)'),
+                React.createElement('input', {
+                  type: 'number',
+                  step: '0.1',
+                  value: project.pmExternalAllocation,
+                  onChange: (e) => updateProject(pIndex, 'pmExternalAllocation', e.target.value),
+                  className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500`,
+                  placeholder: '0.5'
+                })
+              ),
+              React.createElement('div', null,
+                React.createElement('label', {
+                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
+                }, '⚡ FTE Effort (QA External)'),
+                React.createElement('input', {
+                  type: 'number',
+                  step: '0.1',
+                  value: project.qaExternalAllocation,
+                  onChange: (e) => updateProject(pIndex, 'qaExternalAllocation', e.target.value),
+                  className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-200 bg-white'} rounded focus:ring-1 focus:ring-blue-500`,
+                  placeholder: '0.5'
+                })
+              )
+            )
+          )
+        )
+      ),
+
+      // Right Column - Phases Section
+      React.createElement('div', {
+        className: `rounded-lg border ${darkMode ? 'border-slate-600 bg-slate-700/50' : 'border-purple-200 bg-purple-50/50'} p-2`
+      },
+        // Phases Header
+        React.createElement('div', {
+          className: `text-sm font-bold ${darkMode ? 'text-purple-300' : 'text-purple-900'} mb-1.5 flex items-center gap-1`
+        },
+          React.createElement('div', {
+            className: 'w-0.5 h-3 bg-purple-600 rounded'
+          }),
+          '🎯 Project Phases'
+        ),
+
+        // Main 4 Phases in 2x2 Grid
+        React.createElement('div', {
+          className: 'grid grid-cols-2 gap-1.5 mb-2'
+        },
+          phases.map((phase) =>
+            React.createElement('div', {
+              key: phase.key,
+              className: `${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-100'} rounded p-1.5 border`
+            },
+              React.createElement('div', {
+                className: `text-xs font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-1 mb-1`
+              },
+                React.createElement('div', {
+                  className: `w-2 h-2 ${phase.color} rounded-full`
+                }),
+                React.createElement('span', {
+                  className: 'line-clamp-1'
+                }, phase.label.replace('PSD & Inv. Proposal (Drafting Phase)', 'PSD')
+                           .replace('Investment (Approval Phase)', 'Investment')
+                           .replace('Procurement Phase', 'Procurement')
+                           .replace('Implementation Phase (CAPEX Reg)', 'Implementation'))
+              ),
+              React.createElement('input', {
+                type: 'date',
+                value: project[phase.key].start,
+                onChange: (e) => updatePhase(pIndex, phase.key, 'start', e.target.value),
+                className: `w-full px-1.5 py-0.5 text-xs border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-200 bg-white'} rounded focus:ring-1 focus:ring-purple-500 mb-1`
+              }),
+              React.createElement('input', {
+                type: 'date',
+                value: project[phase.key].finish,
+                onChange: (e) => updatePhase(pIndex, phase.key, 'finish', e.target.value),
+                className: `w-full px-1.5 py-0.5 text-xs border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-200 bg-white'} rounded focus:ring-1 focus:ring-purple-500`
+              })
+            )
+          )
+        ),
+
+        // Planned & Actual Section
+        React.createElement('div', {
+          className: 'grid grid-cols-2 gap-1.5'
+        },
+          // Planned (Investment Proposal)
+          React.createElement('div', {
+            className: `${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-100'} rounded p-1.5 border`
+          },
+            React.createElement('div', {
+              className: `text-xs font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-1 mb-1`
+            },
+              '📅 ',
+              React.createElement('span', null, 'Planned (Inv. Proposal)')
+            ),
+            React.createElement('input', {
+              type: 'date',
+              value: project.plannedInvestment.start,
+              onChange: (e) => updatePhase(pIndex, 'plannedInvestment', 'start', e.target.value),
+              className: `w-full px-1.5 py-0.5 text-xs border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-200 bg-white'} rounded focus:ring-1 focus:ring-purple-500 mb-1`
+            }),
+            React.createElement('input', {
+              type: 'date',
+              value: project.plannedInvestment.finish,
+              onChange: (e) => updatePhase(pIndex, 'plannedInvestment', 'finish', e.target.value),
+              className: `w-full px-1.5 py-0.5 text-xs border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-200 bg-white'} rounded focus:ring-1 focus:ring-purple-500`
+            })
+          ),
+          // Actual Implementation Phase
+          React.createElement('div', {
+            className: `${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-100'} rounded p-1.5 border`
+          },
+            React.createElement('div', {
+              className: `text-xs font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-1 mb-1`
+            },
+              '📅 ',
+              React.createElement('span', null, 'Actual Implementation Phase')
+            ),
+            React.createElement('input', {
+              type: 'date',
+              value: project.actualDates.start,
+              onChange: (e) => updatePhase(pIndex, 'actualDates', 'start', e.target.value),
+              className: `w-full px-1.5 py-0.5 text-xs border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-200 bg-white'} rounded focus:ring-1 focus:ring-purple-500 mb-1`
+            }),
+            React.createElement('input', {
+              type: 'date',
+              value: project.actualDates.finish,
+              onChange: (e) => updatePhase(pIndex, 'actualDates', 'finish', e.target.value),
+              className: `w-full px-1.5 py-0.5 text-xs border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-200 bg-white'} rounded focus:ring-1 focus:ring-purple-500`
+            })
+          )
+        )
+      )
+    )
+  );
+}
