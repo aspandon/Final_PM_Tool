@@ -3,15 +3,18 @@ import { phases, colors, divisionColors, WORKING_DAYS_PER_MONTH } from './utils/
 import * as dateUtils from './utils/dateUtils.js';
 import { exportToExcel, importFromExcel } from './utils/excelUtils.js';
 import { calculateFTEChartData } from './utils/calculations.js';
+import { saveProjects, loadProjects, saveFilters, loadFilters, clearAllData, loadSettings, saveSettings } from './utils/storage.js';
 import { Header } from './components/Header.js';
+import { MenuBar } from './components/MenuBar.js';
 import { FilterPanel } from './components/FilterPanel.js';
 import { ProjectForm } from './components/ProjectForm.js';
 import { GanttTimeline } from './components/GanttTimeline.js';
-import { ResourcesChart } from './components/ResourcesChart.js';
 import { DivisionsChart } from './components/DivisionsChart.js';
+import { ResourcesChart } from './components/ResourcesChart.js';
 import { ActualsTimeline } from './components/ActualsTimeline.js';
+import { KanbanBoard } from './components/KanbanBoard.js';
 
-const { useState, useRef, useMemo } = React;
+const { useState, useRef, useMemo, useEffect } = React;
 const { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
 
 function GanttChart() {
@@ -22,8 +25,16 @@ function GanttChart() {
   
   // UI state
   const [hideProjectFields, setHideProjectFields] = useState(false);
-  const [activeTab, setActiveTab] = useState('planner');
+  const [isEditLocked, setIsEditLocked] = useState(false);
+  const [activeTab, setActiveTab] = useState('projects');
   const [darkMode, setDarkMode] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('success'); // 'success', 'error', 'saving'
+  const [kanbanSettings, setKanbanSettings] = useState({
+    showRAG: true,
+    showPM: true,
+    showBP: true,
+    showDivision: true
+  });
   
   // Filter state
   const [filterStartDate, setFilterStartDate] = useState('');
@@ -40,6 +51,160 @@ function GanttChart() {
   
   // Ref for file input
   const fileInputRef = useRef(null);
+
+  // Ref to track previous project count for data loss detection
+  const previousProjectCount = useRef(0);
+
+  // ===== AUTO-SAVE & PERSISTENCE =====
+
+  /**
+   * Load projects from Supabase/localStorage on mount
+   */
+  useEffect(() => {
+    const loadData = async () => {
+      const savedProjects = await loadProjects();
+      if (savedProjects && savedProjects.length > 0) {
+        setProjects(savedProjects);
+        console.log('Loaded', savedProjects.length, 'projects');
+      }
+    };
+    loadData();
+  }, []);
+
+  /**
+   * Load filters from localStorage on mount
+   */
+  useEffect(() => {
+    const savedFilters = loadFilters();
+    if (savedFilters) {
+      setFilterStartDate(savedFilters.filterStartDate || '');
+      setFilterEndDate(savedFilters.filterEndDate || '');
+      setFilterDivisions(savedFilters.filterDivisions || []);
+      setSelectedProjects(savedFilters.selectedProjects || []);
+      setSelectedPMs(savedFilters.selectedPMs || []);
+      setSelectedBPs(savedFilters.selectedBPs || []);
+      setShowExternalPM(savedFilters.showExternalPM !== undefined ? savedFilters.showExternalPM : true);
+      setShowExternalQA(savedFilters.showExternalQA !== undefined ? savedFilters.showExternalQA : true);
+      setPmBAU(savedFilters.pmBAU || '');
+      setBpBAU(savedFilters.bpBAU || '');
+      setIsFilterActive(savedFilters.isFilterActive || false);
+      console.log('Loaded filters from localStorage');
+    }
+  }, []);
+
+  /**
+   * Load settings from localStorage on mount
+   */
+  useEffect(() => {
+    const savedSettings = loadSettings();
+    if (savedSettings) {
+      setDarkMode(savedSettings.darkMode || false);
+      setHideProjectFields(savedSettings.hideProjectFields || false);
+      if (savedSettings.kanban) {
+        setKanbanSettings(savedSettings.kanban);
+      }
+      console.log('Loaded settings from localStorage');
+    }
+  }, []);
+
+  /**
+   * Auto-save settings whenever they change
+   */
+  useEffect(() => {
+    const settings = {
+      darkMode,
+      hideProjectFields,
+      activeTab,
+      kanban: kanbanSettings
+    };
+    saveSettings(settings);
+  }, [darkMode, hideProjectFields, activeTab, kanbanSettings]);
+
+  /**
+   * Auto-save projects whenever they change (to Supabase and localStorage)
+   * Includes data loss prevention: won't save if project count drops dramatically
+   */
+  useEffect(() => {
+    if (projects.length > 0) {
+      // Data loss prevention check
+      const prevCount = previousProjectCount.current;
+      const currentCount = projects.length;
+
+      // If this is the first load, just set the count and save
+      if (prevCount === 0) {
+        previousProjectCount.current = currentCount;
+      } else {
+        // Check if project count dropped dramatically (more than 50% AND by more than 10 projects)
+        const percentageRemaining = (currentCount / prevCount) * 100;
+        const projectsLost = prevCount - currentCount;
+
+        if (percentageRemaining < 50 && projectsLost > 10) {
+          // CRITICAL: Potential data loss detected!
+          console.error('🚨 DATA LOSS PREVENTION: Refusing to save!');
+          console.error(`Previous count: ${prevCount}, Current count: ${currentCount}`);
+          console.error(`This would delete ${projectsLost} projects (${(100 - percentageRemaining).toFixed(1)}% loss)`);
+
+          setSaveStatus('error');
+          alert(`⚠️ DATA LOSS PREVENTED!\n\nYour project count dropped from ${prevCount} to ${currentCount}.\nAuto-save has been blocked to prevent data loss.\n\nPlease refresh the page and try again.`);
+          return; // Don't save!
+        }
+
+        // Update the count for next time
+        previousProjectCount.current = currentCount;
+      }
+
+      const saveData = async () => {
+        try {
+          setSaveStatus('saving');
+          const success = await saveProjects(projects);
+          if (success) {
+            setSaveStatus('success');
+            console.log('Auto-saved', projects.length, 'projects to Supabase');
+          } else {
+            setSaveStatus('error');
+            console.error('Failed to save projects');
+          }
+        } catch (error) {
+          setSaveStatus('error');
+          console.error('Error during auto-save:', error);
+        }
+      };
+      saveData();
+    }
+  }, [projects]);
+
+  /**
+   * Auto-save filters whenever they change
+   */
+  useEffect(() => {
+    const filters = {
+      filterStartDate,
+      filterEndDate,
+      filterDivisions,
+      selectedProjects,
+      selectedPMs,
+      selectedBPs,
+      showExternalPM,
+      showExternalQA,
+      pmBAU,
+      bpBAU,
+      isFilterActive
+    };
+    try {
+      setSaveStatus('saving');
+      const success = saveFilters(filters);
+      if (success) {
+        setSaveStatus('success');
+        console.log('Auto-saved filters to localStorage');
+      } else {
+        setSaveStatus('error');
+        console.error('Failed to save filters');
+      }
+    } catch (error) {
+      setSaveStatus('error');
+      console.error('Error during filter auto-save:', error);
+    }
+  }, [filterStartDate, filterEndDate, filterDivisions, selectedProjects, selectedPMs, selectedBPs, showExternalPM, showExternalQA, pmBAU, bpBAU, isFilterActive]);
 
   // ===== PROJECT MANAGEMENT FUNCTIONS =====
   
@@ -97,7 +262,7 @@ function GanttChart() {
   };
 
   // ===== EXCEL IMPORT/EXPORT FUNCTIONS =====
-  
+
   const handleExport = () => {
     exportToExcel(projects);
   };
@@ -108,6 +273,29 @@ function GanttChart() {
       setProjects(importedProjects);
     });
     e.target.value = '';
+  };
+
+  /**
+   * Clear all data from localStorage and reset app
+   */
+  const handleClearAll = () => {
+    clearAllData();
+    setProjects([]);
+
+    // Reset all filter state
+    setFilterStartDate('');
+    setFilterEndDate('');
+    setFilterDivisions([]);
+    setSelectedProjects([]);
+    setSelectedPMs([]);
+    setSelectedBPs([]);
+    setShowExternalPM(true);
+    setShowExternalQA(true);
+    setPmBAU('');
+    setBpBAU('');
+    setIsFilterActive(false);
+
+    console.log('All data and filters cleared from localStorage');
   };
 
   // ===== FILTER FUNCTIONS =====
@@ -334,39 +522,40 @@ function GanttChart() {
     return React.createElement('button', {
       key: tabName,
       onClick: () => setActiveTab(tabName),
-      className: `px-6 py-3 text-sm font-semibold rounded-t-xl transition-all transform ${
+      className: `px-8 py-4 text-base font-bold rounded-t-xl transition-all transform shadow-md ${
         isActive
           ? darkMode
-            ? 'bg-slate-800 text-blue-400 border-b-2 border-blue-400 shadow-lg'
-            : 'bg-white text-blue-600 border-b-2 border-blue-500 shadow-lg'
+            ? 'bg-gradient-to-br from-slate-800 to-slate-700 text-blue-400 border-b-4 border-blue-400 shadow-xl scale-105'
+            : 'bg-gradient-to-br from-white to-blue-50 text-blue-700 border-b-4 border-blue-600 shadow-xl scale-105'
           : darkMode
-            ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 hover:scale-102'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-102'
       }`
     }, `${emoji} ${label}`);
   };
 
   /**
-   * Render project planner view
+   * Render projects input view
    */
-  const renderPlannerView = () => {
+  const renderProjectsView = () => {
     return React.createElement('div', null,
       // Project forms (only show if not hidden or if no projects)
       !hideProjectFields && React.createElement('div', {
         className: 'mb-6 space-y-4'
       },
-        filteredProjects.length > 0 
+        filteredProjects.length > 0
           ? filteredProjects.map((project, pIndex) => {
               const actualIndex = projects.indexOf(project);
               return React.createElement(ProjectForm, {
-                key: actualIndex,
+                key: `${actualIndex}-${isEditLocked ? 'locked' : 'unlocked'}`,
                 project,
                 pIndex: actualIndex,
                 updateProject,
                 updatePhase,
                 deleteProject,
                 phases,
-                darkMode
+                darkMode,
+                isEditLocked
               });
             })
           : React.createElement('div', {
@@ -375,18 +564,71 @@ function GanttChart() {
               React.createElement('p', { className: 'text-lg mb-2' }, '📋 No projects yet'),
               React.createElement('p', { className: 'text-sm' }, 'Click "Add" to create your first project')
             )
-      ),
+      )
+    );
+  };
 
-      // Gantt Timeline
-      filteredProjects.length > 0 && React.createElement(GanttTimeline, {
+  /**
+   * Render planner timeline view
+   */
+  const renderPlannerView = () => {
+    if (filteredProjects.length === 0) {
+      return React.createElement('div', {
+        className: `text-center py-12 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+      },
+        React.createElement('p', { className: 'text-lg mb-2' }, '📅 No projects to display'),
+        React.createElement('p', { className: 'text-sm' }, 'Add projects to see the timeline')
+      );
+    }
+
+    return React.createElement(GanttTimeline, {
+      filteredProjects,
+      phases,
+      monthLabels,
+      getBarPosition,
+      getDaysDiff,
+      getEarliestDate,
+      getLatestDate,
+      darkMode
+    });
+  };
+
+  /**
+   * Render Kanban board view
+   */
+  const renderKanbanView = () => {
+    return React.createElement(KanbanBoard, {
+      projects: projects,
+      setProjects: setProjects,
+      darkMode: darkMode,
+      kanbanSettings: kanbanSettings
+    });
+  };
+
+  /**
+   * Render overview with consolidated metrics
+   */
+  const renderOverviewView = () => {
+    if (filteredProjects.length === 0) {
+      return React.createElement('div', {
+        className: `text-center py-12 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+      },
+        React.createElement('p', { className: 'text-lg' }, '📊 No projects to display')
+      );
+    }
+
+    return React.createElement('div', null,
+      // Divisions Chart
+      React.createElement(DivisionsChart, {
         filteredProjects,
         phases,
-        monthLabels,
-        getBarPosition,
-        getDaysDiff,
-        getEarliestDate,
-        getLatestDate,
-        darkMode
+        earliestDate: earliest,
+        latestDate: latest,
+        isFilterActive,
+        filterStartDate,
+        filterEndDate,
+        darkMode,
+        divisionColors
       })
     );
   };
@@ -403,139 +645,21 @@ function GanttChart() {
       );
     }
 
-    return React.createElement('div', null,
-      // Resources Chart (per person)
-      React.createElement(ResourcesChart, {
-        filteredProjects,
-        filteredProjectsForExternal,
-        earliestDate: earliest,
-        latestDate: latest,
-        isFilterActive,
-        filterStartDate,
-        filterEndDate,
-        pmBAU,
-        bpBAU,
-        showExternalPM,
-        showExternalQA,
-        darkMode,
-        colors
-      })
-    );
-  };
-
-  /**
-   * Render overview with consolidated metrics
-   */
-  const renderOverviewView = () => {
-    if (filteredProjects.length === 0) {
-      return React.createElement('div', {
-        className: `text-center py-12 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
-      },
-        React.createElement('p', { className: 'text-lg' }, '📊 No projects to display')
-      );
-    }
-
-    return React.createElement('div', null,
-      // Consolidated FTE Chart
-      React.createElement('div', { className: 'mb-6' },
-        React.createElement('h2', {
-          className: `text-xl font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-2`
-        },
-          React.createElement('div', {
-            className: 'w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full'
-          }),
-          'Consolidated Resource Effort (FTE)'
-        ),
-        React.createElement('div', {
-          className: `${darkMode ? 'bg-slate-800' : 'bg-white'} p-5 rounded-xl border ${darkMode ? 'border-slate-700' : 'border-gray-200'} shadow-md`
-        },
-          React.createElement(ResponsiveContainer, { width: '100%', height: 400 },
-            React.createElement(LineChart, {
-              data: fteChartData,
-              margin: { top: 5, right: 30, left: 20, bottom: 5 }
-            },
-              React.createElement(CartesianGrid, {
-                strokeDasharray: '3 3',
-                stroke: darkMode ? '#475569' : '#e5e7eb'
-              }),
-              React.createElement(XAxis, {
-                dataKey: 'month',
-                angle: -45,
-                textAnchor: 'end',
-                height: 80,
-                style: { fontSize: '12px', fill: darkMode ? '#e5e7eb' : '#374151' },
-                stroke: darkMode ? '#94a3b8' : '#9ca3af'
-              }),
-              React.createElement(YAxis, {
-                label: { 
-                  value: 'FTE (Full-Time Equivalent)', 
-                  angle: -90, 
-                  position: 'insideLeft',
-                  style: { fill: darkMode ? '#e5e7eb' : '#374151' }
-                },
-                style: { fontSize: '12px', fill: darkMode ? '#e5e7eb' : '#374151' },
-                stroke: darkMode ? '#94a3b8' : '#9ca3af'
-              }),
-              React.createElement(Tooltip, {
-                contentStyle: { 
-                  fontSize: '12px', 
-                  backgroundColor: darkMode ? '#1e293b' : '#ffffff', 
-                  border: `1px solid ${darkMode ? '#475569' : '#e5e7eb'}`,
-                  color: darkMode ? '#e5e7eb' : '#374151'
-                },
-                formatter: (value) => `${value} FTE`,
-                labelStyle: { color: darkMode ? '#e5e7eb' : '#374151' }
-              }),
-              React.createElement(Legend, {
-                wrapperStyle: { fontSize: '12px', color: darkMode ? '#e5e7eb' : '#374151' }
-              }),
-              React.createElement(Line, {
-                type: 'monotone',
-                dataKey: 'Project Managers',
-                stroke: '#3b82f6',
-                strokeWidth: 3,
-                dot: { r: 4 },
-                activeDot: { r: 6 }
-              }),
-              React.createElement(Line, {
-                type: 'monotone',
-                dataKey: 'Business Partners',
-                stroke: '#10b981',
-                strokeWidth: 3,
-                dot: { r: 4 },
-                activeDot: { r: 6 }
-              })
-            )
-          ),
-          React.createElement('div', {
-            className: `mt-3 text-xs ${darkMode ? 'text-gray-300 bg-slate-700' : 'text-gray-600 bg-gray-50'} p-2 rounded`
-          },
-            React.createElement('strong', null, 'Note:'),
-            ' This chart shows consolidated team effort. PMs work during Implementation phase, BPs work during PSD preparation and BP Implementation phase. Values are shown in FTE (Full-Time Equivalent).',
-            (pmBAU || bpBAU) && React.createElement('span', null,
-              ' BAU allocation included: ',
-              pmBAU && `PM BAU = ${pmBAU} FTE/month`,
-              pmBAU && bpBAU && ', ',
-              bpBAU && `BP BAU = ${bpBAU} FTE/month`,
-              '.'
-            )
-          )
-        )
-      ),
-
-      // Divisions Chart
-      React.createElement(DivisionsChart, {
-        filteredProjects,
-        phases,
-        earliestDate: earliest,
-        latestDate: latest,
-        isFilterActive,
-        filterStartDate,
-        filterEndDate,
-        darkMode,
-        divisionColors
-      })
-    );
+    return React.createElement(ResourcesChart, {
+      filteredProjects,
+      filteredProjectsForExternal,
+      earliestDate: earliest,
+      latestDate: latest,
+      isFilterActive,
+      filterStartDate,
+      filterEndDate,
+      pmBAU,
+      bpBAU,
+      showExternalPM,
+      showExternalQA,
+      darkMode,
+      colors
+    });
   };
 
   /**
@@ -562,15 +686,33 @@ function GanttChart() {
       React.createElement('div', {
         className: `${darkMode ? 'bg-slate-800/90' : 'bg-white/80'} backdrop-blur-xl rounded-2xl shadow-2xl border ${darkMode ? 'border-slate-700' : 'border-white/50'} p-6`
       },
+        // Back to Hub button
+        React.createElement('div', {
+          className: 'mb-6'
+        },
+          React.createElement('a', {
+            href: 'index.html',
+            className: `inline-flex items-center gap-2 ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} font-medium transition-colors`
+          },
+            React.createElement('svg', {
+              className: 'w-5 h-5',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: 2,
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round',
+              viewBox: '0 0 24 24'
+            },
+              React.createElement('path', { d: 'm12 19-7-7 7-7' }),
+              React.createElement('path', { d: 'M19 12H5' })
+            ),
+            'Back to Hub'
+          )
+        ),
+
         // Header
         React.createElement(Header, {
-          addProject,
-          hideProjectFields,
-          setHideProjectFields,
-          onImportClick: () => fileInputRef.current?.click(),
-          exportToExcel: handleExport,
-          darkMode,
-          setDarkMode
+          darkMode
         }),
 
         // Hidden file input for import
@@ -580,6 +722,21 @@ function GanttChart() {
           accept: '.xlsx,.xls',
           onChange: handleImport,
           style: { display: 'none' }
+        }),
+
+        // Menu Bar
+        React.createElement(MenuBar, {
+          addProject,
+          onImportClick: () => fileInputRef.current?.click(),
+          exportToExcel: handleExport,
+          onClearAll: handleClearAll,
+          hideProjectFields,
+          setHideProjectFields,
+          darkMode,
+          setDarkMode,
+          kanbanSettings,
+          setKanbanSettings,
+          saveStatus
         }),
 
         // Filter Panel
@@ -621,17 +778,36 @@ function GanttChart() {
         React.createElement('div', {
           className: 'flex gap-2 mb-6 border-b-2 ' + (darkMode ? 'border-slate-700' : 'border-gray-200')
         },
-          renderTabButton('planner', 'Projects & Planner', '📋'),
+          renderTabButton('projects', 'Projects', '📋'),
+          renderTabButton('planner', 'Planner', '📅'),
+          renderTabButton('kanban', 'Kanban', '📋'),
           renderTabButton('resources', 'Resources', '👥'),
-          renderTabButton('overview', 'Overview', '📊'),
-          renderTabButton('actuals', 'Actuals Comparison', '📈')
+          renderTabButton('overview', 'Divisions', '📊'),
+          renderTabButton('actuals', 'Actuals Comparison', '📈'),
+
+          // Lock/Unlock button - only visible on Projects tab
+          activeTab === 'projects' && React.createElement('button', {
+            onClick: () => {
+              const newLockState = !isEditLocked;
+              alert(`Lock state changing to: ${newLockState ? 'LOCKED' : 'UNLOCKED'}`);
+              setIsEditLocked(newLockState);
+            },
+            className: `ml-auto px-3 py-3 text-xl rounded-t-xl transition-all transform ${
+              darkMode
+                ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-2 ' + (isEditLocked ? 'border-red-400' : 'border-green-400')
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-2 ' + (isEditLocked ? 'border-red-500' : 'border-green-500')
+            }`,
+            title: isEditLocked ? 'Unlock editing' : 'Lock editing'
+          }, isEditLocked ? '🔒' : '🔓')
         ),
 
         // Tab Content
         React.createElement('div', { className: 'mt-6' },
+          activeTab === 'projects' && renderProjectsView(),
           activeTab === 'planner' && renderPlannerView(),
-          activeTab === 'resources' && renderResourcesView(),
+          activeTab === 'kanban' && renderKanbanView(),
           activeTab === 'overview' && renderOverviewView(),
+          activeTab === 'resources' && renderResourcesView(),
           activeTab === 'actuals' && renderActualsView()
         )
       )
