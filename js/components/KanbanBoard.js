@@ -365,7 +365,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
           e.stopPropagation();
           onOpenNotes(project, e);
         },
-        className: `p-1.5 rounded-lg transition-all ${
+        className: `p-1.5 rounded-lg transition-all flex-shrink-0 ${
           hasNotes
             ? darkMode
               ? 'bg-blue-600 text-white hover:bg-blue-700 notes-icon-pulse'
@@ -401,7 +401,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
           e.stopPropagation();
           onEditProject(project.name);
         },
-        className: `p-1.5 rounded-lg transition-all ${
+        className: `p-1.5 rounded-lg transition-all flex-shrink-0 ${
           darkMode
             ? 'bg-slate-600 text-gray-400 hover:bg-indigo-600 hover:text-white'
             : 'bg-gray-100 text-gray-400 hover:bg-indigo-500 hover:text-white'
@@ -443,20 +443,8 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
       className: `text-xs mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `BP: ${project.businessPartner}`),
 
-    // RAG Status Badge (conditional)
-    settings.showRAG && React.createElement('div', {
-      className: 'flex items-center justify-between mt-3 pt-3 border-t ' + (darkMode ? 'border-slate-600' : 'border-gray-200')
-    },
-      React.createElement('span', {
-        className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-      }, 'RAG Status:'),
-      React.createElement('span', {
-        className: `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ragStatus.color} text-white`
-      }, ragStatus.label)
-    ),
-
-    // Date info (conditional - show with RAG status)
-    settings.showRAG && finishDate && React.createElement('div', {
+    // Date info (conditional - only show when date exists)
+    finishDate && React.createElement('div', {
       className: `text-xs mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `Due: ${formatDate(finishDate)}`)
   );
