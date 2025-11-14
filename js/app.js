@@ -8,6 +8,7 @@ import { Header } from './components/Header.js';
 import { MenuBar } from './components/MenuBar.js';
 import { FilterPanel } from './components/FilterPanel.js';
 import { ProjectForm } from './components/ProjectForm.js';
+import { ActionPlan } from './components/ActionPlan.js';
 import { GanttTimeline } from './components/GanttTimeline.js';
 import { DivisionsChart } from './components/DivisionsChart.js';
 import { ResourcesChart } from './components/ResourcesChart.js';
@@ -412,7 +413,9 @@ function GanttChart() {
       opexYear2: '',
       opexYear3: '',
       opexYear4: '',
-      opexYear5: ''
+      opexYear5: '',
+      // Action plan
+      actionPlan: []
     };
     setProjects([...projects, newProject]);
   };

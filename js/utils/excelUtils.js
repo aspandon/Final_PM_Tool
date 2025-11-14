@@ -38,7 +38,9 @@ export const exportToExcel = (projects) => {
     'OPEX Year 2': p.opexYear2 || '',
     'OPEX Year 3': p.opexYear3 || '',
     'OPEX Year 4': p.opexYear4 || '',
-    'OPEX Year 5': p.opexYear5 || ''
+    'OPEX Year 5': p.opexYear5 || '',
+    // Action Plan (stored as JSON string)
+    'Action Plan': p.actionPlan ? JSON.stringify(p.actionPlan) : ''
   }));
 
   const ws = XLSX.utils.json_to_sheet(data, { cellDates: true, dateNF: 'yyyy-mm-dd' });
@@ -143,7 +145,16 @@ export const importFromExcel = (file, callback) => {
         opexYear2: row['OPEX Year 2'] || '',
         opexYear3: row['OPEX Year 3'] || '',
         opexYear4: row['OPEX Year 4'] || '',
-        opexYear5: row['OPEX Year 5'] || ''
+        opexYear5: row['OPEX Year 5'] || '',
+        // Action Plan (parse from JSON string)
+        actionPlan: (() => {
+          try {
+            return row['Action Plan'] ? JSON.parse(row['Action Plan']) : [];
+          } catch (e) {
+            console.error('Error parsing action plan:', e);
+            return [];
+          }
+        })()
       }));
 
       callback(importedProjects);
