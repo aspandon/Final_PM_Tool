@@ -166,6 +166,7 @@ export function Reporting({
   const [selectedRAGStatus, setSelectedRAGStatus] = useState(null);
   const [selectedKanbanStatus, setSelectedKanbanStatus] = useState(null);
   const [selectedKPIFilter, setSelectedKPIFilter] = useState(null); // 'total', 'red', 'amber', 'green', 'onhold', 'completed'
+  const [selectedRiskAlert, setSelectedRiskAlert] = useState(null); // 'critical', 'high', 'medium', 'onhold'
 
   // Calculate all analytics data
   const analyticsData = useMemo(() => {
@@ -194,6 +195,24 @@ export function Reporting({
     const greenCount = projectsWithRAG.filter(p => p.ragStatus.label === 'Green').length;
     const onHoldCount = projectsWithRAG.filter(p => p.column === 'onhold').length;
     const completedCount = projectsWithRAG.filter(p => p.column === 'done').length;
+
+    // Risk Alert Metrics
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    // Critical: Red projects expiring within 7 days
+    const criticalRiskProjects = projectsWithRAG.filter(p => {
+      if (p.ragStatus.label !== 'Red' || !p.finishDate) return false;
+      const finishDate = new Date(p.finishDate);
+      finishDate.setHours(0, 0, 0, 0);
+      const daysUntilDeadline = Math.ceil((finishDate - currentDate) / (1000 * 60 * 60 * 24));
+      return daysUntilDeadline <= 7 && daysUntilDeadline >= 0;
+    });
+
+    const criticalRiskCount = criticalRiskProjects.length;
+    const highRiskCount = redCount; // All red projects
+    const mediumRiskCount = amberCount; // All amber projects
+    const onHoldRiskCount = onHoldCount; // All on-hold projects
 
     // Report 1: On Hold Projects by Division
     const onHoldByDivision = divisions.map(division => {
@@ -347,6 +366,11 @@ export function Reporting({
       greenCount,
       onHoldCount,
       completedCount,
+      criticalRiskCount,
+      criticalRiskProjects,
+      highRiskCount,
+      mediumRiskCount,
+      onHoldRiskCount,
       onHoldByDivision,
       ragByDivision,
       ragByDivisionAndStatusCombined,
@@ -415,6 +439,29 @@ export function Reporting({
     }
   }, [selectedKPIFilter, analyticsData.projectsWithRAG]);
 
+  // Handle Risk Alert card click
+  const handleRiskAlertClick = (alertType) => {
+    setSelectedRiskAlert(selectedRiskAlert === alertType ? null : alertType);
+  };
+
+  // Get filtered projects based on selected risk alert
+  const riskAlertFilteredProjects = useMemo(() => {
+    if (!selectedRiskAlert) return [];
+
+    switch (selectedRiskAlert) {
+      case 'critical':
+        return analyticsData.criticalRiskProjects;
+      case 'high':
+        return analyticsData.projectsWithRAG.filter(p => p.ragStatus.label === 'Red');
+      case 'medium':
+        return analyticsData.projectsWithRAG.filter(p => p.ragStatus.label === 'Amber');
+      case 'onhold':
+        return analyticsData.projectsWithRAG.filter(p => p.column === 'onhold');
+      default:
+        return [];
+    }
+  }, [selectedRiskAlert, analyticsData.projectsWithRAG, analyticsData.criticalRiskProjects]);
+
   // KPI Card Component
   const KPICard = ({ title, value, percentage, color, icon, filterType, onClick }) => {
     const isSelected = selectedKPIFilter === filterType;
@@ -439,6 +486,70 @@ export function Reporting({
         React.createElement('div', {
           className: `text-3xl opacity-20`
         }, icon)
+      )
+    );
+  };
+
+  // Risk Alert Card Component
+  const RiskAlertCard = ({ title, value, severity, icon, alertType, onClick }) => {
+    const isSelected = selectedRiskAlert === alertType;
+    const isCritical = alertType === 'critical';
+
+    // Define severity styles
+    const severityStyles = {
+      critical: {
+        border: 'border-red-600',
+        bg: darkMode ? 'bg-red-900/30' : 'bg-red-50',
+        text: darkMode ? 'text-red-300' : 'text-red-700',
+        icon: '🚨',
+        pulse: 'animate-pulse'
+      },
+      high: {
+        border: 'border-red-500',
+        bg: darkMode ? 'bg-red-900/20' : 'bg-red-50/70',
+        text: darkMode ? 'text-red-400' : 'text-red-600',
+        icon: '🔴',
+        pulse: ''
+      },
+      medium: {
+        border: 'border-orange-500',
+        bg: darkMode ? 'bg-orange-900/20' : 'bg-orange-50',
+        text: darkMode ? 'text-orange-400' : 'text-orange-600',
+        icon: '⚠️',
+        pulse: ''
+      },
+      low: {
+        border: 'border-yellow-500',
+        bg: darkMode ? 'bg-yellow-900/20' : 'bg-yellow-50',
+        text: darkMode ? 'text-yellow-400' : 'text-yellow-600',
+        icon: '⏸️',
+        pulse: ''
+      }
+    };
+
+    const style = severityStyles[severity];
+
+    return React.createElement('div', {
+      className: `rounded-lg p-4 ${style.bg} border-2 ${style.border} shadow-lg cursor-pointer transition-all transform hover:scale-105 hover:shadow-2xl ${isSelected ? 'ring-4 ring-blue-500 scale-105' : ''} ${isCritical && !isSelected ? style.pulse : ''}`,
+      onClick: () => onClick(alertType)
+    },
+      React.createElement('div', {
+        className: 'flex items-center justify-between'
+      },
+        React.createElement('div', null,
+          React.createElement('div', {
+            className: `text-xs font-bold uppercase tracking-wide ${style.text} mb-1`
+          }, severity.toUpperCase() + ' RISK'),
+          React.createElement('div', {
+            className: `text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`
+          }, title),
+          React.createElement('div', {
+            className: `text-3xl font-bold ${style.text}`
+          }, value)
+        ),
+        React.createElement('div', {
+          className: `text-4xl ${isCritical ? style.pulse : ''}`
+        }, style.icon)
       )
     );
   };
@@ -700,6 +811,116 @@ export function Reporting({
       React.createElement('h3', {
         className: `text-2xl font-bold mb-6 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
       }, '🚨 Risk Analysis'),
+
+      // Risk Alert Cards
+      React.createElement('div', {
+        className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'
+      },
+        React.createElement(RiskAlertCard, {
+          title: 'Expiring ≤ 7 Days',
+          value: analyticsData.criticalRiskCount,
+          severity: 'critical',
+          alertType: 'critical',
+          onClick: handleRiskAlertClick
+        }),
+        React.createElement(RiskAlertCard, {
+          title: 'All Red Projects',
+          value: analyticsData.highRiskCount,
+          severity: 'high',
+          alertType: 'high',
+          onClick: handleRiskAlertClick
+        }),
+        React.createElement(RiskAlertCard, {
+          title: 'All Amber Projects',
+          value: analyticsData.mediumRiskCount,
+          severity: 'medium',
+          alertType: 'medium',
+          onClick: handleRiskAlertClick
+        }),
+        React.createElement(RiskAlertCard, {
+          title: 'On Hold Projects',
+          value: analyticsData.onHoldRiskCount,
+          severity: 'low',
+          alertType: 'onhold',
+          onClick: handleRiskAlertClick
+        })
+      ),
+
+      // Expandable section for Risk Alert details
+      selectedRiskAlert && React.createElement('div', {
+        className: `mb-6 rounded-lg overflow-hidden transition-all duration-300 ease-in-out ${darkMode ? 'bg-slate-700' : 'bg-gray-50'} shadow-lg border-2 ${
+          selectedRiskAlert === 'critical' ? 'border-red-600' :
+          selectedRiskAlert === 'high' ? 'border-red-500' :
+          selectedRiskAlert === 'medium' ? 'border-orange-500' :
+          'border-yellow-500'
+        }`
+      },
+        // Header with title and close button
+        React.createElement('div', {
+          className: `flex items-center justify-between p-4 ${
+            selectedRiskAlert === 'critical' ? (darkMode ? 'bg-red-900/30' : 'bg-red-50') :
+            selectedRiskAlert === 'high' ? (darkMode ? 'bg-red-900/20' : 'bg-red-50/70') :
+            selectedRiskAlert === 'medium' ? (darkMode ? 'bg-orange-900/20' : 'bg-orange-50') :
+            (darkMode ? 'bg-yellow-900/20' : 'bg-yellow-50')
+          } border-b ${darkMode ? 'border-slate-600' : 'border-gray-200'}`
+        },
+          React.createElement('h3', {
+            className: `text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
+          },
+            selectedRiskAlert === 'critical' ? `🚨 Critical Risk Projects (${riskAlertFilteredProjects.length})` :
+            selectedRiskAlert === 'high' ? `🔴 High Risk Projects (${riskAlertFilteredProjects.length})` :
+            selectedRiskAlert === 'medium' ? `⚠️ Medium Risk Projects (${riskAlertFilteredProjects.length})` :
+            `⏸️ On Hold Projects (${riskAlertFilteredProjects.length})`
+          ),
+          React.createElement('button', {
+            onClick: () => setSelectedRiskAlert(null),
+            className: `px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${darkMode ? 'bg-slate-600 text-gray-200 hover:bg-slate-500' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
+          }, 'Close ✕')
+        ),
+        // Projects table
+        React.createElement('div', {
+          className: 'p-4'
+        },
+          React.createElement(DataTable, {
+            data: riskAlertFilteredProjects,
+            columns: [
+              { header: 'Project', key: 'name' },
+              { header: 'Division', key: 'division' },
+              {
+                header: 'Kanban Status',
+                render: (row) => getColumnDisplayName(row.column)
+              },
+              {
+                header: 'RAG Status',
+                render: (row) => React.createElement('span', {
+                  className: `px-2 py-1 rounded text-white text-xs font-semibold ${row.ragStatus.color}`
+                }, row.ragStatus.label)
+              },
+              {
+                header: 'Due Date',
+                render: (row) => formatDate(row.finishDate)
+              },
+              {
+                header: 'Days Until Deadline',
+                render: (row) => {
+                  if (!row.finishDate) return '-';
+                  const now = new Date();
+                  now.setHours(0, 0, 0, 0);
+                  const finish = new Date(row.finishDate);
+                  finish.setHours(0, 0, 0, 0);
+                  const days = Math.ceil((finish - now) / (1000 * 60 * 60 * 24));
+                  const color = days < 0 ? 'text-red-600 font-bold' : days <= 7 ? 'text-orange-600 font-bold' : 'text-gray-700';
+                  return React.createElement('span', { className: color },
+                    days < 0 ? `${Math.abs(days)} days overdue` : `${days} days`
+                  );
+                }
+              },
+              { header: 'PM', key: 'projectManager' },
+              { header: 'BP', key: 'businessPartner' }
+            ]
+          })
+        )
+      ),
 
       // Report 1: On Hold Projects by Division
       analyticsData.onHoldByDivision.length > 0 && React.createElement('div', {
