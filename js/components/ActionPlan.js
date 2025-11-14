@@ -1157,9 +1157,9 @@ export function ActionPlan({
     );
   };
 
-  // Gantt Chart View - Visual timeline with dependencies
+  // Gantt Chart View - Timeline style matching Action Items app
   const renderGanttView = () => {
-    // Collect all items with dates
+    // Collect all items
     const ganttItems = [];
 
     actionPlan.forEach(action => {
@@ -1212,160 +1212,139 @@ export function ActionPlan({
     });
 
     return React.createElement('div', {
-      className: `rounded-xl overflow-hidden ${darkMode ? 'bg-slate-800/50 border border-slate-700' : 'bg-white border border-gray-200'} shadow-lg`
+      className: `overflow-x-auto ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-xl shadow-md p-4 border ${darkMode ? 'border-slate-700' : 'border-gray-200'}`
     },
-      // Gantt Header
-      React.createElement('div', {
-        className: `p-4 border-b ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-gray-50'}`
-      },
-        React.createElement('h3', {
-          className: `text-lg font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-        }, 'Project Timeline'),
-        React.createElement('p', {
-          className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`
-        }, 'Visual representation of actions, tasks, and dependencies')
-      ),
-      // Gantt Grid
-      React.createElement('div', {
-        className: 'overflow-x-auto'
+      // Header
+      React.createElement('h2', {
+        className: `text-xl font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-2`
       },
         React.createElement('div', {
-          className: 'min-w-[800px]'
-        },
-          // Grid Header
-          React.createElement('div', {
-            className: `grid grid-cols-12 gap-2 p-3 border-b ${darkMode ? 'border-slate-700 bg-slate-700/50' : 'border-gray-200 bg-gray-100'}`
-          },
-            React.createElement('div', {
-              className: `col-span-4 font-bold text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
-            }, 'Item'),
-            React.createElement('div', {
-              className: `col-span-2 font-bold text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
-            }, 'Status'),
-            React.createElement('div', {
-              className: `col-span-2 font-bold text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
-            }, 'Priority'),
-            React.createElement('div', {
-              className: `col-span-3 font-bold text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
-            }, 'Progress'),
-            React.createElement('div', {
-              className: `col-span-1 font-bold text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
-            }, 'Deps')
-          ),
-          // Grid Rows
-          React.createElement('div', {
-            className: `divide-y ${darkMode ? 'divide-slate-700' : 'divide-gray-200'}`
-          },
-            ganttItems.map(item => {
-              const statusInfo = STATUSES[item.status || 'not-started'];
-              const priorityInfo = PRIORITIES[item.priority || 'medium'];
-              const indentation = item.level * 20;
-
-              return React.createElement('div', {
-                key: `${item.type}-${item.id}`,
-                className: `grid grid-cols-12 gap-2 p-3 text-xs ${darkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'} transition-colors`
-              },
-                // Item Name
-                React.createElement('div', {
-                  className: `col-span-4 flex items-center gap-2`,
-                  style: { paddingLeft: `${indentation}px` }
-                },
-                  item.type === 'action' && React.createElement('div', {
-                    className: `w-2 h-2 rounded-full ${darkMode ? 'bg-green-400' : 'bg-green-500'}`
-                  }),
-                  item.type === 'task' && React.createElement('div', {
-                    className: `w-2 h-2 rounded-sm ${darkMode ? 'bg-blue-400' : 'bg-blue-500'}`
-                  }),
-                  item.type === 'subtask' && React.createElement('div', {
-                    className: `w-1.5 h-1.5 rounded-full ${darkMode ? 'bg-purple-400' : 'bg-purple-500'}`
-                  }),
-                  React.createElement('span', {
-                    className: `font-semibold ${
-                      item.type === 'action'
-                        ? darkMode ? 'text-green-300' : 'text-green-700'
-                        : item.type === 'task'
-                        ? darkMode ? 'text-blue-300' : 'text-blue-700'
-                        : darkMode ? 'text-purple-300' : 'text-purple-700'
-                    }`
-                  }, item.name)
-                ),
-                // Status
-                React.createElement('div', {
-                  className: 'col-span-2'
-                },
-                  React.createElement('span', {
-                    className: `px-2 py-1 rounded-md text-xs font-semibold ${statusInfo.bg} ${statusInfo.text}`
-                  }, statusInfo.label)
-                ),
-                // Priority
-                React.createElement('div', {
-                  className: 'col-span-2'
-                },
-                  React.createElement('span', {
-                    className: `px-2 py-1 rounded-md text-xs font-semibold ${priorityInfo.bg} ${priorityInfo.text}`
-                  }, `${priorityInfo.icon} ${priorityInfo.label}`)
-                ),
-                // Progress Bar
-                React.createElement('div', {
-                  className: 'col-span-3 flex items-center gap-2'
-                },
-                  React.createElement('div', {
-                    className: `flex-1 h-3 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`
-                  },
-                    React.createElement('div', {
-                      className: `h-full transition-all duration-300 bg-gradient-to-r ${statusInfo.gradient}`,
-                      style: { width: `${item.progress}%` }
-                    })
-                  ),
-                  React.createElement('span', {
-                    className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} min-w-[35px]`
-                  }, `${item.progress}%`)
-                ),
-                // Dependencies
-                React.createElement('div', {
-                  className: 'col-span-1 flex items-center justify-center'
-                },
-                  item.dependencies.length > 0 && React.createElement('span', {
-                    className: `px-1.5 py-0.5 rounded-full text-xs font-bold ${darkMode ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-100 text-amber-700'}`
-                  }, item.dependencies.length)
-                )
-              );
-            })
-          )
-        )
+          className: 'w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full'
+        }),
+        'Action Plan Timeline'
       ),
+
+      React.createElement('div', { className: 'min-w-[1000px]' },
+        // Progress scale header (0% to 100%)
+        React.createElement('div', { className: 'flex mb-2' },
+          // Empty space for item names
+          React.createElement('div', { className: 'w-48 flex-shrink-0' }),
+          // Progress scale
+          React.createElement('div', {
+            className: `flex-1 flex border-b ${darkMode ? 'border-slate-600' : 'border-gray-300'} pb-1`
+          },
+            [0, 25, 50, 75, 100].map(percent =>
+              React.createElement('div', {
+                key: percent,
+                className: `flex-1 text-xs ${darkMode ? 'text-gray-200' : 'text-gray-700'} text-center font-semibold`
+              }, `${percent}%`)
+            )
+          )
+        ),
+
+        // Item rows
+        ganttItems.map((item, index) => {
+          const indentation = item.level * 12;
+          const isCompleted = item.status === 'completed';
+
+          // Determine color based on type
+          let barColor, textColor;
+          if (item.type === 'action') {
+            barColor = 'bg-green-500';
+            textColor = darkMode ? 'text-green-300' : 'text-green-700';
+          } else if (item.type === 'task') {
+            barColor = 'bg-blue-500';
+            textColor = darkMode ? 'text-blue-300' : 'text-blue-700';
+          } else {
+            barColor = 'bg-purple-500';
+            textColor = darkMode ? 'text-purple-300' : 'text-purple-700';
+          }
+
+          return React.createElement('div', {
+            key: `${item.type}-${item.id}`,
+            className: 'flex items-center mb-1'
+          },
+            // Item name column
+            React.createElement('div', {
+              className: 'w-48 flex-shrink-0 pr-2',
+              style: { paddingLeft: `${indentation}px` }
+            },
+              React.createElement('div', {
+                className: `text-[11px] font-bold ${textColor} truncate flex items-center gap-1.5`
+              },
+                item.type === 'action' && React.createElement('div', {
+                  className: `w-1.5 h-1.5 rounded-full ${barColor}`
+                }),
+                item.type === 'task' && React.createElement('div', {
+                  className: `w-1.5 h-1.5 rounded-sm ${barColor}`
+                }),
+                item.type === 'subtask' && React.createElement('div', {
+                  className: `w-1 h-1 rounded-full ${barColor}`
+                }),
+                item.name
+              ),
+              item.dependencies.length > 0 && React.createElement('div', {
+                className: `text-[9px] ${darkMode ? 'text-amber-400' : 'text-amber-600'}`
+              }, `${item.dependencies.length} dep${item.dependencies.length > 1 ? 's' : ''}`)
+            ),
+
+            // Timeline area
+            React.createElement('div', {
+              className: `flex-1 relative h-5 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-200'} rounded border`
+            },
+              // Grid lines at 25%, 50%, 75%
+              [25, 50, 75].map(percent =>
+                React.createElement('div', {
+                  key: percent,
+                  className: `absolute top-0 bottom-0 w-px ${darkMode ? 'bg-slate-600' : 'bg-gray-300'}`,
+                  style: { left: `${percent}%` }
+                })
+              ),
+
+              // Progress bar
+              React.createElement('div', {
+                className: `absolute h-full ${barColor} rounded flex items-center justify-center text-white text-[10px] font-semibold hover:opacity-90 transition cursor-pointer`,
+                style: {
+                  left: '0%',
+                  width: `${item.progress}%`,
+                  opacity: isCompleted ? 0.3 : 1
+                },
+                title: `${item.name}: ${item.progress}% complete`
+              }, item.progress > 15 ? `${item.progress}%` : '')
+            )
+          );
+        })
+      ),
+
       // Legend
       React.createElement('div', {
-        className: `p-4 border-t ${darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-gray-200 bg-gray-50'}`
+        className: `mt-4 pt-3 border-t ${darkMode ? 'border-slate-700' : 'border-gray-300'} flex items-center justify-between`
       },
         React.createElement('div', {
           className: 'flex items-center gap-6 text-xs'
         },
           React.createElement('div', { className: 'flex items-center gap-2' },
-            React.createElement('div', {
-              className: `w-2 h-2 rounded-full ${darkMode ? 'bg-green-400' : 'bg-green-500'}`
-            }),
+            React.createElement('div', { className: 'w-3 h-3 bg-green-500 rounded' }),
             React.createElement('span', {
               className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
             }, 'Action')
           ),
           React.createElement('div', { className: 'flex items-center gap-2' },
-            React.createElement('div', {
-              className: `w-2 h-2 rounded-sm ${darkMode ? 'bg-blue-400' : 'bg-blue-500'}`
-            }),
+            React.createElement('div', { className: 'w-3 h-3 bg-blue-500 rounded' }),
             React.createElement('span', {
               className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
             }, 'Task')
           ),
           React.createElement('div', { className: 'flex items-center gap-2' },
-            React.createElement('div', {
-              className: `w-1.5 h-1.5 rounded-full ${darkMode ? 'bg-purple-400' : 'bg-purple-500'}`
-            }),
+            React.createElement('div', { className: 'w-3 h-3 bg-purple-500 rounded' }),
             React.createElement('span', {
               className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
             }, 'Subtask')
           )
-        )
+        ),
+        React.createElement('div', {
+          className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+        }, 'Completed items shown with reduced opacity')
       )
     );
   };
