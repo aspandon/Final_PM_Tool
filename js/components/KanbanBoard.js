@@ -445,11 +445,8 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
 
     // RAG Status Badge (conditional)
     settings.showRAG && React.createElement('div', {
-      className: 'flex items-center justify-between mt-3 pt-3 border-t ' + (darkMode ? 'border-slate-600' : 'border-gray-200')
+      className: 'flex items-center justify-end mt-3 pt-3 border-t ' + (darkMode ? 'border-slate-600' : 'border-gray-200')
     },
-      React.createElement('span', {
-        className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-      }, 'RAG Status:'),
       React.createElement('span', {
         className: `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ragStatus.color} text-white`
       }, ragStatus.label)
