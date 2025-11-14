@@ -195,6 +195,8 @@ export function ActionPlan({
       status: 'not-started',
       priority: 'medium',
       owner: currentUser,
+      startDate: '',
+      finishDate: '',
       tasks: [],
       dependencies: [],
       comments: [],
@@ -216,6 +218,8 @@ export function ActionPlan({
           status: 'not-started',
           priority: 'medium',
           assignees: [],
+          startDate: '',
+          finishDate: '',
           dueDate: '',
           estimatedHours: 0,
           actualHours: 0,
@@ -249,6 +253,10 @@ export function ActionPlan({
               const newSubtask = {
                 id: Date.now().toString(),
                 name: 'New Subtask',
+                status: 'not-started',
+                priority: 'medium',
+                startDate: '',
+                finishDate: '',
                 dueDate: '',
                 assignee: '',
                 dependencies: [],
@@ -687,14 +695,32 @@ export function ActionPlan({
               onClick: () => !isEditLocked && setEditingItem({ type: 'subtask', actionId, taskId, subtaskId: subtask.id }),
               className: `flex-1 text-sm font-medium ${subtask.status === 'completed' ? 'line-through' : ''} ${darkMode ? 'text-gray-200' : 'text-gray-800'} cursor-pointer`
             }, subtask.name),
-        // Due Date
-        React.createElement('input', {
-          type: 'date',
-          value: subtask.dueDate || '',
-          onChange: (e) => updateItem('subtask', ids, 'dueDate', e.target.value),
-          className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
-          disabled: isEditLocked
-        }),
+        // Start Date
+        React.createElement('div', { className: 'flex flex-col gap-0.5' },
+          React.createElement('label', {
+            className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+          }, 'Start'),
+          React.createElement('input', {
+            type: 'date',
+            value: subtask.startDate || '',
+            onChange: (e) => updateItem('subtask', ids, 'startDate', e.target.value),
+            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+            disabled: isEditLocked
+          })
+        ),
+        // Finish Date
+        React.createElement('div', { className: 'flex flex-col gap-0.5' },
+          React.createElement('label', {
+            className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+          }, 'Finish'),
+          React.createElement('input', {
+            type: 'date',
+            value: subtask.finishDate || '',
+            onChange: (e) => updateItem('subtask', ids, 'finishDate', e.target.value),
+            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+            disabled: isEditLocked
+          })
+        ),
         // Assignee
         React.createElement('input', {
           type: 'text',
@@ -799,14 +825,32 @@ export function ActionPlan({
           totalSubtasks > 0 && React.createElement('div', {
             className: `px-2 py-0.5 rounded-full text-xs font-semibold ${darkMode ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-700'}`
           }, `${completedSubtasks}/${totalSubtasks}`),
-          // Due Date
-          React.createElement('input', {
-            type: 'date',
-            value: task.dueDate || '',
-            onChange: (e) => updateItem('task', ids, 'dueDate', e.target.value),
-            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded`,
-            disabled: isEditLocked
-          }),
+          // Start Date
+          React.createElement('div', { className: 'flex flex-col gap-0.5' },
+            React.createElement('label', {
+              className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+            }, 'Start'),
+            React.createElement('input', {
+              type: 'date',
+              value: task.startDate || '',
+              onChange: (e) => updateItem('task', ids, 'startDate', e.target.value),
+              className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded`,
+              disabled: isEditLocked
+            })
+          ),
+          // Finish Date
+          React.createElement('div', { className: 'flex flex-col gap-0.5' },
+            React.createElement('label', {
+              className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+            }, 'Finish'),
+            React.createElement('input', {
+              type: 'date',
+              value: task.finishDate || '',
+              onChange: (e) => updateItem('task', ids, 'finishDate', e.target.value),
+              className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded`,
+              disabled: isEditLocked
+            })
+          ),
           // Assignee
           React.createElement('input', {
             type: 'text',
@@ -920,11 +964,11 @@ export function ActionPlan({
                 className: `flex-1 text-base font-bold ${action.status === 'completed' ? 'line-through' : ''} ${darkMode ? 'text-gray-200' : 'text-gray-800'} cursor-pointer hover:text-green-500 transition-colors`
               }, action.name)
         ),
-        // Row 2: Stats and Action buttons
+        // Row 2: Stats, Dates and Action buttons
         React.createElement('div', {
           className: 'flex items-center justify-between gap-4'
         },
-          // Left: Stats
+          // Left: Stats and Dates
           React.createElement('div', {
             className: 'flex items-center gap-3'
           },
@@ -933,7 +977,33 @@ export function ActionPlan({
             }, `${completedTasks}/${totalTasks} Tasks`),
             totalTasks > 0 && React.createElement('div', {
               className: `px-4 py-2 rounded-lg text-sm font-bold ${darkMode ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`
-            }, `${progress}% Complete`)
+            }, `${progress}% Complete`),
+            // Start Date
+            React.createElement('div', { className: 'flex flex-col gap-0.5' },
+              React.createElement('label', {
+                className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+              }, 'Start'),
+              React.createElement('input', {
+                type: 'date',
+                value: action.startDate || '',
+                onChange: (e) => updateItem('action', ids, 'startDate', e.target.value),
+                className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+                disabled: isEditLocked
+              })
+            ),
+            // Finish Date
+            React.createElement('div', { className: 'flex flex-col gap-0.5' },
+              React.createElement('label', {
+                className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+              }, 'Finish'),
+              React.createElement('input', {
+                type: 'date',
+                value: action.finishDate || '',
+                onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
+                className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+                disabled: isEditLocked
+              })
+            )
           ),
           // Right: Action buttons
           React.createElement('div', {
@@ -1035,9 +1105,44 @@ export function ActionPlan({
     );
   }
 
-  // Board View (Kanban) - Phase 4 - Modern PM Tool Style
+  // Board View (Kanban) - Phase 4 - Modern PM Tool Style with Drag & Drop
   const renderBoardView = () => {
-    const statuses = ['not-started', 'in-progress', 'blocked', 'completed'];
+    const statuses = ['not-started', 'blocked', 'in-progress', 'completed'];
+    const [draggedTask, setDraggedTask] = React.useState(null);
+
+    // Handle drag start
+    const handleDragStart = (task) => {
+      setDraggedTask(task);
+    };
+
+    // Handle drag over - allow drop
+    const handleDragOver = (e) => {
+      e.preventDefault();
+    };
+
+    // Handle drop - update task status
+    const handleDrop = (newStatus) => {
+      if (!draggedTask || isEditLocked) return;
+
+      // Find and update the task
+      const newActionPlan = actionPlan.map(action => {
+        if (action.id === draggedTask.actionId) {
+          return {
+            ...action,
+            tasks: action.tasks.map(task => {
+              if (task.id === draggedTask.id) {
+                return { ...task, status: newStatus };
+              }
+              return task;
+            })
+          };
+        }
+        return action;
+      });
+
+      updateActionPlan(newActionPlan);
+      setDraggedTask(null);
+    };
 
     // Get all tasks grouped by status
     const tasksByStatus = {};
@@ -1062,7 +1167,9 @@ export function ActionPlan({
 
           return React.createElement('div', {
             key: status,
-            className: `rounded-xl ${darkMode ? 'bg-slate-800/50 border border-slate-700' : 'bg-gray-50 border border-gray-200'} p-4 shadow-sm`
+            className: `rounded-xl ${darkMode ? 'bg-slate-800/50 border border-slate-700' : 'bg-gray-50 border border-gray-200'} p-4 shadow-sm min-h-[400px]`,
+            onDragOver: handleDragOver,
+            onDrop: () => handleDrop(status)
           },
             // Column Header
             React.createElement('div', {
@@ -1090,11 +1197,13 @@ export function ActionPlan({
 
                 return React.createElement('div', {
                   key: task.id,
+                  draggable: !isEditLocked,
+                  onDragStart: () => handleDragStart(task),
                   className: `p-3 rounded-lg ${
                     darkMode
                       ? 'bg-slate-700/70 hover:bg-slate-700 border border-slate-600'
                       : 'bg-white hover:shadow-md border border-gray-200'
-                  } cursor-pointer transition-all text-xs group`
+                  } ${!isEditLocked ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'} transition-all text-xs group`
                 },
                   // Task Name
                   React.createElement('div', {
@@ -1157,10 +1266,11 @@ export function ActionPlan({
     );
   };
 
-  // Gantt Chart View - Timeline style matching Action Items app
+  // Gantt Chart View - Timeline style matching Action Items app with actual dates
   const renderGanttView = () => {
-    // Collect all items
+    // Collect all items with dates
     const ganttItems = [];
+    const allDates = [];
 
     actionPlan.forEach(action => {
       const actionProgress = calculateProgress(action);
@@ -1171,9 +1281,14 @@ export function ActionPlan({
         status: action.status,
         priority: action.priority,
         progress: actionProgress,
+        startDate: action.startDate,
+        finishDate: action.finishDate,
         dependencies: action.dependencies || [],
         level: 0
       });
+
+      if (action.startDate) allDates.push(new Date(action.startDate));
+      if (action.finishDate) allDates.push(new Date(action.finishDate));
 
       action.tasks.forEach(task => {
         const taskProgress = task.subtasks && task.subtasks.length > 0
@@ -1188,9 +1303,14 @@ export function ActionPlan({
           status: task.status,
           priority: task.priority,
           progress: taskProgress,
+          startDate: task.startDate,
+          finishDate: task.finishDate,
           dependencies: task.dependencies || [],
           level: 1
         });
+
+        if (task.startDate) allDates.push(new Date(task.startDate));
+        if (task.finishDate) allDates.push(new Date(task.finishDate));
 
         if (task.subtasks) {
           task.subtasks.forEach(subtask => {
@@ -1203,13 +1323,43 @@ export function ActionPlan({
               status: subtask.status,
               priority: subtask.priority,
               progress: subtask.status === 'completed' ? 100 : 0,
+              startDate: subtask.startDate,
+              finishDate: subtask.finishDate,
               dependencies: subtask.dependencies || [],
               level: 2
             });
+
+            if (subtask.startDate) allDates.push(new Date(subtask.startDate));
+            if (subtask.finishDate) allDates.push(new Date(subtask.finishDate));
           });
         }
       });
     });
+
+    // Determine if we have any dates to work with
+    const hasDates = allDates.length > 0;
+    let earliestDate, latestDate, totalDays;
+
+    if (hasDates) {
+      earliestDate = new Date(Math.min(...allDates));
+      latestDate = new Date(Math.max(...allDates));
+      totalDays = Math.ceil((latestDate - earliestDate) / (1000 * 60 * 60 * 24)) || 1;
+    }
+
+    // Calculate bar position based on dates
+    const getBarPosition = (startDate, finishDate) => {
+      if (!startDate || !finishDate || !hasDates) return null;
+
+      const start = new Date(startDate);
+      const finish = new Date(finishDate);
+      const offsetDays = Math.ceil((start - earliestDate) / (1000 * 60 * 60 * 24));
+      const durationDays = Math.ceil((finish - start) / (1000 * 60 * 60 * 24)) || 1;
+
+      const left = (offsetDays / totalDays) * 100;
+      const width = (durationDays / totalDays) * 100;
+
+      return { left: `${left}%`, width: `${width}%` };
+    };
 
     return React.createElement('div', {
       className: `overflow-x-auto ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-xl shadow-md p-4 border ${darkMode ? 'border-slate-700' : 'border-gray-200'}`
@@ -1225,20 +1375,30 @@ export function ActionPlan({
       ),
 
       React.createElement('div', { className: 'min-w-[1000px]' },
-        // Progress scale header (0% to 100%)
+        // Header - dates or progress scale
         React.createElement('div', { className: 'flex mb-2' },
           // Empty space for item names
           React.createElement('div', { className: 'w-48 flex-shrink-0' }),
-          // Progress scale
+          // Timeline scale
           React.createElement('div', {
             className: `flex-1 flex border-b ${darkMode ? 'border-slate-600' : 'border-gray-300'} pb-1`
           },
-            [0, 25, 50, 75, 100].map(percent =>
-              React.createElement('div', {
-                key: percent,
-                className: `flex-1 text-xs ${darkMode ? 'text-gray-200' : 'text-gray-700'} text-center font-semibold`
-              }, `${percent}%`)
-            )
+            hasDates
+              ? // Show date range when dates are available
+                React.createElement('div', {
+                  className: `flex justify-between w-full text-xs ${darkMode ? 'text-gray-200' : 'text-gray-700'} font-semibold px-2`
+                },
+                  React.createElement('span', null, earliestDate.toLocaleDateString()),
+                  React.createElement('span', null, `${totalDays} days`),
+                  React.createElement('span', null, latestDate.toLocaleDateString())
+                )
+              : // Show progress scale when no dates
+                [0, 25, 50, 75, 100].map(percent =>
+                  React.createElement('div', {
+                    key: percent,
+                    className: `flex-1 text-xs ${darkMode ? 'text-gray-200' : 'text-gray-700'} text-center font-semibold`
+                  }, `${percent}%`)
+                )
           )
         ),
 
@@ -1292,8 +1452,8 @@ export function ActionPlan({
             React.createElement('div', {
               className: `flex-1 relative h-5 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-200'} rounded border`
             },
-              // Grid lines at 25%, 50%, 75%
-              [25, 50, 75].map(percent =>
+              // Grid lines at 25%, 50%, 75% (only when no dates)
+              !hasDates && [25, 50, 75].map(percent =>
                 React.createElement('div', {
                   key: percent,
                   className: `absolute top-0 bottom-0 w-px ${darkMode ? 'bg-slate-600' : 'bg-gray-300'}`,
@@ -1301,16 +1461,37 @@ export function ActionPlan({
                 })
               ),
 
-              // Progress bar
-              React.createElement('div', {
-                className: `absolute h-full ${barColor} rounded flex items-center justify-center text-white text-[10px] font-semibold hover:opacity-90 transition cursor-pointer`,
-                style: {
-                  left: '0%',
-                  width: `${item.progress}%`,
-                  opacity: isCompleted ? 0.3 : 1
-                },
-                title: `${item.name}: ${item.progress}% complete`
-              }, item.progress > 15 ? `${item.progress}%` : '')
+              // Timeline bar based on dates OR progress bar
+              (() => {
+                const barPosition = getBarPosition(item.startDate, item.finishDate);
+                const durationDays = item.startDate && item.finishDate
+                  ? Math.ceil((new Date(item.finishDate) - new Date(item.startDate)) / (1000 * 60 * 60 * 24)) || 1
+                  : null;
+
+                if (barPosition) {
+                  // Date-based timeline bar
+                  return React.createElement('div', {
+                    className: `absolute h-full ${barColor} rounded flex items-center justify-center text-white text-[10px] font-semibold hover:opacity-90 transition cursor-pointer`,
+                    style: {
+                      left: barPosition.left,
+                      width: barPosition.width,
+                      opacity: isCompleted ? 0.3 : 1
+                    },
+                    title: `${item.name}: ${item.startDate} to ${item.finishDate} (${durationDays}d)`
+                  }, durationDays >= 5 ? `${durationDays}d` : '');
+                } else {
+                  // Progress-based bar (fallback when no dates)
+                  return React.createElement('div', {
+                    className: `absolute h-full ${barColor} rounded flex items-center justify-center text-white text-[10px] font-semibold hover:opacity-90 transition cursor-pointer`,
+                    style: {
+                      left: '0%',
+                      width: `${item.progress}%`,
+                      opacity: isCompleted ? 0.3 : 1
+                    },
+                    title: `${item.name}: ${item.progress}% complete`
+                  }, item.progress > 15 ? `${item.progress}%` : '');
+                }
+              })()
             )
           );
         })
