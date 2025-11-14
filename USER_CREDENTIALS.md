@@ -5,11 +5,13 @@
 1. Go to your Supabase dashboard: https://erumehpzdescjyfliceb.supabase.co
 2. Click on **SQL Editor** in the left sidebar
 3. Click **New Query**
-4. Open the file `supabase_add_users.sql` from this repository
+4. Open the file `supabase_add_users_simplified.sql` from this repository
 5. Copy and paste the entire SQL script into the query editor
 6. Click **Run** to execute the script
-7. You should see "Success. No rows returned" message
+7. You should see success messages for each user created
 8. Verify users were created by running the verification query at the end
+
+**IMPORTANT:** Use the `supabase_add_users_simplified.sql` file (NOT the regular one). This version matches the format that worked for the admin user.
 
 ## User Login Credentials
 
