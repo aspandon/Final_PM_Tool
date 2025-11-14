@@ -1,9 +1,9 @@
 // js/components/ActionPlan.js
 
 /**
- * ActionPlan Component - Full PM Platform
+ * ActionPlan Component - Modern PM Platform
  * Manages hierarchical action plans with Actions > Tasks > Subtasks
- * Features: Status workflow, Priority levels, Descriptions, Comments, Activity log,
+ * Features: Status workflow, Priority levels, Descriptions, Activity log,
  *          Completion tracking, Inline editing, Tag-based dependencies, Progress bars,
  *          Dependency validation, Templates, Multiple views
  */
@@ -19,28 +19,107 @@ export function ActionPlan({
   const [expandedTasks, setExpandedTasks] = React.useState({});
   const [editingItem, setEditingItem] = React.useState(null);
   const [showDependencies, setShowDependencies] = React.useState({});
-  const [showComments, setShowComments] = React.useState({});
   const [showDescription, setShowDescription] = React.useState({});
   const [showActivityLog, setShowActivityLog] = React.useState({});
-  const [newComment, setNewComment] = React.useState({});
   const [currentView, setCurrentView] = React.useState('list'); // list, board, table
   const [showTemplates, setShowTemplates] = React.useState(false);
   const [filters, setFilters] = React.useState({ status: [], priority: [], search: '' });
 
-  // Constants for status workflow
+  // Modern status workflow with sleek styling
   const STATUSES = {
-    'not-started': { label: 'Not Started', color: 'gray', icon: '⭕', bg: 'bg-gray-500', bgLight: 'bg-gray-100', text: 'text-gray-700' },
-    'in-progress': { label: 'In Progress', color: 'blue', icon: '🔵', bg: 'bg-blue-500', bgLight: 'bg-blue-100', text: 'text-blue-700' },
-    'blocked': { label: 'Blocked', color: 'red', icon: '🔴', bg: 'bg-red-500', bgLight: 'bg-red-100', text: 'text-red-700' },
-    'review': { label: 'Review', color: 'yellow', icon: '🟡', bg: 'bg-yellow-500', bgLight: 'bg-yellow-100', text: 'text-yellow-700' },
-    'completed': { label: 'Completed', color: 'green', icon: '🟢', bg: 'bg-green-500', bgLight: 'bg-green-100', text: 'text-green-700' }
+    'not-started': {
+      label: 'Not Started',
+      color: 'slate',
+      icon: '○',
+      gradient: 'from-slate-400 to-slate-500',
+      bg: darkMode ? 'bg-slate-500/20' : 'bg-slate-100',
+      border: darkMode ? 'border-slate-400/50' : 'border-slate-300',
+      text: darkMode ? 'text-slate-300' : 'text-slate-700',
+      hover: darkMode ? 'hover:bg-slate-500/30' : 'hover:bg-slate-200'
+    },
+    'in-progress': {
+      label: 'In Progress',
+      color: 'blue',
+      icon: '▶',
+      gradient: 'from-blue-400 to-blue-600',
+      bg: darkMode ? 'bg-blue-500/20' : 'bg-blue-100',
+      border: darkMode ? 'border-blue-400/50' : 'border-blue-300',
+      text: darkMode ? 'text-blue-300' : 'text-blue-700',
+      hover: darkMode ? 'hover:bg-blue-500/30' : 'hover:bg-blue-200'
+    },
+    'blocked': {
+      label: 'Blocked',
+      color: 'red',
+      icon: '⬛',
+      gradient: 'from-red-400 to-red-600',
+      bg: darkMode ? 'bg-red-500/20' : 'bg-red-100',
+      border: darkMode ? 'border-red-400/50' : 'border-red-300',
+      text: darkMode ? 'text-red-300' : 'text-red-700',
+      hover: darkMode ? 'hover:bg-red-500/30' : 'hover:bg-red-200'
+    },
+    'review': {
+      label: 'Review',
+      color: 'amber',
+      icon: '◐',
+      gradient: 'from-amber-400 to-amber-600',
+      bg: darkMode ? 'bg-amber-500/20' : 'bg-amber-100',
+      border: darkMode ? 'border-amber-400/50' : 'border-amber-300',
+      text: darkMode ? 'text-amber-300' : 'text-amber-700',
+      hover: darkMode ? 'hover:bg-amber-500/30' : 'hover:bg-amber-200'
+    },
+    'completed': {
+      label: 'Completed',
+      color: 'emerald',
+      icon: '✓',
+      gradient: 'from-emerald-400 to-emerald-600',
+      bg: darkMode ? 'bg-emerald-500/20' : 'bg-emerald-100',
+      border: darkMode ? 'border-emerald-400/50' : 'border-emerald-300',
+      text: darkMode ? 'text-emerald-300' : 'text-emerald-700',
+      hover: darkMode ? 'hover:bg-emerald-500/30' : 'hover:bg-emerald-200'
+    }
   };
 
   const PRIORITIES = {
-    'critical': { label: 'Critical', icon: '🔴', order: 4, color: 'red', bg: 'bg-red-500', bgLight: 'bg-red-100', text: 'text-red-700' },
-    'high': { label: 'High', icon: '🟠', order: 3, color: 'orange', bg: 'bg-orange-500', bgLight: 'bg-orange-100', text: 'text-orange-700' },
-    'medium': { label: 'Medium', icon: '🟡', order: 2, color: 'yellow', bg: 'bg-yellow-500', bgLight: 'bg-yellow-100', text: 'text-yellow-700' },
-    'low': { label: 'Low', icon: '🔵', order: 1, color: 'blue', bg: 'bg-blue-500', bgLight: 'bg-blue-100', text: 'text-blue-700' }
+    'critical': {
+      label: 'Critical',
+      icon: '⚠',
+      order: 4,
+      gradient: 'from-red-500 to-rose-600',
+      bg: darkMode ? 'bg-red-500/20' : 'bg-red-100',
+      border: darkMode ? 'border-red-400/50' : 'border-red-300',
+      text: darkMode ? 'text-red-300' : 'text-red-700',
+      hover: darkMode ? 'hover:bg-red-500/30' : 'hover:bg-red-200'
+    },
+    'high': {
+      label: 'High',
+      icon: '▲',
+      order: 3,
+      gradient: 'from-orange-400 to-orange-600',
+      bg: darkMode ? 'bg-orange-500/20' : 'bg-orange-100',
+      border: darkMode ? 'border-orange-400/50' : 'border-orange-300',
+      text: darkMode ? 'text-orange-300' : 'text-orange-700',
+      hover: darkMode ? 'hover:bg-orange-500/30' : 'hover:bg-orange-200'
+    },
+    'medium': {
+      label: 'Medium',
+      icon: '●',
+      order: 2,
+      gradient: 'from-sky-400 to-sky-600',
+      bg: darkMode ? 'bg-sky-500/20' : 'bg-sky-100',
+      border: darkMode ? 'border-sky-400/50' : 'border-sky-300',
+      text: darkMode ? 'text-sky-300' : 'text-sky-700',
+      hover: darkMode ? 'hover:bg-sky-500/30' : 'hover:bg-sky-200'
+    },
+    'low': {
+      label: 'Low',
+      icon: '▼',
+      order: 1,
+      gradient: 'from-gray-400 to-gray-500',
+      bg: darkMode ? 'bg-gray-500/20' : 'bg-gray-100',
+      border: darkMode ? 'border-gray-400/50' : 'border-gray-300',
+      text: darkMode ? 'text-gray-300' : 'text-gray-600',
+      hover: darkMode ? 'hover:bg-gray-500/30' : 'hover:bg-gray-200'
+    }
   };
 
   // Initialize action plan with data migration
@@ -359,48 +438,6 @@ export function ActionPlan({
     }
   };
 
-  // Add comment (Phase 3)
-  const addComment = (type, ids, text) => {
-    if (!text.trim()) return;
-
-    const comment = {
-      id: Date.now().toString(),
-      author: currentUser,
-      text: text.trim(),
-      timestamp: getTimestamp()
-    };
-
-    const newActionPlan = actionPlan.map(action => {
-      if (type === 'action' && action.id === ids.actionId) {
-        return {
-          ...action,
-          comments: [...action.comments, comment],
-          activityLog: [...action.activityLog, createActivity('comment-added', 'Comment added')]
-        };
-      }
-      if (action.id === ids.actionId) {
-        return {
-          ...action,
-          tasks: action.tasks.map(task => {
-            if (type === 'task' && task.id === ids.taskId) {
-              return {
-                ...task,
-                comments: [...task.comments, comment],
-                activityLog: [...task.activityLog, createActivity('comment-added', 'Comment added')]
-              };
-            }
-            return task;
-          })
-        };
-      }
-      return action;
-    });
-
-    updateActionPlan(newActionPlan);
-    const key = ids.actionId + (ids.taskId || '');
-    setNewComment({ ...newComment, [key]: '' });
-  };
-
   // Template management (Phase 5)
   const saveAsTemplate = () => {
     const name = prompt('Enter template name:');
@@ -468,7 +505,7 @@ export function ActionPlan({
     return Math.round((completedTasks / action.tasks.length) * 100);
   };
 
-  // Render status dropdown (Phase 1)
+  // Modern status badge/selector
   const renderStatusDropdown = (item, type, ids) => {
     const status = item.status || 'not-started';
     const statusInfo = STATUSES[status];
@@ -476,8 +513,9 @@ export function ActionPlan({
     return React.createElement('select', {
       value: status,
       onChange: (e) => updateItem(type, ids, 'status', e.target.value, status),
-      className: `px-2 py-1 text-xs rounded border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} font-semibold ${statusInfo.text}`,
-      disabled: isEditLocked
+      className: `px-3 py-1.5 text-xs rounded-lg font-bold border-2 ${statusInfo.border} ${statusInfo.bg} ${statusInfo.text} ${statusInfo.hover} transition-all cursor-pointer shadow-sm ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+      disabled: isEditLocked,
+      style: { minWidth: '120px' }
     },
       Object.entries(STATUSES).map(([key, val]) =>
         React.createElement('option', { key, value: key }, `${val.icon} ${val.label}`)
@@ -485,7 +523,7 @@ export function ActionPlan({
     );
   };
 
-  // Render priority dropdown (Phase 1)
+  // Modern priority badge/selector
   const renderPriorityDropdown = (item, type, ids) => {
     const priority = item.priority || 'medium';
     const priorityInfo = PRIORITIES[priority];
@@ -493,8 +531,9 @@ export function ActionPlan({
     return React.createElement('select', {
       value: priority,
       onChange: (e) => updateItem(type, ids, 'priority', e.target.value, priority),
-      className: `px-2 py-1 text-xs rounded border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} font-semibold ${priorityInfo.text}`,
-      disabled: isEditLocked
+      className: `px-3 py-1.5 text-xs rounded-lg font-bold border-2 ${priorityInfo.border} ${priorityInfo.bg} ${priorityInfo.text} ${priorityInfo.hover} transition-all cursor-pointer shadow-sm ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+      disabled: isEditLocked,
+      style: { minWidth: '100px' }
     },
       Object.entries(PRIORITIES).map(([key, val]) =>
         React.createElement('option', { key, value: key }, `${val.icon} ${val.label}`)
@@ -502,78 +541,50 @@ export function ActionPlan({
     );
   };
 
-  // Render description field (Phase 1)
+  // Modern description field
   const renderDescription = (item, type, ids) => {
     const key = ids.actionId + (ids.taskId || '');
     const isExpanded = showDescription[key];
 
-    return React.createElement('div', { className: 'mt-2' },
+    return React.createElement('div', { className: 'mt-3' },
       React.createElement('button', {
         onClick: () => setShowDescription({ ...showDescription, [key]: !isExpanded }),
-        className: `text-xs font-semibold ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'}`,
+        className: `px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          darkMode
+            ? 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-400/30'
+            : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200'
+        } ${isEditLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`,
         disabled: isEditLocked
-      }, isExpanded ? '📝 Hide Description' : '📝 Description'),
+      }, isExpanded ? '▼ Description' : '▶ Description'),
       isExpanded && React.createElement('textarea', {
         value: item.description || '',
         onChange: (e) => updateItem(type, ids, 'description', e.target.value),
-        placeholder: 'Add description...',
-        className: `mt-1 w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+        placeholder: 'Add detailed description...',
+        className: `mt-2 w-full px-3 py-2 text-sm border-2 rounded-lg transition-all focus:ring-2 ${
+          darkMode
+            ? 'border-slate-600 bg-slate-800/50 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20'
+            : 'border-gray-200 bg-white text-gray-800 focus:border-indigo-400 focus:ring-indigo-400/20'
+        }`,
         rows: 3,
         disabled: isEditLocked
       })
     );
   };
 
-  // Render comments section (Phase 3)
-  const renderComments = (item, type, ids) => {
-    const key = ids.actionId + (ids.taskId || '');
-    const isExpanded = showComments[key];
-    const comments = item.comments || [];
-
-    return React.createElement('div', { className: 'mt-2' },
-      React.createElement('button', {
-        onClick: () => setShowComments({ ...showComments, [key]: !isExpanded }),
-        className: `text-xs font-semibold ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'}`,
-        disabled: isEditLocked
-      }, `💬 Comments (${comments.length})`),
-      isExpanded && React.createElement('div', { className: 'mt-2 space-y-2' },
-        comments.length > 0 && React.createElement('div', { className: `space-y-1 max-h-40 overflow-y-auto ${darkMode ? 'bg-slate-900/50' : 'bg-gray-50'} rounded p-2` },
-          comments.map(comment =>
-            React.createElement('div', { key: comment.id, className: 'text-xs' },
-              React.createElement('div', { className: `font-semibold ${darkMode ? 'text-blue-400' : 'text-blue-600'}` }, comment.author),
-              React.createElement('div', { className: `${darkMode ? 'text-gray-300' : 'text-gray-700'}` }, comment.text),
-              React.createElement('div', { className: `${darkMode ? 'text-gray-500' : 'text-gray-500'} text-xs` }, new Date(comment.timestamp).toLocaleString())
-            )
-          )
-        ),
-        !isEditLocked && React.createElement('div', { className: 'flex gap-1' },
-          React.createElement('input', {
-            type: 'text',
-            value: newComment[key] || '',
-            onChange: (e) => setNewComment({ ...newComment, [key]: e.target.value }),
-            onKeyDown: (e) => e.key === 'Enter' && addComment(type, ids, newComment[key]),
-            placeholder: 'Add a comment...',
-            className: `flex-1 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`
-          }),
-          React.createElement('button', {
-            onClick: () => addComment(type, ids, newComment[key]),
-            className: `px-2 py-1 text-xs rounded font-semibold ${darkMode ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`,
-          }, 'Send')
-        )
-      )
-    );
-  };
-
-  // Render activity log (Phase 3)
+  // Modern activity log
   const renderActivityLog = (item, ids) => {
     const key = ids.actionId + (ids.taskId || '');
     const isExpanded = showActivityLog[key];
     const activities = item.activityLog || [];
 
-    return React.createElement('div', { className: 'mt-2' },
+    return React.createElement('div', { className: 'mt-3' },
       React.createElement('button', {
         onClick: () => setShowActivityLog({ ...showActivityLog, [key]: !isExpanded }),
-        className: `text-xs font-semibold ${darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'}`
+        className: `px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          darkMode
+            ? 'bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-400/30'
+            : 'bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200'
+        }`
       }, `📋 Activity Log (${activities.length})`),
       isExpanded && React.createElement('div', { className: `mt-2 max-h-32 overflow-y-auto ${darkMode ? 'bg-slate-900/50' : 'bg-gray-50'} rounded p-2 space-y-1` },
         activities.slice().reverse().map((activity, i) =>
@@ -845,11 +856,9 @@ export function ActionPlan({
           className: 'mt-2 flex flex-wrap gap-1'
         }, renderDependencyTags(task, 'task', ids)),
         showDeps && renderDependencySelector(task, 'task', ids),
-        // Description (Phase 1)
+        // Description
         renderDescription(task, 'task', ids),
-        // Comments (Phase 3)
-        renderComments(task, 'task', ids),
-        // Activity Log (Phase 3)
+        // Activity Log
         renderActivityLog(task, ids)
       ),
       // Subtasks
@@ -968,11 +977,9 @@ export function ActionPlan({
           className: 'mt-2 flex flex-wrap gap-1'
         }, renderDependencyTags(action, 'action', ids)),
         showDeps && renderDependencySelector(action, 'action', ids),
-        // Description (Phase 1)
+        // Description
         renderDescription(action, 'action', ids),
-        // Comments (Phase 3)
-        renderComments(action, 'action', ids),
-        // Activity Log (Phase 3)
+        // Activity Log
         renderActivityLog(action, ids)
       ),
       // Tasks
@@ -1004,8 +1011,12 @@ export function ActionPlan({
       }, 'Create your first action to start planning'),
       !isEditLocked && React.createElement('button', {
         onClick: addAction,
-        className: `px-4 py-2 rounded-lg font-semibold ${darkMode ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`
-      }, '+ Add Action')
+        className: `px-6 py-3 rounded-xl font-bold shadow-lg transition-all transform hover:scale-105 ${
+          darkMode
+            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white'
+            : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white'
+        }`
+      }, '✨ Add Action')
     );
   }
 
@@ -1237,12 +1248,12 @@ export function ActionPlan({
       // Add Action button
       !isEditLocked && React.createElement('button', {
         onClick: addAction,
-        className: `w-full py-3 rounded-xl border-2 border-dashed font-semibold transition-all ${
+        className: `w-full py-4 rounded-xl border-2 border-dashed font-bold transition-all shadow-sm hover:shadow-md ${
           darkMode
-            ? 'border-green-500 bg-green-500/10 hover:bg-green-500/20 text-green-400'
-            : 'border-green-500 bg-green-50 hover:bg-green-100 text-green-700'
+            ? 'border-emerald-400/50 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:border-emerald-400'
+            : 'border-emerald-400 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:border-emerald-500'
         }`
-      }, '+ Add Action')
+      }, '✨ Add Action')
     )
   );
 }
