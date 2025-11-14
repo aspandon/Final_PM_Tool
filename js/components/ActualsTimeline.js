@@ -2,7 +2,7 @@
 
 /**
  * ActualsTimeline Component
- * Displays a comparison timeline showing Implementation, Planned, and Actual dates
+ * Displays a comparison timeline showing Implementation (Actual), PM Plan, and Initial Official Plan dates
  * with delay calculations and visual indicators
  */
 
@@ -145,7 +145,7 @@ export function ActualsTimeline({
       React.createElement('div', {
         className: 'w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full'
       }),
-      'Project Timeline Comparison: Implementation vs Planned vs Actual'
+      'Project Timeline Comparison: Implementation (Actual) vs PM Plan vs Initial Official Plan'
     ),
 
     // Container
@@ -160,19 +160,19 @@ export function ActualsTimeline({
           React.createElement('div', { className: 'w-3 h-3 bg-purple-500 rounded' }),
           React.createElement('span', {
             className: `text-xs font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`
-          }, 'Implementation (CAPEX)')
+          }, 'Implementation (Actual)')
         ),
         React.createElement('div', { className: 'flex items-center gap-1' },
           React.createElement('div', { className: 'w-3 h-3 bg-green-500 rounded' }),
           React.createElement('span', {
             className: `text-xs font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`
-          }, 'Planned (Inv. Prop)')
+          }, 'PM Plan (In. Proposal)')
         ),
         React.createElement('div', { className: 'flex items-center gap-1' },
           React.createElement('div', { className: 'w-3 h-3 bg-blue-500 rounded' }),
           React.createElement('span', {
             className: `text-xs font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`
-          }, 'Actual Progress')
+          }, 'Initial Official Plan')
         )
       ),
 
@@ -344,7 +344,7 @@ export function ActualsTimeline({
                 implPos && React.createElement('div', { className: 'flex items-center gap-2' },
                   React.createElement('div', {
                     className: `w-32 flex-shrink-0 text-[10px] ${darkMode ? 'text-gray-200' : 'text-gray-700'} font-medium`
-                  }, 'Implementation (CAPEX)'),
+                  }, 'Implementation (Actual)'),
                   React.createElement('div', {
                     className: `flex-1 relative h-3 rounded border ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-200'}`
                   },
@@ -357,7 +357,7 @@ export function ActualsTimeline({
                         top: '1px',
                         height: '10px'
                       },
-                      title: `Implementation (CAPEX): ${project.implementation.start} to ${project.implementation.finish} (${implPos.duration}d)`
+                      title: `Implementation (Actual): ${project.implementation.start} to ${project.implementation.finish} (${implPos.duration}d)`
                     }, `${implPos.duration}d`)
                   )
                 ),
@@ -365,7 +365,7 @@ export function ActualsTimeline({
                 plannedPos && React.createElement('div', { className: 'flex items-center gap-2' },
                   React.createElement('div', {
                     className: `w-32 flex-shrink-0 text-[10px] ${darkMode ? 'text-gray-200' : 'text-gray-700'} font-medium`
-                  }, 'Planned (Inv. Prop)'),
+                  }, 'PM Plan (In. Proposal)'),
                   React.createElement('div', {
                     className: `flex-1 relative h-3 rounded border ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-200'}`
                   },
@@ -378,7 +378,7 @@ export function ActualsTimeline({
                         top: '1px',
                         height: '10px'
                       },
-                      title: `Planned: ${project.plannedInvestment.start} to ${project.plannedInvestment.finish} (${plannedPos.duration}d)`
+                      title: `PM Plan (In. Proposal): ${project.plannedInvestment.start} to ${project.plannedInvestment.finish} (${plannedPos.duration}d)`
                     }, `${plannedPos.duration}d`)
                   )
                 ),
@@ -386,7 +386,7 @@ export function ActualsTimeline({
                 actualPos && React.createElement('div', { className: 'flex items-center gap-2' },
                   React.createElement('div', {
                     className: `w-32 flex-shrink-0 text-[10px] ${darkMode ? 'text-gray-200' : 'text-gray-700'} font-medium`
-                  }, 'Actual Progress'),
+                  }, 'Initial Official Plan'),
                   React.createElement('div', {
                     className: `flex-1 relative h-3 rounded border ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-200'}`
                   },
@@ -399,7 +399,7 @@ export function ActualsTimeline({
                         top: '1px',
                         height: '10px'
                       },
-                      title: `Actual Progress: ${project.actualDates.start} to ${project.actualDates.finish} (${actualPos.duration}d)`
+                      title: `Initial Official Plan: ${project.actualDates.start} to ${project.actualDates.finish} (${actualPos.duration}d)`
                     }, `${actualPos.duration}d`)
                   )
                 )

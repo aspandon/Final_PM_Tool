@@ -13,8 +13,8 @@ export const exportToExcel = (projects) => {
     'QA External Allocation (FTEs)': p.qaExternalAllocation,
     'BP Implementation Start': p.bpImplementation.start ? new Date(p.bpImplementation.start) : '',
     'BP Implementation Finish': p.bpImplementation.finish ? new Date(p.bpImplementation.finish) : '',
-    'Planned Start Date (Inv. Prop) Start': p.plannedInvestment.start ? new Date(p.plannedInvestment.start) : '',
-    'Planned Start Date (Inv. Prop) Finish': p.plannedInvestment.finish ? new Date(p.plannedInvestment.finish) : '',
+    'PM Plan (In. Proposal) Start': p.plannedInvestment.start ? new Date(p.plannedInvestment.start) : '',
+    'PM Plan (In. Proposal) Finish': p.plannedInvestment.finish ? new Date(p.plannedInvestment.finish) : '',
     'Actual Start Date': p.actualDates.start ? new Date(p.actualDates.start) : '',
     'Actual Finish Date': p.actualDates.finish ? new Date(p.actualDates.finish) : '',
     'PSD Start': p.psd.start ? new Date(p.psd.start) : '',
@@ -23,8 +23,8 @@ export const exportToExcel = (projects) => {
     'Investment Proposal Finish': p.investment.finish ? new Date(p.investment.finish) : '',
     'Procurement Start': p.procurement.start ? new Date(p.procurement.start) : '',
     'Procurement Finish': p.procurement.finish ? new Date(p.procurement.finish) : '',
-    'Implementation Start': p.implementation.start ? new Date(p.implementation.start) : '',
-    'Implementation Finish': p.implementation.finish ? new Date(p.implementation.finish) : ''
+    'Implementation (Actual) Start': p.implementation.start ? new Date(p.implementation.start) : '',
+    'Implementation (Actual) Finish': p.implementation.finish ? new Date(p.implementation.finish) : ''
   }));
 
   const ws = XLSX.utils.json_to_sheet(data, { cellDates: true, dateNF: 'yyyy-mm-dd' });
@@ -91,9 +91,9 @@ export const importFromExcel = (file, callback) => {
           start: formatDate(row['BP Implementation Start']), 
           finish: formatDate(row['BP Implementation Finish']) 
         },
-        plannedInvestment: { 
-          start: formatDate(row['Planned Start Date (Inv. Prop) Start']), 
-          finish: formatDate(row['Planned Start Date (Inv. Prop) Finish']) 
+        plannedInvestment: {
+          start: formatDate(row['PM Plan (In. Proposal) Start']),
+          finish: formatDate(row['PM Plan (In. Proposal) Finish'])
         },
         actualDates: { 
           start: formatDate(row['Actual Start Date']), 
@@ -111,9 +111,9 @@ export const importFromExcel = (file, callback) => {
           start: formatDate(row['Procurement Start']), 
           finish: formatDate(row['Procurement Finish']) 
         },
-        implementation: { 
-          start: formatDate(row['Implementation Start']), 
-          finish: formatDate(row['Implementation Finish']) 
+        implementation: {
+          start: formatDate(row['Implementation (Actual) Start']),
+          finish: formatDate(row['Implementation (Actual) Finish'])
         }
       }));
 
