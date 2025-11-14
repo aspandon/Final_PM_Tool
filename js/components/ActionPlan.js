@@ -25,12 +25,12 @@ export function ActionPlan({
   const [showTemplates, setShowTemplates] = React.useState(false);
   const [filters, setFilters] = React.useState({ status: [], priority: [], search: '' });
 
-  // Modern status workflow with sleek styling
+  // Modern status workflow (4 states, no Review)
   const STATUSES = {
     'not-started': {
       label: 'Not Started',
-      color: 'slate',
       icon: '○',
+      color: 'slate',
       gradient: 'from-slate-400 to-slate-500',
       bg: darkMode ? 'bg-slate-500/20' : 'bg-slate-100',
       border: darkMode ? 'border-slate-400/50' : 'border-slate-300',
@@ -39,8 +39,8 @@ export function ActionPlan({
     },
     'in-progress': {
       label: 'In Progress',
-      color: 'blue',
       icon: '▶',
+      color: 'blue',
       gradient: 'from-blue-400 to-blue-600',
       bg: darkMode ? 'bg-blue-500/20' : 'bg-blue-100',
       border: darkMode ? 'border-blue-400/50' : 'border-blue-300',
@@ -49,28 +49,18 @@ export function ActionPlan({
     },
     'blocked': {
       label: 'Blocked',
-      color: 'red',
       icon: '⬛',
+      color: 'red',
       gradient: 'from-red-400 to-red-600',
       bg: darkMode ? 'bg-red-500/20' : 'bg-red-100',
       border: darkMode ? 'border-red-400/50' : 'border-red-300',
       text: darkMode ? 'text-red-300' : 'text-red-700',
       hover: darkMode ? 'hover:bg-red-500/30' : 'hover:bg-red-200'
     },
-    'review': {
-      label: 'Review',
-      color: 'amber',
-      icon: '◐',
-      gradient: 'from-amber-400 to-amber-600',
-      bg: darkMode ? 'bg-amber-500/20' : 'bg-amber-100',
-      border: darkMode ? 'border-amber-400/50' : 'border-amber-300',
-      text: darkMode ? 'text-amber-300' : 'text-amber-700',
-      hover: darkMode ? 'hover:bg-amber-500/30' : 'hover:bg-amber-200'
-    },
     'completed': {
       label: 'Completed',
-      color: 'emerald',
       icon: '✓',
+      color: 'emerald',
       gradient: 'from-emerald-400 to-emerald-600',
       bg: darkMode ? 'bg-emerald-500/20' : 'bg-emerald-100',
       border: darkMode ? 'border-emerald-400/50' : 'border-emerald-300',
@@ -513,9 +503,9 @@ export function ActionPlan({
     return React.createElement('select', {
       value: status,
       onChange: (e) => updateItem(type, ids, 'status', e.target.value, status),
-      className: `px-3 py-1.5 text-xs rounded-lg font-bold border-2 ${statusInfo.border} ${statusInfo.bg} ${statusInfo.text} ${statusInfo.hover} transition-all cursor-pointer shadow-sm ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+      className: `px-3 py-2 text-xs rounded-lg font-bold border-2 ${statusInfo.border} ${statusInfo.bg} ${statusInfo.text} ${statusInfo.hover} transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg transform hover:scale-105 ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
       disabled: isEditLocked,
-      style: { minWidth: '120px' }
+      style: { minWidth: '140px' }
     },
       Object.entries(STATUSES).map(([key, val]) =>
         React.createElement('option', { key, value: key }, `${val.icon} ${val.label}`)
@@ -531,9 +521,9 @@ export function ActionPlan({
     return React.createElement('select', {
       value: priority,
       onChange: (e) => updateItem(type, ids, 'priority', e.target.value, priority),
-      className: `px-3 py-1.5 text-xs rounded-lg font-bold border-2 ${priorityInfo.border} ${priorityInfo.bg} ${priorityInfo.text} ${priorityInfo.hover} transition-all cursor-pointer shadow-sm ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+      className: `px-3 py-2 text-xs rounded-lg font-bold border-2 ${priorityInfo.border} ${priorityInfo.bg} ${priorityInfo.text} ${priorityInfo.hover} transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg transform hover:scale-105 ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
       disabled: isEditLocked,
-      style: { minWidth: '100px' }
+      style: { minWidth: '120px' }
     },
       Object.entries(PRIORITIES).map(([key, val]) =>
         React.createElement('option', { key, value: key }, `${val.icon} ${val.label}`)
@@ -764,12 +754,18 @@ export function ActionPlan({
     return React.createElement('div', {
       key: task.id,
       className: `group mb-3 rounded-lg overflow-hidden transition-all ${
-        darkMode ? 'bg-slate-700/70 border-slate-600' : 'bg-white border-blue-200'
-      } border-l-4 shadow-sm hover:shadow-md ${task.completed ? 'opacity-70' : ''}`
+        darkMode
+          ? 'bg-slate-700/50 border-l-4 border-blue-500/50 shadow-md'
+          : 'bg-white border-l-4 border-blue-400 shadow-md'
+      } hover:shadow-lg ${task.completed ? 'opacity-70' : ''}`
     },
       // Task Header
       React.createElement('div', {
-        className: `p-3 ${darkMode ? 'bg-slate-700/50' : 'bg-blue-50/50'}`
+        className: `p-3 ${
+          darkMode
+            ? 'bg-slate-700/30'
+            : 'bg-gradient-to-r from-blue-50/30 to-indigo-50/30'
+        }`
       },
         React.createElement('div', {
           className: 'flex items-center gap-2'
@@ -863,7 +859,7 @@ export function ActionPlan({
       ),
       // Subtasks
       isExpanded && task.subtasks.length > 0 && React.createElement('div', {
-        className: `p-3 ${darkMode ? 'bg-slate-800/30' : 'bg-blue-50/30'}`
+        className: `p-3 ${darkMode ? 'bg-slate-800/20' : 'bg-indigo-50/20'}`
       }, task.subtasks.map(subtask => renderSubtask(subtask, actionId, task.id)))
     );
   };
@@ -881,24 +877,31 @@ export function ActionPlan({
     return React.createElement('div', {
       key: action.id,
       className: `group mb-4 rounded-xl overflow-hidden transition-all ${
-        darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-green-300'
-      } border-2 shadow-lg hover:shadow-xl ${action.status === 'completed' ? 'opacity-70' : ''}`
+        darkMode
+          ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700/50'
+          : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
+      } border shadow-lg hover:shadow-2xl ${action.status === 'completed' ? 'opacity-70' : ''}`
     },
-      // Action Header with Gradient
+      // Action Header - Modern sleek design with improved layout
       React.createElement('div', {
-        className: `p-4 ${darkMode ? 'bg-gradient-to-r from-green-900/50 to-emerald-900/50' : 'bg-gradient-to-r from-green-50 to-emerald-50'}`
+        className: `p-5 ${
+          darkMode
+            ? 'bg-gradient-to-r from-slate-700/30 to-slate-800/30 border-b border-slate-700/50'
+            : 'bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-b border-gray-200/50'
+        }`
       },
+        // Row 1: Main info (expand, status, priority, name)
         React.createElement('div', {
-          className: 'flex items-center gap-3'
+          className: 'flex items-center gap-4 mb-3'
         },
           // Expand/Collapse
           totalTasks > 0 && React.createElement('button', {
             onClick: () => setExpandedActions({ ...expandedActions, [action.id]: !isExpanded }),
-            className: `p-1.5 rounded ${darkMode ? 'hover:bg-green-800 text-green-400' : 'hover:bg-green-100 text-green-600'}`
+            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-green-400' : 'hover:bg-blue-100 text-blue-600'}`
           }, isExpanded ? '▼' : '▶'),
-          // Status dropdown (Phase 1)
+          // Status dropdown
           renderStatusDropdown(action, 'action', ids),
-          // Priority dropdown (Phase 1)
+          // Priority dropdown
           renderPriorityDropdown(action, 'action', ids),
           // Name
           isEditing
@@ -909,65 +912,77 @@ export function ActionPlan({
                 onBlur: () => setEditingItem(null),
                 onKeyDown: (e) => e.key === 'Enter' && setEditingItem(null),
                 autoFocus: true,
-                className: `flex-1 px-3 py-1.5 text-base font-bold border ${darkMode ? 'border-green-500 bg-slate-800 text-gray-200' : 'border-green-400 bg-white'} rounded`,
+                className: `flex-1 px-4 py-2 text-base font-bold border-2 rounded-lg ${darkMode ? 'border-green-500 bg-slate-800 text-gray-200' : 'border-green-400 bg-white'} focus:ring-2 focus:ring-green-500`,
                 disabled: isEditLocked
               })
             : React.createElement('div', {
                 onClick: () => !isEditLocked && setEditingItem({ type: 'action', actionId: action.id }),
-                className: `flex-1 text-base font-bold ${action.status === 'completed' ? 'line-through' : ''} ${darkMode ? 'text-gray-200' : 'text-gray-800'} cursor-pointer`
-              }, action.name),
-          // Task count badge
-          totalTasks > 0 && React.createElement('div', {
-            className: `px-3 py-1 rounded-full text-xs font-bold ${darkMode ? 'bg-green-500/30 text-green-300' : 'bg-green-100 text-green-700'}`
-          }, `${completedTasks}/${totalTasks} Tasks`),
-          // Progress percentage
-          totalTasks > 0 && React.createElement('div', {
-            className: `px-3 py-1 rounded-full text-xs font-bold ${darkMode ? 'bg-emerald-500/30 text-emerald-300' : 'bg-emerald-100 text-emerald-700'}`
-          }, `${progress}%`),
-          // Actions (shown on hover)
+                className: `flex-1 text-base font-bold ${action.status === 'completed' ? 'line-through' : ''} ${darkMode ? 'text-gray-200' : 'text-gray-800'} cursor-pointer hover:text-green-500 transition-colors`
+              }, action.name)
+        ),
+        // Row 2: Stats and Action buttons
+        React.createElement('div', {
+          className: 'flex items-center justify-between gap-4'
+        },
+          // Left: Stats
           React.createElement('div', {
-            className: 'flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'
+            className: 'flex items-center gap-3'
           },
-            React.createElement('button', {
+            totalTasks > 0 && React.createElement('div', {
+              className: `px-4 py-2 rounded-lg text-sm font-bold ${darkMode ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-blue-100 text-blue-700 border border-blue-200'}`
+            }, `${completedTasks}/${totalTasks} Tasks`),
+            totalTasks > 0 && React.createElement('div', {
+              className: `px-4 py-2 rounded-lg text-sm font-bold ${darkMode ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`
+            }, `${progress}% Complete`)
+          ),
+          // Right: Action buttons
+          React.createElement('div', {
+            className: 'flex items-center gap-2'
+          },
+            !isEditLocked && React.createElement('button', {
               onClick: () => addTask(action.id),
-              className: `px-2 py-1 text-xs rounded font-semibold ${darkMode ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`,
+              className: `px-4 py-2 text-sm rounded-lg font-semibold transition-all shadow-sm hover:shadow-md ${darkMode ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`,
               disabled: isEditLocked
-            }, '+ Task'),
-            React.createElement('button', {
-              onClick: () => moveItem('action', ids, 'up'),
-              className: `p-1 rounded ${darkMode ? 'hover:bg-green-800 text-gray-400' : 'hover:bg-green-100 text-gray-600'}`,
-              disabled: isEditLocked,
-              title: 'Move up'
-            }, '↑'),
-            React.createElement('button', {
-              onClick: () => moveItem('action', ids, 'down'),
-              className: `p-1 rounded ${darkMode ? 'hover:bg-green-800 text-gray-400' : 'hover:bg-green-100 text-gray-600'}`,
-              disabled: isEditLocked,
-              title: 'Move down'
-            }, '↓'),
-            React.createElement('button', {
-              onClick: () => setShowDependencies({ ...showDependencies, [action.id]: !showDeps }),
-              className: `p-1 rounded ${darkMode ? 'hover:bg-green-800 text-gray-400' : 'hover:bg-green-100 text-gray-600'}`,
-              disabled: isEditLocked,
-              title: 'Dependencies'
-            }, '🔗'),
-            React.createElement('button', {
-              onClick: () => deleteItem('action', ids),
-              className: `p-1 rounded ${darkMode ? 'hover:bg-red-600 text-red-400' : 'hover:bg-red-100 text-red-600'}`,
-              disabled: isEditLocked,
-              title: 'Delete'
-            }, '×')
+            }, '+ Add Task'),
+            React.createElement('div', {
+              className: `flex items-center gap-1 ${darkMode ? 'bg-slate-700/50' : 'bg-gray-100'} rounded-lg p-1`
+            },
+              React.createElement('button', {
+                onClick: () => moveItem('action', ids, 'up'),
+                className: `p-1.5 rounded transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-200 text-gray-600 hover:text-gray-800'}`,
+                disabled: isEditLocked,
+                title: 'Move up'
+              }, '↑'),
+              React.createElement('button', {
+                onClick: () => moveItem('action', ids, 'down'),
+                className: `p-1.5 rounded transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-200 text-gray-600 hover:text-gray-800'}`,
+                disabled: isEditLocked,
+                title: 'Move down'
+              }, '↓'),
+              React.createElement('button', {
+                onClick: () => setShowDependencies({ ...showDependencies, [action.id]: !showDeps }),
+                className: `p-1.5 rounded transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-200 text-gray-600 hover:text-gray-800'}`,
+                disabled: isEditLocked,
+                title: 'Dependencies'
+              }, '🔗'),
+              !isEditLocked && React.createElement('button', {
+                onClick: () => deleteItem('action', ids),
+                className: `p-1.5 rounded transition-all ${darkMode ? 'hover:bg-red-600 text-red-400 hover:text-white' : 'hover:bg-red-100 text-red-600 hover:text-red-700'}`,
+                disabled: isEditLocked,
+                title: 'Delete'
+              }, '×')
+            )
           )
         ),
-        // Progress Bar
+        // Row 3: Progress Bar
         totalTasks > 0 && React.createElement('div', {
-          className: 'mt-3'
+          className: 'mt-4'
         },
           React.createElement('div', {
-            className: `w-full h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`
+            className: `w-full h-2.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`
           },
             React.createElement('div', {
-              className: `h-full transition-all duration-300 ${darkMode ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-green-500 to-emerald-500'}`,
+              className: `h-full transition-all duration-500 ${darkMode ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-green-500 to-emerald-500'}`,
               style: { width: `${progress}%` }
             })
           )
@@ -984,7 +999,7 @@ export function ActionPlan({
       ),
       // Tasks
       isExpanded && React.createElement('div', {
-        className: `p-4 ${darkMode ? 'bg-slate-800/50' : 'bg-green-50/20'}`
+        className: `p-4 ${darkMode ? 'bg-slate-900/30' : 'bg-gray-50/50'}`
       },
         action.tasks.length > 0
           ? action.tasks.map(task => renderTask(task, action.id))
@@ -1020,9 +1035,9 @@ export function ActionPlan({
     );
   }
 
-  // Board View (Kanban) - Phase 4
+  // Board View (Kanban) - Phase 4 - Modern PM Tool Style
   const renderBoardView = () => {
-    const statuses = ['not-started', 'in-progress', 'blocked', 'review', 'completed'];
+    const statuses = ['not-started', 'in-progress', 'blocked', 'completed'];
 
     // Get all tasks grouped by status
     const tasksByStatus = {};
@@ -1039,7 +1054,7 @@ export function ActionPlan({
 
     return React.createElement('div', { className: 'space-y-4' },
       React.createElement('div', {
-        className: 'grid grid-cols-5 gap-4'
+        className: 'grid grid-cols-4 gap-4'
       },
         statuses.map(status => {
           const statusInfo = STATUSES[status];
@@ -1047,37 +1062,91 @@ export function ActionPlan({
 
           return React.createElement('div', {
             key: status,
-            className: `rounded-lg ${darkMode ? 'bg-slate-800' : 'bg-gray-50'} p-3`
+            className: `rounded-xl ${darkMode ? 'bg-slate-800/50 border border-slate-700' : 'bg-gray-50 border border-gray-200'} p-4 shadow-sm`
           },
+            // Column Header
             React.createElement('div', {
-              className: `flex items-center gap-2 mb-3 pb-2 border-b ${darkMode ? 'border-slate-700' : 'border-gray-200'}`
+              className: `flex items-center justify-between mb-4 pb-3 border-b-2 ${statusInfo.border}`
             },
-              React.createElement('span', { className: 'text-xl' }, statusInfo.icon),
+              React.createElement('div', { className: 'flex items-center gap-2' },
+                React.createElement('div', {
+                  className: `w-3 h-3 rounded-full bg-gradient-to-br ${statusInfo.gradient}`
+                }),
+                React.createElement('span', {
+                  className: `font-bold text-sm ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+                }, statusInfo.label)
+              ),
               React.createElement('span', {
-                className: `font-bold text-sm ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-              }, statusInfo.label),
-              React.createElement('span', {
-                className: `ml-auto px-2 py-0.5 rounded-full text-xs font-bold ${darkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`
+                className: `px-2.5 py-1 rounded-lg text-xs font-bold ${statusInfo.bg} ${statusInfo.text}`
               }, tasks.length)
             ),
-            React.createElement('div', { className: 'space-y-2' },
+            // Cards
+            React.createElement('div', { className: 'space-y-3' },
               tasks.map(task => {
                 const priorityInfo = PRIORITIES[task.priority || 'medium'];
+                const subtaskProgress = task.subtasks && task.subtasks.length > 0
+                  ? Math.round((task.subtasks.filter(s => s.status === 'completed').length / task.subtasks.length) * 100)
+                  : 0;
+
                 return React.createElement('div', {
                   key: task.id,
-                  className: `p-2 rounded ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-white hover:bg-gray-100'} cursor-pointer transition-colors text-xs`
+                  className: `p-3 rounded-lg ${
+                    darkMode
+                      ? 'bg-slate-700/70 hover:bg-slate-700 border border-slate-600'
+                      : 'bg-white hover:shadow-md border border-gray-200'
+                  } cursor-pointer transition-all text-xs group`
                 },
+                  // Task Name
                   React.createElement('div', {
-                    className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-1`
+                    className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-2`
                   }, task.name),
+                  // Action Name
                   React.createElement('div', {
-                    className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
-                  }, `📋 ${task.actionName}`),
-                  React.createElement('div', { className: 'flex items-center gap-1' },
-                    React.createElement('span', null, priorityInfo.icon),
-                    task.assignees && task.assignees.length > 0 && React.createElement('span', {
-                      className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-                    }, `👤 ${task.assignees.join(', ')}`)
+                    className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2 flex items-center gap-1.5`
+                  },
+                    React.createElement('div', {
+                      className: `w-1.5 h-1.5 rounded-full ${darkMode ? 'bg-green-400' : 'bg-green-500'}`
+                    }),
+                    task.actionName
+                  ),
+                  // Priority & Assignees
+                  React.createElement('div', { className: 'flex items-center justify-between gap-2 mb-2' },
+                    React.createElement('div', {
+                      className: `flex items-center gap-1.5 px-2 py-1 rounded ${priorityInfo.bg}`
+                    },
+                      React.createElement('span', { className: priorityInfo.text }, priorityInfo.icon),
+                      React.createElement('span', {
+                        className: `text-xs font-semibold ${priorityInfo.text}`
+                      }, priorityInfo.label)
+                    ),
+                    task.assignees && task.assignees.length > 0 && React.createElement('div', {
+                      className: `flex items-center gap-1 px-2 py-1 rounded ${darkMode ? 'bg-slate-600' : 'bg-gray-100'}`
+                    },
+                      React.createElement('span', {
+                        className: `text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+                      }, task.assignees[0])
+                    )
+                  ),
+                  // Progress Bar (if has subtasks)
+                  task.subtasks && task.subtasks.length > 0 && React.createElement('div', {
+                    className: 'mt-2'
+                  },
+                    React.createElement('div', {
+                      className: `flex items-center gap-2 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+                    },
+                      React.createElement('span', null, `${task.subtasks.filter(s => s.status === 'completed').length}/${task.subtasks.length} subtasks`),
+                      React.createElement('span', {
+                        className: 'ml-auto font-semibold'
+                      }, `${subtaskProgress}%`)
+                    ),
+                    React.createElement('div', {
+                      className: `w-full h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`
+                    },
+                      React.createElement('div', {
+                        className: `h-full transition-all duration-300 bg-gradient-to-r ${statusInfo.gradient}`,
+                        style: { width: `${subtaskProgress}%` }
+                      })
+                    )
                   )
                 );
               })
@@ -1088,7 +1157,220 @@ export function ActionPlan({
     );
   };
 
-  // Table View - Phase 4
+  // Gantt Chart View - Visual timeline with dependencies
+  const renderGanttView = () => {
+    // Collect all items with dates
+    const ganttItems = [];
+
+    actionPlan.forEach(action => {
+      const actionProgress = calculateProgress(action);
+      ganttItems.push({
+        type: 'action',
+        id: action.id,
+        name: action.name,
+        status: action.status,
+        priority: action.priority,
+        progress: actionProgress,
+        dependencies: action.dependencies || [],
+        level: 0
+      });
+
+      action.tasks.forEach(task => {
+        const taskProgress = task.subtasks && task.subtasks.length > 0
+          ? Math.round((task.subtasks.filter(s => s.status === 'completed').length / task.subtasks.length) * 100)
+          : (task.status === 'completed' ? 100 : 0);
+
+        ganttItems.push({
+          type: 'task',
+          id: task.id,
+          actionId: action.id,
+          name: task.name,
+          status: task.status,
+          priority: task.priority,
+          progress: taskProgress,
+          dependencies: task.dependencies || [],
+          level: 1
+        });
+
+        if (task.subtasks) {
+          task.subtasks.forEach(subtask => {
+            ganttItems.push({
+              type: 'subtask',
+              id: subtask.id,
+              taskId: task.id,
+              actionId: action.id,
+              name: subtask.name,
+              status: subtask.status,
+              priority: subtask.priority,
+              progress: subtask.status === 'completed' ? 100 : 0,
+              dependencies: subtask.dependencies || [],
+              level: 2
+            });
+          });
+        }
+      });
+    });
+
+    return React.createElement('div', {
+      className: `rounded-xl overflow-hidden ${darkMode ? 'bg-slate-800/50 border border-slate-700' : 'bg-white border border-gray-200'} shadow-lg`
+    },
+      // Gantt Header
+      React.createElement('div', {
+        className: `p-4 border-b ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-gray-50'}`
+      },
+        React.createElement('h3', {
+          className: `text-lg font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+        }, 'Project Timeline'),
+        React.createElement('p', {
+          className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`
+        }, 'Visual representation of actions, tasks, and dependencies')
+      ),
+      // Gantt Grid
+      React.createElement('div', {
+        className: 'overflow-x-auto'
+      },
+        React.createElement('div', {
+          className: 'min-w-[800px]'
+        },
+          // Grid Header
+          React.createElement('div', {
+            className: `grid grid-cols-12 gap-2 p-3 border-b ${darkMode ? 'border-slate-700 bg-slate-700/50' : 'border-gray-200 bg-gray-100'}`
+          },
+            React.createElement('div', {
+              className: `col-span-4 font-bold text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+            }, 'Item'),
+            React.createElement('div', {
+              className: `col-span-2 font-bold text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+            }, 'Status'),
+            React.createElement('div', {
+              className: `col-span-2 font-bold text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+            }, 'Priority'),
+            React.createElement('div', {
+              className: `col-span-3 font-bold text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+            }, 'Progress'),
+            React.createElement('div', {
+              className: `col-span-1 font-bold text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+            }, 'Deps')
+          ),
+          // Grid Rows
+          React.createElement('div', {
+            className: `divide-y ${darkMode ? 'divide-slate-700' : 'divide-gray-200'}`
+          },
+            ganttItems.map(item => {
+              const statusInfo = STATUSES[item.status || 'not-started'];
+              const priorityInfo = PRIORITIES[item.priority || 'medium'];
+              const indentation = item.level * 20;
+
+              return React.createElement('div', {
+                key: `${item.type}-${item.id}`,
+                className: `grid grid-cols-12 gap-2 p-3 text-xs ${darkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'} transition-colors`
+              },
+                // Item Name
+                React.createElement('div', {
+                  className: `col-span-4 flex items-center gap-2`,
+                  style: { paddingLeft: `${indentation}px` }
+                },
+                  item.type === 'action' && React.createElement('div', {
+                    className: `w-2 h-2 rounded-full ${darkMode ? 'bg-green-400' : 'bg-green-500'}`
+                  }),
+                  item.type === 'task' && React.createElement('div', {
+                    className: `w-2 h-2 rounded-sm ${darkMode ? 'bg-blue-400' : 'bg-blue-500'}`
+                  }),
+                  item.type === 'subtask' && React.createElement('div', {
+                    className: `w-1.5 h-1.5 rounded-full ${darkMode ? 'bg-purple-400' : 'bg-purple-500'}`
+                  }),
+                  React.createElement('span', {
+                    className: `font-semibold ${
+                      item.type === 'action'
+                        ? darkMode ? 'text-green-300' : 'text-green-700'
+                        : item.type === 'task'
+                        ? darkMode ? 'text-blue-300' : 'text-blue-700'
+                        : darkMode ? 'text-purple-300' : 'text-purple-700'
+                    }`
+                  }, item.name)
+                ),
+                // Status
+                React.createElement('div', {
+                  className: 'col-span-2'
+                },
+                  React.createElement('span', {
+                    className: `px-2 py-1 rounded-md text-xs font-semibold ${statusInfo.bg} ${statusInfo.text}`
+                  }, statusInfo.label)
+                ),
+                // Priority
+                React.createElement('div', {
+                  className: 'col-span-2'
+                },
+                  React.createElement('span', {
+                    className: `px-2 py-1 rounded-md text-xs font-semibold ${priorityInfo.bg} ${priorityInfo.text}`
+                  }, `${priorityInfo.icon} ${priorityInfo.label}`)
+                ),
+                // Progress Bar
+                React.createElement('div', {
+                  className: 'col-span-3 flex items-center gap-2'
+                },
+                  React.createElement('div', {
+                    className: `flex-1 h-3 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`
+                  },
+                    React.createElement('div', {
+                      className: `h-full transition-all duration-300 bg-gradient-to-r ${statusInfo.gradient}`,
+                      style: { width: `${item.progress}%` }
+                    })
+                  ),
+                  React.createElement('span', {
+                    className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} min-w-[35px]`
+                  }, `${item.progress}%`)
+                ),
+                // Dependencies
+                React.createElement('div', {
+                  className: 'col-span-1 flex items-center justify-center'
+                },
+                  item.dependencies.length > 0 && React.createElement('span', {
+                    className: `px-1.5 py-0.5 rounded-full text-xs font-bold ${darkMode ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-100 text-amber-700'}`
+                  }, item.dependencies.length)
+                )
+              );
+            })
+          )
+        )
+      ),
+      // Legend
+      React.createElement('div', {
+        className: `p-4 border-t ${darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-gray-200 bg-gray-50'}`
+      },
+        React.createElement('div', {
+          className: 'flex items-center gap-6 text-xs'
+        },
+          React.createElement('div', { className: 'flex items-center gap-2' },
+            React.createElement('div', {
+              className: `w-2 h-2 rounded-full ${darkMode ? 'bg-green-400' : 'bg-green-500'}`
+            }),
+            React.createElement('span', {
+              className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+            }, 'Action')
+          ),
+          React.createElement('div', { className: 'flex items-center gap-2' },
+            React.createElement('div', {
+              className: `w-2 h-2 rounded-sm ${darkMode ? 'bg-blue-400' : 'bg-blue-500'}`
+            }),
+            React.createElement('span', {
+              className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+            }, 'Task')
+          ),
+          React.createElement('div', { className: 'flex items-center gap-2' },
+            React.createElement('div', {
+              className: `w-1.5 h-1.5 rounded-full ${darkMode ? 'bg-purple-400' : 'bg-purple-500'}`
+            }),
+            React.createElement('span', {
+              className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+            }, 'Subtask')
+          )
+        )
+      )
+    );
+  };
+
+  // Table View - Phase 4 - Modernized
   const renderTableView = () => {
     const allTasks = [];
     actionPlan.forEach(action => {
@@ -1105,22 +1387,22 @@ export function ActionPlan({
     });
 
     return React.createElement('div', {
-      className: `rounded-lg overflow-hidden ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-700' : 'border-gray-200'}`
+      className: `rounded-xl overflow-hidden ${darkMode ? 'bg-slate-800/50 border border-slate-700' : 'bg-white border border-gray-200'} shadow-lg`
     },
       // Table header
       React.createElement('div', {
-        className: `grid grid-cols-7 gap-2 p-3 font-bold text-xs ${darkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-700'} border-b ${darkMode ? 'border-slate-600' : 'border-gray-200'}`
+        className: `grid grid-cols-7 gap-3 p-4 font-bold text-xs ${darkMode ? 'bg-slate-800 text-gray-300 border-b border-slate-700' : 'bg-gray-50 text-gray-700 border-b border-gray-200'}`
       },
-        React.createElement('div', null, 'Task'),
-        React.createElement('div', null, 'Action'),
-        React.createElement('div', null, 'Status'),
-        React.createElement('div', null, 'Priority'),
-        React.createElement('div', null, 'Assignees'),
-        React.createElement('div', null, 'Due Date'),
-        React.createElement('div', null, 'Progress')
+        React.createElement('div', null, 'TASK'),
+        React.createElement('div', null, 'ACTION'),
+        React.createElement('div', null, 'STATUS'),
+        React.createElement('div', null, 'PRIORITY'),
+        React.createElement('div', null, 'ASSIGNEES'),
+        React.createElement('div', null, 'DUE DATE'),
+        React.createElement('div', null, 'PROGRESS')
       ),
       // Table rows
-      React.createElement('div', { className: 'divide-y' + (darkMode ? ' divide-slate-700' : ' divide-gray-200') },
+      React.createElement('div', { className: `divide-y ${darkMode ? 'divide-slate-700' : 'divide-gray-200'}` },
         allTasks.map(task => {
           const statusInfo = STATUSES[task.status || 'not-started'];
           const priorityInfo = PRIORITIES[task.priority || 'medium'];
@@ -1130,21 +1412,30 @@ export function ActionPlan({
 
           return React.createElement('div', {
             key: task.id,
-            className: `grid grid-cols-7 gap-2 p-3 text-xs ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-50'} transition-colors`
+            className: `grid grid-cols-7 gap-3 p-4 text-xs ${darkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'} transition-colors`
           },
             React.createElement('div', {
               className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
             }, task.name),
             React.createElement('div', {
-              className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-            }, task.actionName),
-            React.createElement('div', null,
+              className: `flex items-center gap-1.5`
+            },
+              React.createElement('div', {
+                className: `w-1.5 h-1.5 rounded-full ${darkMode ? 'bg-green-400' : 'bg-green-500'}`
+              }),
               React.createElement('span', {
-                className: `px-2 py-1 rounded text-xs ${darkMode ? statusInfo.bgLight.replace('bg-', 'bg-opacity-20 bg-') : statusInfo.bgLight}`
-              }, `${statusInfo.icon} ${statusInfo.label}`)
+                className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+              }, task.actionName)
             ),
             React.createElement('div', null,
-              React.createElement('span', null, `${priorityInfo.icon} ${priorityInfo.label}`)
+              React.createElement('span', {
+                className: `px-2.5 py-1.5 rounded-lg font-semibold ${statusInfo.bg} ${statusInfo.text}`
+              }, statusInfo.label)
+            ),
+            React.createElement('div', null,
+              React.createElement('span', {
+                className: `px-2.5 py-1.5 rounded-lg font-semibold ${priorityInfo.bg} ${priorityInfo.text}`
+              }, `${priorityInfo.icon} ${priorityInfo.label}`)
             ),
             React.createElement('div', {
               className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
@@ -1152,10 +1443,24 @@ export function ActionPlan({
             React.createElement('div', {
               className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
             }, task.dueDate || '-'),
-            React.createElement('div', null,
-              task.subtasks && task.subtasks.length > 0 && React.createElement('span', {
-                className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-              }, `${progress}%`)
+            React.createElement('div', { className: 'flex items-center gap-2' },
+              task.subtasks && task.subtasks.length > 0 ? [
+                React.createElement('div', {
+                  key: 'bar',
+                  className: `flex-1 h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`
+                },
+                  React.createElement('div', {
+                    className: `h-full transition-all duration-300 bg-gradient-to-r ${statusInfo.gradient}`,
+                    style: { width: `${progress}%` }
+                  })
+                ),
+                React.createElement('span', {
+                  key: 'text',
+                  className: `font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                }, `${progress}%`)
+              ] : React.createElement('span', {
+                className: `${darkMode ? 'text-gray-500' : 'text-gray-400'}`
+              }, '-')
             )
           );
         })
@@ -1163,35 +1468,126 @@ export function ActionPlan({
     );
   };
 
+  // SVG Icon Components - Modern toolbar icons
+  const ListIcon = () => React.createElement('svg', {
+    className: 'w-4 h-4',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M4 6h16M4 12h16M4 18h16' })
+  );
+
+  const BoardIcon = () => React.createElement('svg', {
+    className: 'w-4 h-4',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M9 3H4a1 1 0 00-1 1v16a1 1 0 001 1h5V3zM15 3h-4v20h4V3zM21 3h-5v20h5a1 1 0 001-1V4a1 1 0 00-1-1z' })
+  );
+
+  const TableIcon = () => React.createElement('svg', {
+    className: 'w-4 h-4',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M3 3h18v18H3V3zm0 6h18M9 3v18' })
+  );
+
+  const GanttIcon = () => React.createElement('svg', {
+    className: 'w-4 h-4',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M3 3v18h18M7 16h4M7 11h7M7 6h10' })
+  );
+
+  const SaveIcon = () => React.createElement('svg', {
+    className: 'w-4 h-4',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z' }),
+    React.createElement('path', { d: 'M17 21v-8H7v8M7 3v5h8' })
+  );
+
+  const TemplatesIcon = () => React.createElement('svg', {
+    className: 'w-4 h-4',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z' }),
+    React.createElement('path', { d: 'M9 7h6M9 11h6M9 15h4' })
+  );
+
   // Toolbar with view switcher and template management (Phase 4 & 5)
   const renderToolbar = () => {
+    const views = [
+      { id: 'list', label: 'List', icon: ListIcon },
+      { id: 'board', label: 'Board', icon: BoardIcon },
+      { id: 'table', label: 'Table', icon: TableIcon },
+      { id: 'gantt', label: 'Gantt', icon: GanttIcon }
+    ];
+
     return React.createElement('div', {
-      className: `flex items-center justify-between mb-4 p-3 rounded-lg ${darkMode ? 'bg-slate-800/50' : 'bg-gray-100'}`
+      className: `flex items-center justify-between mb-6 p-4 rounded-xl ${darkMode ? 'bg-slate-800/80 border border-slate-700/50' : 'bg-white border border-gray-200'} shadow-lg`
     },
       // View switcher (Phase 4)
-      React.createElement('div', { className: 'flex gap-2' },
-        ['list', 'board', 'table'].map(view =>
+      React.createElement('div', { className: 'flex gap-3' },
+        views.map(view =>
           React.createElement('button', {
-            key: view,
-            onClick: () => setCurrentView(view),
-            className: `px-3 py-1.5 rounded text-sm font-semibold transition-all ${
-              currentView === view
-                ? darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
-                : darkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-white text-gray-700 hover:bg-gray-200'
+            key: view.id,
+            onClick: () => setCurrentView(view.id),
+            className: `flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
+              currentView === view.id
+                ? darkMode
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                  : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
+                : darkMode
+                  ? 'bg-slate-700/50 text-gray-300 hover:bg-slate-600/50 border border-slate-600'
+                  : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
             }`
-          }, view === 'list' ? '📋 List' : view === 'board' ? '📊 Board' : '📑 Table')
+          },
+            React.createElement(view.icon),
+            view.label
+          )
         )
       ),
       // Template management (Phase 5)
-      !isEditLocked && React.createElement('div', { className: 'flex gap-2' },
+      !isEditLocked && React.createElement('div', { className: 'flex gap-3' },
         actionPlan.length > 0 && React.createElement('button', {
           onClick: saveAsTemplate,
-          className: `px-3 py-1.5 rounded text-sm font-semibold ${darkMode ? 'bg-purple-600 hover:bg-purple-500 text-white' : 'bg-purple-500 hover:bg-purple-600 text-white'}`
-        }, '💾 Save as Template'),
+          className: `flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
+            darkMode
+              ? 'bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-md'
+              : 'bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white shadow-md'
+          }`
+        },
+          React.createElement(SaveIcon),
+          'Save as Template'
+        ),
         settings.templates.length > 0 && React.createElement('button', {
           onClick: () => setShowTemplates(!showTemplates),
-          className: `px-3 py-1.5 rounded text-sm font-semibold ${darkMode ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'bg-indigo-500 hover:bg-indigo-600 text-white'}`
-        }, `📚 Templates (${settings.templates.length})`)
+          className: `flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
+            darkMode
+              ? 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md'
+              : 'bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white shadow-md'
+          }`
+        },
+          React.createElement(TemplatesIcon),
+          `Templates (${settings.templates.length})`
+        )
       )
     );
   };
@@ -1242,6 +1638,7 @@ export function ActionPlan({
     // Content based on current view
     currentView === 'board' ? renderBoardView() :
     currentView === 'table' ? renderTableView() :
+    currentView === 'gantt' ? renderGanttView() :
     // List view (default)
     React.createElement('div', { className: 'space-y-4' },
       actionPlan.map((action, index) => renderAction(action, index)),
