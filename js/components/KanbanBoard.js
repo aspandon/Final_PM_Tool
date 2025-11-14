@@ -443,17 +443,10 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
       className: `text-xs mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `BP: ${project.businessPartner}`),
 
-    // Date info with RAG status (conditional)
-    settings.showRAG && React.createElement('div', {
-      className: `flex items-center justify-between mt-2`
-    },
-      React.createElement('span', {
-        className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-      }, finishDate ? `Due: ${formatDate(finishDate)}` : 'Due: -'),
-      React.createElement('span', {
-        className: `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ragStatus.color} text-white`
-      }, ragStatus.label)
-    )
+    // Date info (conditional - only show when date exists)
+    finishDate && React.createElement('div', {
+      className: `text-xs mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+    }, `Due: ${formatDate(finishDate)}`)
   );
 };
 
