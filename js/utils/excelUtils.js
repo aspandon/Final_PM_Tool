@@ -26,7 +26,19 @@ export const exportToExcel = (projects) => {
     'Procurement Start': p.procurement.start ? new Date(p.procurement.start) : '',
     'Procurement Finish': p.procurement.finish ? new Date(p.procurement.finish) : '',
     'Implementation (Actual) Start': p.implementation.start ? new Date(p.implementation.start) : '',
-    'Implementation (Actual) Finish': p.implementation.finish ? new Date(p.implementation.finish) : ''
+    'Implementation (Actual) Finish': p.implementation.finish ? new Date(p.implementation.finish) : '',
+    // Budget fields
+    'Budget First Year': p.budgetFirstYear || '',
+    'CAPEX Year 1': p.capexYear1 || '',
+    'CAPEX Year 2': p.capexYear2 || '',
+    'CAPEX Year 3': p.capexYear3 || '',
+    'CAPEX Year 4': p.capexYear4 || '',
+    'CAPEX Year 5': p.capexYear5 || '',
+    'OPEX Year 1': p.opexYear1 || '',
+    'OPEX Year 2': p.opexYear2 || '',
+    'OPEX Year 3': p.opexYear3 || '',
+    'OPEX Year 4': p.opexYear4 || '',
+    'OPEX Year 5': p.opexYear5 || ''
   }));
 
   const ws = XLSX.utils.json_to_sheet(data, { cellDates: true, dateNF: 'yyyy-mm-dd' });
@@ -119,7 +131,19 @@ export const importFromExcel = (file, callback) => {
         implementation: {
           start: formatDate(row['Implementation (Actual) Start']),
           finish: formatDate(row['Implementation (Actual) Finish'])
-        }
+        },
+        // Budget fields
+        budgetFirstYear: row['Budget First Year'] || new Date().getFullYear(),
+        capexYear1: row['CAPEX Year 1'] || '',
+        capexYear2: row['CAPEX Year 2'] || '',
+        capexYear3: row['CAPEX Year 3'] || '',
+        capexYear4: row['CAPEX Year 4'] || '',
+        capexYear5: row['CAPEX Year 5'] || '',
+        opexYear1: row['OPEX Year 1'] || '',
+        opexYear2: row['OPEX Year 2'] || '',
+        opexYear3: row['OPEX Year 3'] || '',
+        opexYear4: row['OPEX Year 4'] || '',
+        opexYear5: row['OPEX Year 5'] || ''
       }));
 
       callback(importedProjects);

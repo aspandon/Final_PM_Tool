@@ -383,6 +383,7 @@ function GanttChart() {
    * Add a new empty project
    */
   const addProject = () => {
+    const currentYear = new Date().getFullYear();
     const newProject = {
       name: '',
       division: '',
@@ -399,7 +400,19 @@ function GanttChart() {
       psd: { start: '', finish: '' },
       investment: { start: '', finish: '' },
       procurement: { start: '', finish: '' },
-      implementation: { start: '', finish: '' }
+      implementation: { start: '', finish: '' },
+      // Budget fields
+      budgetFirstYear: currentYear,
+      capexYear1: '',
+      capexYear2: '',
+      capexYear3: '',
+      capexYear4: '',
+      capexYear5: '',
+      opexYear1: '',
+      opexYear2: '',
+      opexYear3: '',
+      opexYear4: '',
+      opexYear5: ''
     };
     setProjects([...projects, newProject]);
   };
