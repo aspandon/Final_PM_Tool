@@ -212,7 +212,7 @@ export function Reporting({
 
     const criticalRiskCount = criticalRiskProjects.length;
     const highRiskCount = redCount; // All red projects
-    const mediumRiskCount = amberCount; // All amber projects
+    const mediumRiskCount = projectsWithRAG.filter(p => p.ragStatus.label === 'Amber' && p.column !== 'onhold').length; // Amber projects excluding on-hold
     const onHoldRiskCount = onHoldCount; // All on-hold projects
 
     // Report 1: On Hold Projects by Division
@@ -475,7 +475,7 @@ export function Reporting({
       case 'high':
         return analyticsData.projectsWithRAG.filter(p => p.ragStatus.label === 'Red');
       case 'medium':
-        return analyticsData.projectsWithRAG.filter(p => p.ragStatus.label === 'Amber');
+        return analyticsData.projectsWithRAG.filter(p => p.ragStatus.label === 'Amber' && p.column !== 'onhold');
       case 'onhold':
         return analyticsData.projectsWithRAG.filter(p => p.column === 'onhold');
       default:
@@ -526,24 +526,153 @@ export function Reporting({
     );
   };
 
+  // SVG Icon Components for Pipeline Statuses
+  const PauseCircleIcon = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('circle', { cx: '12', cy: '12', r: '10' }),
+    React.createElement('line', { x1: '10', x2: '10', y1: '15', y2: '9' }),
+    React.createElement('line', { x1: '14', x2: '14', y1: '15', y2: '9' })
+  );
+
+  const InboxIcon = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('polyline', { points: '22 12 16 12 14 15 10 15 8 12 2 12' }),
+    React.createElement('path', { d: 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z' })
+  );
+
+  const FileEditIcon = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5' }),
+    React.createElement('polyline', { points: '14 2 14 8 20 8' }),
+    React.createElement('path', { d: 'M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z' })
+  );
+
+  const CheckSquareIcon = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('polyline', { points: '9 11 12 14 22 4' }),
+    React.createElement('path', { d: 'M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11' })
+  );
+
+  const DollarSignIcon = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('line', { x1: '12', x2: '12', y1: '2', y2: '22' }),
+    React.createElement('path', { d: 'M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' })
+  );
+
+  const ShoppingCartIcon = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('circle', { cx: '8', cy: '21', r: '1' }),
+    React.createElement('circle', { cx: '19', cy: '21', r: '1' }),
+    React.createElement('path', { d: 'M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12' })
+  );
+
+  const SettingsIcon = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z' }),
+    React.createElement('circle', { cx: '12', cy: '12', r: '3' })
+  );
+
+  const FlaskIcon = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M9 3h6' }),
+    React.createElement('path', { d: 'M10 9v7.5' }),
+    React.createElement('path', { d: 'M14 9v7.5' }),
+    React.createElement('path', { d: 'M7.252 21h9.496c1.076 0 1.908-.982 1.659-1.98L16.5 9M7.5 9l-1.907 10.02C5.344 20.018 6.176 21 7.252 21' }),
+    React.createElement('path', { d: 'M10 3v6h4V3' })
+  );
+
+  const PartyPopperIcon = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M5.8 11.3 2 22l10.7-3.79' }),
+    React.createElement('path', { d: 'M4 3h.01' }),
+    React.createElement('path', { d: 'M22 8h.01' }),
+    React.createElement('path', { d: 'M15 2h.01' }),
+    React.createElement('path', { d: 'M22 20h.01' }),
+    React.createElement('path', { d: 'M22 2 13 13l-2-2 11-11Z' }),
+    React.createElement('path', { d: 'M11 13 9 11l-6 6v.01' })
+  );
+
   // Pipeline Status Card Component
   const PipelineStatusCard = ({ status, count, percentage, columnKey, topDivisions, onClick }) => {
     const isSelected = selectedPipelineStatus === columnKey;
 
-    // Define status colors and icons
+    // Define status colors and icon components
     const statusStyles = {
-      'onhold': { color: 'border-orange-500', icon: '⏸️', gradient: 'from-orange-500 to-orange-600' },
-      'backlog': { color: 'border-gray-500', icon: '📋', gradient: 'from-gray-500 to-gray-600' },
-      'psdpre': { color: 'border-blue-500', icon: '📝', gradient: 'from-blue-500 to-blue-600' },
-      'psdready': { color: 'border-cyan-500', icon: '✅', gradient: 'from-cyan-500 to-cyan-600' },
-      'invapproved': { color: 'border-green-500', icon: '💰', gradient: 'from-green-500 to-green-600' },
-      'procurement': { color: 'border-yellow-500', icon: '🛒', gradient: 'from-yellow-500 to-yellow-600' },
-      'implementation': { color: 'border-purple-500', icon: '⚙️', gradient: 'from-purple-500 to-purple-600' },
-      'uat': { color: 'border-pink-500', icon: '🧪', gradient: 'from-pink-500 to-pink-600' },
-      'done': { color: 'border-emerald-500', icon: '🎉', gradient: 'from-emerald-500 to-emerald-600' }
+      'onhold': { color: 'border-orange-500', Icon: PauseCircleIcon, gradient: 'from-orange-500 to-orange-600' },
+      'backlog': { color: 'border-gray-500', Icon: InboxIcon, gradient: 'from-gray-500 to-gray-600' },
+      'psdpre': { color: 'border-blue-500', Icon: FileEditIcon, gradient: 'from-blue-500 to-blue-600' },
+      'psdready': { color: 'border-cyan-500', Icon: CheckSquareIcon, gradient: 'from-cyan-500 to-cyan-600' },
+      'invapproved': { color: 'border-green-500', Icon: DollarSignIcon, gradient: 'from-green-500 to-green-600' },
+      'procurement': { color: 'border-yellow-500', Icon: ShoppingCartIcon, gradient: 'from-yellow-500 to-yellow-600' },
+      'implementation': { color: 'border-purple-500', Icon: SettingsIcon, gradient: 'from-purple-500 to-purple-600' },
+      'uat': { color: 'border-pink-500', Icon: FlaskIcon, gradient: 'from-pink-500 to-pink-600' },
+      'done': { color: 'border-emerald-500', Icon: PartyPopperIcon, gradient: 'from-emerald-500 to-emerald-600' }
     };
 
-    const style = statusStyles[columnKey] || { color: 'border-gray-500', icon: '📊', gradient: 'from-gray-500 to-gray-600' };
+    const style = statusStyles[columnKey] || { color: 'border-gray-500', Icon: InboxIcon, gradient: 'from-gray-500 to-gray-600' };
 
     return React.createElement('div', {
       className: `relative rounded-xl p-6 ${darkMode ? 'bg-slate-700' : 'bg-white'} border-2 ${style.color} shadow-lg cursor-pointer transition-all transform hover:scale-105 hover:shadow-2xl ${isSelected ? 'ring-4 ring-blue-500 scale-105' : ''}`,
@@ -551,8 +680,10 @@ export function Reporting({
     },
       // Icon badge
       React.createElement('div', {
-        className: `absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-br ${style.gradient} rounded-full flex items-center justify-center text-2xl shadow-lg`
-      }, style.icon),
+        className: `absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-br ${style.gradient} rounded-full flex items-center justify-center shadow-lg`
+      },
+        React.createElement(style.Icon, { className: 'w-6 h-6 text-white' })
+      ),
 
       // Main content
       React.createElement('div', {
