@@ -662,7 +662,7 @@ function GanttChart() {
     return React.createElement('button', {
       key: tabName,
       onClick: () => setActiveTab(tabName),
-      className: `px-4 py-2 text-base font-semibold rounded-t-lg tab-button ripple flex items-center gap-2 ${
+      className: `px-4 py-2 text-base font-semibold rounded-t-lg tab-button flex items-center gap-2 ${
         isActive ? 'active' : ''
       } ${
         isActive
