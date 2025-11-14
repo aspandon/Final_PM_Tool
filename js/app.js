@@ -753,12 +753,46 @@ function GanttChart() {
   };
 
   /**
+   * Navigate to a specific project in the Projects tab
+   */
+  const navigateToProject = (projectName) => {
+    // Switch to Projects tab
+    setActiveTab('projects');
+
+    // Use setTimeout to ensure the tab has switched before scrolling
+    setTimeout(() => {
+      // Find the project index in the full projects array
+      const projectIndex = projects.findIndex(p => p.name === projectName);
+
+      if (projectIndex !== -1) {
+        // Find the project card element and scroll to it
+        const projectCards = document.querySelectorAll('.card-modern');
+        if (projectCards[projectIndex]) {
+          projectCards[projectIndex].scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+
+          // Add a temporary highlight effect
+          projectCards[projectIndex].style.transition = 'box-shadow 0.3s ease';
+          projectCards[projectIndex].style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.5)';
+
+          setTimeout(() => {
+            projectCards[projectIndex].style.boxShadow = '';
+          }, 2000);
+        }
+      }
+    }, 100);
+  };
+
+  /**
    * Render Kanban board view
    */
   const renderKanbanView = () => {
     return React.createElement(KanbanBoard, {
       projects: filteredProjects,
       updateProjectByName: updateProjectByName,
+      navigateToProject: navigateToProject,
       darkMode: darkMode,
       kanbanSettings: kanbanSettings
     });
