@@ -12,6 +12,7 @@ import { GanttTimeline } from './components/GanttTimeline.js';
 import { DivisionsChart } from './components/DivisionsChart.js';
 import { ResourcesChart } from './components/ResourcesChart.js';
 import { ActualsTimeline } from './components/ActualsTimeline.js';
+import { Reporting } from './components/Reporting.js';
 import { KanbanBoard } from './components/KanbanBoard.js';
 
 const { useState, useRef, useMemo, useEffect } = React;
@@ -103,6 +104,22 @@ function GanttChart() {
   },
     React.createElement('polyline', { points: '22 7 13.5 15.5 8.5 10.5 2 17' }),
     React.createElement('polyline', { points: '16 7 22 7 22 13' })
+  );
+
+  const FileText = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' }),
+    React.createElement('polyline', { points: '14 2 14 8 20 8' }),
+    React.createElement('line', { x1: '16', x2: '8', y1: '13', y2: '13' }),
+    React.createElement('line', { x1: '16', x2: '8', y1: '17', y2: '17' }),
+    React.createElement('polyline', { points: '10 9 9 9 8 9' })
   );
 
   const Lock = ({ className }) => React.createElement('svg', {
@@ -868,6 +885,17 @@ function GanttChart() {
     });
   };
 
+  /**
+   * Render reporting view
+   */
+  const renderReportingView = () => {
+    return React.createElement(Reporting, {
+      filteredProjects,
+      projects,
+      darkMode
+    });
+  };
+
   // ===== MAIN RENDER =====
   
   return React.createElement('div', {
@@ -977,6 +1005,7 @@ function GanttChart() {
           renderTabButton('resources', 'Resources', Users),
           renderTabButton('overview', 'Divisions', PieChart),
           renderTabButton('actuals', 'Actuals', TrendingUp),
+          renderTabButton('reporting', 'Reporting', FileText),
 
           // Lock/Unlock button - only visible on Projects tab
           activeTab === 'projects' && React.createElement('button', {
@@ -999,7 +1028,8 @@ function GanttChart() {
           activeTab === 'kanban' && renderKanbanView(),
           activeTab === 'overview' && renderOverviewView(),
           activeTab === 'resources' && renderResourcesView(),
-          activeTab === 'actuals' && renderActualsView()
+          activeTab === 'actuals' && renderActualsView(),
+          activeTab === 'reporting' && renderReportingView()
         )
       )
     )
