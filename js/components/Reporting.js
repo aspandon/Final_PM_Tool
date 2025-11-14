@@ -215,26 +215,30 @@ export function Reporting({
       };
     }).filter(d => d.total > 0);
 
-    // Report 2B: RAG by Division and Kanban Status (Grouped Bar)
-    const ragByDivisionAndStatus = divisions.map(division => {
-      const divisionProjects = projectsWithRAG.filter(p =>
-        p.division === division &&
-        (p.ragStatus.label === 'Red' || p.ragStatus.label === 'Amber')
-      );
+    // Report 2B: RAG by Division and Kanban Status (Combined)
+    // Create combined data for single chart with all divisions
+    const ragByDivisionAndStatusCombined = [];
+    const kanbanColumns = ['backlog', 'psdpre', 'psdready', 'invapproved', 'procurement', 'implementation', 'uat'];
 
-      const kanbanColumns = ['backlog', 'psdpre', 'psdready', 'invapproved', 'procurement', 'implementation', 'uat'];
-      const statusBreakdown = kanbanColumns.map(column => ({
-        column: getColumnDisplayName(column),
-        Red: divisionProjects.filter(p => p.column === column && p.ragStatus.label === 'Red').length,
-        Amber: divisionProjects.filter(p => p.column === column && p.ragStatus.label === 'Amber').length
-      })).filter(s => s.Red > 0 || s.Amber > 0);
+    divisions.forEach(division => {
+      kanbanColumns.forEach(column => {
+        const divisionProjects = projectsWithRAG.filter(p =>
+          p.division === division &&
+          p.column === column &&
+          (p.ragStatus.label === 'Red' || p.ragStatus.label === 'Amber')
+        );
 
-      return {
-        division,
-        statusBreakdown,
-        projects: divisionProjects
-      };
-    }).filter(d => d.projects.length > 0);
+        if (divisionProjects.length > 0) {
+          ragByDivisionAndStatusCombined.push({
+            key: `${division}-${column}`,
+            division,
+            kanbanStatus: getColumnDisplayName(column),
+            Red: divisionProjects.filter(p => p.ragStatus.label === 'Red').length,
+            Amber: divisionProjects.filter(p => p.ragStatus.label === 'Amber').length
+          });
+        }
+      });
+    });
 
     // Report 2C: Heat Map Data
     const heatMapData = [];
@@ -346,7 +350,7 @@ export function Reporting({
       completedCount,
       onHoldByDivision,
       ragByDivision,
-      ragByDivisionAndStatus,
+      ragByDivisionAndStatusCombined,
       heatMapData,
       projectsByKanban,
       projectsByDivision,
@@ -609,41 +613,49 @@ export function Reporting({
         React.createElement('h4', {
           className: `text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
         }, 'On Hold Projects by Division'),
-        React.createElement(ResponsiveContainer, { width: '100%', height: 300 },
-          React.createElement(BarChart, {
-            data: analyticsData.onHoldByDivision,
-            layout: 'vertical',
-            margin: { top: 5, right: 30, left: 120, bottom: 5 }
-          },
-            React.createElement(CartesianGrid, {
-              strokeDasharray: '3 3',
-              stroke: darkMode ? '#374151' : '#E5E7EB'
-            }),
-            React.createElement(XAxis, {
-              type: 'number',
-              stroke: darkMode ? '#9CA3AF' : '#6B7280'
-            }),
-            React.createElement(YAxis, {
-              type: 'category',
-              dataKey: 'division',
-              stroke: darkMode ? '#9CA3AF' : '#6B7280'
-            }),
-            React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
-            React.createElement(Bar, {
-              dataKey: 'count',
-              fill: '#F97316',
-              onClick: (data) => setSelectedDivision(data.division)
+        React.createElement('div', {
+          className: 'grid grid-cols-1 lg:grid-cols-2 gap-6'
+        },
+          React.createElement('div', null,
+            React.createElement(ResponsiveContainer, { width: '100%', height: 250 },
+              React.createElement(BarChart, {
+                data: analyticsData.onHoldByDivision,
+                layout: 'vertical',
+                margin: { top: 5, right: 30, left: 100, bottom: 5 }
+              },
+                React.createElement(CartesianGrid, {
+                  strokeDasharray: '3 3',
+                  stroke: darkMode ? '#374151' : '#E5E7EB'
+                }),
+                React.createElement(XAxis, {
+                  type: 'number',
+                  stroke: darkMode ? '#9CA3AF' : '#6B7280'
+                }),
+                React.createElement(YAxis, {
+                  type: 'category',
+                  dataKey: 'division',
+                  stroke: darkMode ? '#9CA3AF' : '#6B7280'
+                }),
+                React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
+                React.createElement(Bar, {
+                  dataKey: 'count',
+                  fill: '#F97316',
+                  onClick: (data) => setSelectedDivision(data.division)
+                })
+              )
+            )
+          ),
+          React.createElement('div', null,
+            React.createElement(DataTable, {
+              title: 'On Hold Projects Details',
+              data: analyticsData.onHoldByDivision,
+              columns: [
+                { header: 'Division', key: 'division' },
+                { header: 'Count', key: 'count' }
+              ]
             })
           )
-        ),
-        React.createElement(DataTable, {
-          title: 'On Hold Projects Details',
-          data: analyticsData.onHoldByDivision,
-          columns: [
-            { header: 'Division', key: 'division' },
-            { header: 'Count', key: 'count' }
-          ]
-        })
+        )
       ),
 
       // Report 2A: Amber/Red by Division (Stacked Bar)
@@ -653,110 +665,158 @@ export function Reporting({
         React.createElement('h4', {
           className: `text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
         }, 'At-Risk Projects by Division (Red & Amber)'),
-        React.createElement(ResponsiveContainer, { width: '100%', height: 300 },
-          React.createElement(BarChart, {
-            data: analyticsData.ragByDivision,
-            margin: { top: 5, right: 30, left: 20, bottom: 5 }
-          },
-            React.createElement(CartesianGrid, {
-              strokeDasharray: '3 3',
-              stroke: darkMode ? '#374151' : '#E5E7EB'
-            }),
-            React.createElement(XAxis, {
-              dataKey: 'division',
-              stroke: darkMode ? '#9CA3AF' : '#6B7280',
-              angle: -45,
-              textAnchor: 'end',
-              height: 100
-            }),
-            React.createElement(YAxis, {
-              stroke: darkMode ? '#9CA3AF' : '#6B7280'
-            }),
-            React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
-            React.createElement(Legend),
-            React.createElement(Bar, {
-              dataKey: 'Red',
-              stackId: 'a',
-              fill: COLORS.Red,
-              onClick: (data) => {
-                setSelectedDivision(data.division);
-                setSelectedRAGStatus('Red');
-              }
-            }),
-            React.createElement(Bar, {
-              dataKey: 'Amber',
-              stackId: 'a',
-              fill: COLORS.Amber,
-              onClick: (data) => {
-                setSelectedDivision(data.division);
-                setSelectedRAGStatus('Amber');
-              }
-            })
-          )
-        ),
-        React.createElement(DataTable, {
-          title: 'At-Risk Projects by Division',
-          data: analyticsData.ragByDivision,
-          columns: [
-            { header: 'Division', key: 'division' },
-            { header: 'Red', key: 'Red' },
-            { header: 'Amber', key: 'Amber' },
-            { header: 'Total At-Risk', key: 'total' }
-          ]
-        })
-      ),
-
-      // Report 2B: RAG by Division and Kanban Status (Grouped Bars)
-      analyticsData.ragByDivisionAndStatus.length > 0 && React.createElement('div', {
-        className: 'mb-8 mt-8'
-      },
-        React.createElement('h4', {
-          className: `text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-        }, 'At-Risk Projects by Division & Kanban Status'),
-        analyticsData.ragByDivisionAndStatus.map((divData, idx) =>
-          React.createElement('div', {
-            key: idx,
-            className: `mb-6 p-4 rounded-lg ${darkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`
-          },
-            React.createElement('h5', {
-              className: `font-semibold mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-            }, divData.division),
-            divData.statusBreakdown.length > 0 && React.createElement(ResponsiveContainer, {
-              width: '100%',
-              height: 250
-            },
+        React.createElement('div', {
+          className: 'grid grid-cols-1 lg:grid-cols-2 gap-6'
+        },
+          React.createElement('div', null,
+            React.createElement(ResponsiveContainer, { width: '100%', height: 300 },
               React.createElement(BarChart, {
-                data: divData.statusBreakdown,
-                margin: { top: 5, right: 30, left: 20, bottom: 60 }
+                data: analyticsData.ragByDivision,
+                layout: 'vertical',
+                margin: { top: 5, right: 30, left: 100, bottom: 5 }
               },
                 React.createElement(CartesianGrid, {
                   strokeDasharray: '3 3',
                   stroke: darkMode ? '#374151' : '#E5E7EB'
                 }),
                 React.createElement(XAxis, {
-                  dataKey: 'column',
-                  stroke: darkMode ? '#9CA3AF' : '#6B7280',
-                  angle: -45,
-                  textAnchor: 'end',
-                  height: 80
+                  type: 'number',
+                  stroke: darkMode ? '#9CA3AF' : '#6B7280'
                 }),
                 React.createElement(YAxis, {
+                  type: 'category',
+                  dataKey: 'division',
                   stroke: darkMode ? '#9CA3AF' : '#6B7280'
                 }),
                 React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
                 React.createElement(Legend),
                 React.createElement(Bar, {
                   dataKey: 'Red',
-                  fill: COLORS.Red
+                  stackId: 'a',
+                  fill: COLORS.Red,
+                  onClick: (data) => {
+                    setSelectedDivision(data.division);
+                    setSelectedRAGStatus('Red');
+                  }
                 }),
                 React.createElement(Bar, {
                   dataKey: 'Amber',
-                  fill: COLORS.Amber
+                  stackId: 'a',
+                  fill: COLORS.Amber,
+                  onClick: (data) => {
+                    setSelectedDivision(data.division);
+                    setSelectedRAGStatus('Amber');
+                  }
                 })
               )
             )
+          ),
+          React.createElement('div', null,
+            React.createElement(DataTable, {
+              title: 'At-Risk Projects by Division',
+              data: analyticsData.ragByDivision,
+              columns: [
+                { header: 'Division', key: 'division' },
+                { header: 'Red', key: 'Red' },
+                { header: 'Amber', key: 'Amber' },
+                { header: 'Total At-Risk', key: 'total' }
+              ]
+            })
           )
         )
+      ),
+
+      // Report 2B: RAG by Division and Kanban Status (Combined)
+      analyticsData.ragByDivisionAndStatusCombined.length > 0 && React.createElement('div', {
+        className: 'mb-8 mt-8'
+      },
+        React.createElement('h4', {
+          className: `text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+        }, 'At-Risk Projects by Division & Kanban Status'),
+        React.createElement(ResponsiveContainer, { width: '100%', height: 500 },
+          React.createElement(BarChart, {
+            data: analyticsData.ragByDivisionAndStatusCombined,
+            margin: { top: 5, right: 30, left: 120, bottom: 100 }
+          },
+            React.createElement(CartesianGrid, {
+              strokeDasharray: '3 3',
+              stroke: darkMode ? '#374151' : '#E5E7EB'
+            }),
+            React.createElement(XAxis, {
+              dataKey: 'key',
+              stroke: darkMode ? '#9CA3AF' : '#6B7280',
+              angle: -45,
+              textAnchor: 'end',
+              height: 120,
+              tick: ({ x, y, payload }) => {
+                const item = analyticsData.ragByDivisionAndStatusCombined.find(d => d.key === payload.value);
+                if (!item) return null;
+                return React.createElement('g', { transform: `translate(${x},${y})` },
+                  React.createElement('text', {
+                    x: 0,
+                    y: 0,
+                    dy: 16,
+                    textAnchor: 'end',
+                    fill: darkMode ? '#9CA3AF' : '#6B7280',
+                    transform: 'rotate(-45)',
+                    fontSize: 11
+                  }, `${item.division} - ${item.kanbanStatus}`)
+                );
+              }
+            }),
+            React.createElement(YAxis, {
+              stroke: darkMode ? '#9CA3AF' : '#6B7280'
+            }),
+            React.createElement(Tooltip, {
+              content: ({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const data = payload[0].payload;
+                  return React.createElement('div', {
+                    className: `${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'} border rounded-lg shadow-lg p-3`
+                  },
+                    React.createElement('p', {
+                      className: `font-semibold mb-1 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+                    }, `${data.division} - ${data.kanbanStatus}`),
+                    React.createElement('p', {
+                      className: 'text-sm',
+                      style: { color: COLORS.Red }
+                    }, `Red: ${data.Red}`),
+                    React.createElement('p', {
+                      className: 'text-sm',
+                      style: { color: COLORS.Amber }
+                    }, `Amber: ${data.Amber}`)
+                  );
+                }
+                return null;
+              }
+            }),
+            React.createElement(Legend),
+            React.createElement(Bar, {
+              dataKey: 'Red',
+              stackId: 'a',
+              fill: COLORS.Red
+            }),
+            React.createElement(Bar, {
+              dataKey: 'Amber',
+              stackId: 'a',
+              fill: COLORS.Amber
+            })
+          )
+        ),
+        React.createElement(DataTable, {
+          title: 'At-Risk Projects by Division & Kanban Status Details',
+          data: analyticsData.ragByDivisionAndStatusCombined,
+          columns: [
+            { header: 'Division', key: 'division' },
+            { header: 'Kanban Status', key: 'kanbanStatus' },
+            { header: 'Red', key: 'Red' },
+            { header: 'Amber', key: 'Amber' },
+            {
+              header: 'Total',
+              render: (row) => row.Red + row.Amber
+            }
+          ]
+        })
       ),
 
       // Report 2C: Heat Map
@@ -809,20 +869,20 @@ export function Reporting({
           React.createElement(ResponsiveContainer, { width: '100%', height: 300 },
             React.createElement(BarChart, {
               data: analyticsData.projectsByKanban,
-              margin: { top: 5, right: 30, left: 20, bottom: 80 }
+              layout: 'vertical',
+              margin: { top: 5, right: 30, left: 150, bottom: 5 }
             },
               React.createElement(CartesianGrid, {
                 strokeDasharray: '3 3',
                 stroke: darkMode ? '#374151' : '#E5E7EB'
               }),
               React.createElement(XAxis, {
-                dataKey: 'status',
-                stroke: darkMode ? '#9CA3AF' : '#6B7280',
-                angle: -45,
-                textAnchor: 'end',
-                height: 100
+                type: 'number',
+                stroke: darkMode ? '#9CA3AF' : '#6B7280'
               }),
               React.createElement(YAxis, {
+                type: 'category',
+                dataKey: 'status',
                 stroke: darkMode ? '#9CA3AF' : '#6B7280'
               }),
               React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
