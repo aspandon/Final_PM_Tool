@@ -9,6 +9,7 @@ const TaskModal = ({ task, darkMode, onClose, onSave }) => {
   const [title, setTitle] = useState(task ? task.title : '');
   const [description, setDescription] = useState(task ? task.description : '');
   const [priority, setPriority] = useState(task ? task.priority || 'medium' : 'medium');
+  const [dueDate, setDueDate] = useState(task ? task.dueDate || '' : '');
   const titleInputRef = React.useRef(null);
 
   // Focus title input when modal opens
@@ -23,7 +24,7 @@ const TaskModal = ({ task, darkMode, onClose, onSave }) => {
       alert('Please enter a task title');
       return;
     }
-    onSave({ title: title.trim(), description: description.trim(), priority });
+    onSave({ title: title.trim(), description: description.trim(), priority, dueDate });
     onClose();
   };
 
@@ -187,6 +188,23 @@ const TaskModal = ({ task, darkMode, onClose, onSave }) => {
           )
         ),
 
+        // Due Date Input
+        React.createElement('div', { className: 'mb-2' },
+          React.createElement('label', {
+            className: `block text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+          }, 'Due Date'),
+          React.createElement('input', {
+            type: 'date',
+            value: dueDate,
+            onChange: (e) => setDueDate(e.target.value),
+            className: `w-full px-4 py-3 rounded-lg border ${
+              darkMode
+                ? 'bg-slate-700 border-slate-600 text-gray-200'
+                : 'bg-white border-gray-300 text-gray-900'
+            } focus:outline-none focus:ring-2 focus:ring-blue-500`
+          })
+        ),
+
         React.createElement('p', {
           className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
         }, 'Press Ctrl+Enter (Cmd+Enter on Mac) to save quickly')
@@ -227,6 +245,32 @@ const TaskCard = ({ task, darkMode, onEdit, onDelete }) => {
   const priority = task.priority || 'medium';
   const priorityStyle = priorityColors[priority];
 
+  // Calculate due date status
+  const getDueDateStatus = (dueDate) => {
+    if (!dueDate) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+
+    const diffTime = due - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return { label: 'Overdue', color: darkMode ? 'text-red-400' : 'text-red-600', icon: '⚠️' };
+    } else if (diffDays === 0) {
+      return { label: 'Due today', color: darkMode ? 'text-orange-400' : 'text-orange-600', icon: '🔔' };
+    } else if (diffDays <= 3) {
+      return { label: `Due in ${diffDays} day${diffDays > 1 ? 's' : ''}`, color: darkMode ? 'text-yellow-400' : 'text-yellow-600', icon: '📅' };
+    } else {
+      return { label: `Due ${new Date(dueDate).toLocaleDateString()}`, color: darkMode ? 'text-gray-400' : 'text-gray-600', icon: '📅' };
+    }
+  };
+
+  const dueDateStatus = getDueDateStatus(task.dueDate);
+
   return React.createElement('div', {
     className: `task-card ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border-l-4 ${priorityStyle.border} cursor-move hover:shadow-md transition-all group relative`,
     draggable: true,
@@ -255,6 +299,14 @@ const TaskCard = ({ task, darkMode, onEdit, onDelete }) => {
     task.description && React.createElement('div', {
       className: `text-sm mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`
     }, task.description),
+
+    // Due Date (if exists)
+    dueDateStatus && React.createElement('div', {
+      className: `text-xs mt-2 font-medium flex items-center gap-1 ${dueDateStatus.color}`
+    },
+      React.createElement('span', null, dueDateStatus.icon),
+      React.createElement('span', null, dueDateStatus.label)
+    ),
 
     // Action buttons
     React.createElement('div', {
