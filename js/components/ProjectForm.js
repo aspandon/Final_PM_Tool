@@ -472,27 +472,6 @@ export function ProjectForm({
           '💰 Project Budget'
         ),
 
-        // First Year Selector
-        React.createElement('div', {
-          className: 'mb-3'
-        },
-          React.createElement('label', {
-            className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-1`
-          }, '📅 First Budget Year'),
-          React.createElement('select', {
-            value: project.budgetFirstYear || new Date().getFullYear(),
-            onChange: (e) => updateProject(pIndex, 'budgetFirstYear', e.target.value),
-            className: `w-32 px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-green-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
-            disabled: isEditLocked
-          },
-            // Generate year options from current year - 5 to current year + 10
-            Array.from({ length: 16 }, (_, i) => {
-              const year = new Date().getFullYear() - 5 + i;
-              return React.createElement('option', { key: year, value: year }, year);
-            })
-          )
-        ),
-
         // Budget Grid
         React.createElement('div', {
           className: 'grid grid-cols-6 gap-2'
@@ -556,8 +535,29 @@ export function ProjectForm({
 
         // Summary Totals
         React.createElement('div', {
-          className: `mt-3 pt-3 border-t ${darkMode ? 'border-slate-600' : 'border-green-300'} grid grid-cols-3 gap-3`
+          className: `mt-3 pt-3 border-t ${darkMode ? 'border-slate-600' : 'border-green-300'} grid grid-cols-4 gap-3`
         },
+          // First Year Selector
+          React.createElement('div', {
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-green-200'} flex flex-col`
+          },
+            React.createElement('div', {
+              className: `text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+            }, '📅 First Budget Year'),
+            React.createElement('select', {
+              value: project.budgetFirstYear || new Date().getFullYear(),
+              onChange: (e) => updateProject(pIndex, 'budgetFirstYear', e.target.value),
+              className: `flex-1 px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-green-300 bg-white'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+              disabled: isEditLocked
+            },
+              // Generate year options from current year - 5 to current year + 10
+              Array.from({ length: 16 }, (_, i) => {
+                const year = new Date().getFullYear() - 5 + i;
+                return React.createElement('option', { key: year, value: year }, year);
+              })
+            )
+          ),
+
           // Total CAPEX
           React.createElement('div', {
             className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-green-200'}`
