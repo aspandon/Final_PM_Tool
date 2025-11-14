@@ -1,7 +1,7 @@
 // js/components/Reporting.js
 
 const { useState, useMemo } = React;
-const { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+const { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, ScatterChart, Scatter, ZAxis, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
 
 /**
  * Calculate RAG status based on finish date
@@ -616,11 +616,12 @@ export function Reporting({
           className: 'grid grid-cols-1 lg:grid-cols-2 gap-6'
         },
           React.createElement('div', null,
-            React.createElement(ResponsiveContainer, { width: '100%', height: 250 },
+            React.createElement(ResponsiveContainer, { width: '100%', height: Math.max(150, analyticsData.onHoldByDivision.length * 40 + 50) },
               React.createElement(BarChart, {
                 data: analyticsData.onHoldByDivision,
                 layout: 'vertical',
-                margin: { top: 5, right: 30, left: 100, bottom: 5 }
+                margin: { top: 5, right: 30, left: 100, bottom: 5 },
+                barSize: 15
               },
                 React.createElement(CartesianGrid, {
                   strokeDasharray: '3 3',
@@ -633,7 +634,8 @@ export function Reporting({
                 React.createElement(YAxis, {
                   type: 'category',
                   dataKey: 'division',
-                  stroke: darkMode ? '#9CA3AF' : '#6B7280'
+                  stroke: darkMode ? '#9CA3AF' : '#6B7280',
+                  width: 90
                 }),
                 React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
                 React.createElement(Bar, {
@@ -668,11 +670,12 @@ export function Reporting({
           className: 'grid grid-cols-1 lg:grid-cols-2 gap-6'
         },
           React.createElement('div', null,
-            React.createElement(ResponsiveContainer, { width: '100%', height: 300 },
+            React.createElement(ResponsiveContainer, { width: '100%', height: Math.max(150, analyticsData.ragByDivision.length * 40 + 70) },
               React.createElement(BarChart, {
                 data: analyticsData.ragByDivision,
                 layout: 'vertical',
-                margin: { top: 5, right: 30, left: 100, bottom: 5 }
+                margin: { top: 5, right: 30, left: 100, bottom: 5 },
+                barSize: 15
               },
                 React.createElement(CartesianGrid, {
                   strokeDasharray: '3 3',
@@ -685,7 +688,9 @@ export function Reporting({
                 React.createElement(YAxis, {
                   type: 'category',
                   dataKey: 'division',
-                  stroke: darkMode ? '#9CA3AF' : '#6B7280'
+                  stroke: darkMode ? '#9CA3AF' : '#6B7280',
+                  width: 90,
+                  tick: { fontSize: 12 }
                 }),
                 React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
                 React.createElement(Legend),
@@ -736,11 +741,12 @@ export function Reporting({
           className: 'grid grid-cols-1 lg:grid-cols-2 gap-6'
         },
           React.createElement('div', null,
-            React.createElement(ResponsiveContainer, { width: '100%', height: 600 },
+            React.createElement(ResponsiveContainer, { width: '100%', height: Math.max(300, analyticsData.ragByDivisionAndStatusCombined.length * 30 + 70) },
               React.createElement(BarChart, {
                 data: analyticsData.ragByDivisionAndStatusCombined,
                 layout: 'vertical',
-                margin: { top: 5, right: 30, left: 180, bottom: 5 }
+                margin: { top: 5, right: 30, left: 200, bottom: 5 },
+                barSize: 15
               },
                 React.createElement(CartesianGrid, {
                   strokeDasharray: '3 3',
@@ -754,7 +760,7 @@ export function Reporting({
                   type: 'category',
                   dataKey: 'key',
                   stroke: darkMode ? '#9CA3AF' : '#6B7280',
-                  width: 170,
+                  width: 190,
                   tick: ({ x, y, payload }) => {
                     const item = analyticsData.ragByDivisionAndStatusCombined.find(d => d.key === payload.value);
                     if (!item) return null;
@@ -765,7 +771,7 @@ export function Reporting({
                         dy: 4,
                         textAnchor: 'end',
                         fill: darkMode ? '#9CA3AF' : '#6B7280',
-                        fontSize: 10
+                        fontSize: 12
                       }, `${item.division} - ${item.kanbanStatus}`)
                     );
                   }
@@ -826,81 +832,127 @@ export function Reporting({
         )
       ),
 
-      // Report 2C: Heat Map
+      // Report 2C: Bubble Chart
       analyticsData.heatMapData.length > 0 && React.createElement('div', {
         className: 'mb-8 mt-8'
       },
         React.createElement('h4', {
           className: `text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-        }, 'At-Risk Projects Heat Map (Division × Kanban Status)'),
+        }, 'At-Risk Projects Bubble Chart (Division × Kanban Status)'),
 
-        // Create heat map visualization
-        React.createElement('div', {
-          className: `overflow-x-auto rounded-lg border ${darkMode ? 'border-slate-600' : 'border-gray-200'}`
-        },
-          React.createElement('div', {
-            className: 'inline-block min-w-full'
+        // Create bubble chart
+        React.createElement(ResponsiveContainer, { width: '100%', height: 500 },
+          React.createElement(ScatterChart, {
+            margin: { top: 20, right: 20, bottom: 80, left: 100 }
           },
-            // Header row with Kanban statuses
-            React.createElement('div', {
-              className: `grid gap-1 p-2 ${darkMode ? 'bg-slate-700' : 'bg-gray-50'}`,
-              style: { gridTemplateColumns: `200px repeat(${analyticsData.allKanbanColumns.length}, 80px)` }
-            },
-              React.createElement('div', {
-                className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'} flex items-center justify-center`
-              }, 'Division'),
-              ...analyticsData.allKanbanColumns.map(col =>
-                React.createElement('div', {
-                  key: col,
-                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center justify-center text-center px-1`,
-                  style: { writingMode: 'vertical-rl', transform: 'rotate(180deg)', height: '100px' }
-                }, getColumnDisplayName(col))
-              )
-            ),
-
-            // Data rows for each division
-            ...analyticsData.divisions.map(division =>
-              React.createElement('div', {
-                key: division,
-                className: `grid gap-1 p-2 border-t ${darkMode ? 'border-slate-600' : 'border-gray-200'}`,
-                style: { gridTemplateColumns: `200px repeat(${analyticsData.allKanbanColumns.length}, 80px)` }
+            React.createElement(CartesianGrid, {
+              strokeDasharray: '3 3',
+              stroke: darkMode ? '#374151' : '#E5E7EB'
+            }),
+            React.createElement(XAxis, {
+              type: 'category',
+              dataKey: 'columnIndex',
+              name: 'Kanban Status',
+              stroke: darkMode ? '#9CA3AF' : '#6B7280',
+              tick: ({ x, y, payload }) => {
+                const colIndex = payload.value;
+                const colName = analyticsData.allKanbanColumns[colIndex];
+                const displayName = getColumnDisplayName(colName);
+                return React.createElement('g', { transform: `translate(${x},${y})` },
+                  React.createElement('text', {
+                    x: 0,
+                    y: 0,
+                    dy: 10,
+                    textAnchor: 'end',
+                    fill: darkMode ? '#9CA3AF' : '#6B7280',
+                    fontSize: 10,
+                    transform: 'rotate(-45)'
+                  }, displayName)
+                );
               },
-                // Division name
-                React.createElement('div', {
-                  className: `font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'} flex items-center px-2`
-                }, division),
-
-                // Heat map cells
-                ...analyticsData.allKanbanColumns.map(col => {
-                  const cellData = analyticsData.heatMapData.find(d =>
-                    d.division === division && d.column === getColumnDisplayName(col)
-                  );
-                  const count = cellData ? cellData.count : 0;
-                  const red = cellData ? cellData.red : 0;
-                  const amber = cellData ? cellData.amber : 0;
-
-                  // Determine background color based on count
-                  let bgColor = darkMode ? 'bg-slate-800' : 'bg-white';
-                  if (count >= 5) {
-                    bgColor = 'bg-red-500';
-                  } else if (count >= 3) {
-                    bgColor = 'bg-orange-500';
-                  } else if (count > 0) {
-                    bgColor = 'bg-yellow-500';
-                  }
-
+              height: 80
+            }),
+            React.createElement(YAxis, {
+              type: 'category',
+              dataKey: 'divisionIndex',
+              name: 'Division',
+              stroke: darkMode ? '#9CA3AF' : '#6B7280',
+              tick: ({ x, y, payload }) => {
+                const divIndex = payload.value;
+                const division = analyticsData.divisions[divIndex];
+                return React.createElement('text', {
+                  x: x - 5,
+                  y: y,
+                  textAnchor: 'end',
+                  fill: darkMode ? '#9CA3AF' : '#6B7280',
+                  fontSize: 11,
+                  dy: 4
+                }, division);
+              },
+              width: 90
+            }),
+            React.createElement(ZAxis, {
+              type: 'number',
+              dataKey: 'count',
+              range: [100, 1000],
+              name: 'Projects'
+            }),
+            React.createElement(Tooltip, {
+              cursor: { strokeDasharray: '3 3' },
+              content: ({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const data = payload[0].payload;
                   return React.createElement('div', {
-                    key: col,
-                    className: `${bgColor} ${count > 0 ? 'text-white' : (darkMode ? 'text-gray-500' : 'text-gray-400')} rounded flex items-center justify-center font-semibold text-sm h-16 cursor-pointer transition-all hover:opacity-80`,
-                    title: count > 0 ? `${division} - ${getColumnDisplayName(col)}\nTotal: ${count}\nRed: ${red}, Amber: ${amber}` : '',
-                    onClick: count > 0 ? () => {
-                      setSelectedDivision(division);
-                      const columnKey = col;
-                      setSelectedKanbanStatus(columnKey);
-                    } : null
-                  }, count > 0 ? count : '');
-                })
-              )
+                    className: `${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'} border rounded-lg shadow-lg p-3`
+                  },
+                    React.createElement('p', {
+                      className: `font-semibold mb-1 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+                    }, `${data.division} - ${data.column}`),
+                    React.createElement('p', {
+                      className: 'text-sm',
+                      style: { color: COLORS.Red }
+                    }, `Red: ${data.red}`),
+                    React.createElement('p', {
+                      className: 'text-sm',
+                      style: { color: COLORS.Amber }
+                    }, `Amber: ${data.amber}`),
+                    React.createElement('p', {
+                      className: `text-sm font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+                    }, `Total: ${data.count}`)
+                  );
+                }
+                return null;
+              }
+            }),
+            React.createElement(Scatter, {
+              name: 'At-Risk Projects',
+              data: analyticsData.heatMapData.map(d => ({
+                ...d,
+                divisionIndex: analyticsData.divisions.indexOf(d.division),
+                columnIndex: analyticsData.allKanbanColumns.indexOf(
+                  analyticsData.allKanbanColumns.find(col => getColumnDisplayName(col) === d.column)
+                )
+              })),
+              fill: '#8884d8',
+              onClick: (data) => {
+                setSelectedDivision(data.division);
+                const columnKey = analyticsData.allKanbanColumns.find(col => getColumnDisplayName(col) === data.column);
+                setSelectedKanbanStatus(columnKey);
+              }
+            },
+              analyticsData.heatMapData.map((entry, index) => {
+                let color = '#EAB308'; // yellow
+                if (entry.count >= 5) {
+                  color = '#EF4444'; // red
+                } else if (entry.count >= 3) {
+                  color = '#F97316'; // orange
+                }
+                return React.createElement(Cell, {
+                  key: `cell-${index}`,
+                  fill: color,
+                  style: { cursor: 'pointer' }
+                });
+              })
             )
           )
         ),
@@ -911,12 +963,12 @@ export function Reporting({
         },
           React.createElement('span', {
             className: `font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
-          }, 'Legend:'),
+          }, 'Bubble Size = Number of Projects:'),
           React.createElement('div', {
             className: 'flex items-center gap-2'
           },
             React.createElement('div', {
-              className: 'w-8 h-8 bg-yellow-500 rounded'
+              className: 'w-6 h-6 bg-yellow-500 rounded-full'
             }),
             React.createElement('span', {
               className: darkMode ? 'text-gray-400' : 'text-gray-600'
@@ -926,7 +978,7 @@ export function Reporting({
             className: 'flex items-center gap-2'
           },
             React.createElement('div', {
-              className: 'w-8 h-8 bg-orange-500 rounded'
+              className: 'w-6 h-6 bg-orange-500 rounded-full'
             }),
             React.createElement('span', {
               className: darkMode ? 'text-gray-400' : 'text-gray-600'
@@ -936,7 +988,7 @@ export function Reporting({
             className: 'flex items-center gap-2'
           },
             React.createElement('div', {
-              className: 'w-8 h-8 bg-red-500 rounded'
+              className: 'w-6 h-6 bg-red-500 rounded-full'
             }),
             React.createElement('span', {
               className: darkMode ? 'text-gray-400' : 'text-gray-600'
@@ -966,7 +1018,8 @@ export function Reporting({
             React.createElement(BarChart, {
               data: analyticsData.projectsByKanban,
               layout: 'vertical',
-              margin: { top: 5, right: 30, left: 150, bottom: 5 }
+              margin: { top: 5, right: 30, left: 180, bottom: 5 },
+              barSize: 15
             },
               React.createElement(CartesianGrid, {
                 strokeDasharray: '3 3',
@@ -980,7 +1033,8 @@ export function Reporting({
                 type: 'category',
                 dataKey: 'status',
                 stroke: darkMode ? '#9CA3AF' : '#6B7280',
-                tick: { fontSize: 11 }
+                width: 170,
+                tick: { fontSize: 12 }
               }),
               React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
               React.createElement(Bar, {
