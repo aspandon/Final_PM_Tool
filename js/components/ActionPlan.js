@@ -926,39 +926,71 @@ export function ActionPlan({
           : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
       } border shadow-lg hover:shadow-2xl ${action.status === 'completed' ? 'opacity-70' : ''}`
     },
-      // Action Header - Clean focused layout
+      // Action Header - Project-style with gradient background
       React.createElement('div', {
-        className: `p-4 ${
-          darkMode
-            ? 'bg-gradient-to-r from-slate-700/30 to-slate-800/30 border-b border-slate-700/50'
-            : 'bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-b border-gray-200/50'
-        }`
+        className: 'px-3 py-2',
+        style: {
+          background: darkMode
+            ? 'linear-gradient(to right, rgba(51, 65, 85, 0.85), rgba(71, 85, 105, 0.85))'
+            : 'linear-gradient(to right, rgba(147, 197, 253, 0.85), rgba(165, 180, 252, 0.85))'
+        }
       },
-        // Main Header Row: Arrow, Title, Buttons
+        // Main Header Row: Arrow, Title, Progress, Buttons
         React.createElement('div', {
-          className: 'flex items-center gap-3 mb-3'
+          className: 'flex items-center gap-2'
         },
           // Expand/Collapse Arrow
           totalTasks > 0 && React.createElement('button', {
             onClick: () => setExpandedActions({ ...expandedActions, [action.id]: !isExpanded }),
-            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-green-400' : 'hover:bg-blue-100 text-blue-600'}`
+            className: `p-1.5 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600/50 text-blue-300' : 'hover:bg-blue-200/50 text-blue-700'}`
           }, isExpanded ? '▼' : '▶'),
-          // Action Title
-          isEditing
-            ? React.createElement('input', {
-                type: 'text',
-                value: action.name,
-                onChange: (e) => updateItem('action', ids, 'name', e.target.value),
-                onBlur: () => setEditingItem(null),
-                onKeyDown: (e) => e.key === 'Enter' && setEditingItem(null),
-                autoFocus: true,
-                className: `flex-1 px-4 py-2 text-lg font-bold border-2 rounded-lg ${darkMode ? 'border-green-500 bg-slate-800 text-gray-200' : 'border-green-400 bg-white'} focus:ring-2 focus:ring-green-500`,
-                disabled: isEditLocked
+          // Action Title (always visible input like projects)
+          React.createElement('input', {
+            type: 'text',
+            value: action.name,
+            onChange: (e) => updateItem('action', ids, 'name', e.target.value),
+            className: `flex-1 text-base font-bold px-3 py-1.5 border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white input-glow'} rounded-lg placeholder-gray-400 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''} ${action.status === 'completed' ? 'line-through' : ''}`,
+            placeholder: 'Action Name',
+            disabled: isEditLocked
+          }),
+          // Circular Progress Indicator
+          totalTasks > 0 && React.createElement('div', {
+            className: 'relative flex items-center justify-center flex-shrink-0',
+            style: { width: '36px', height: '36px' },
+            title: `${completedTasks}/${totalTasks} Tasks Complete`
+          },
+            React.createElement('svg', {
+              className: 'transform -rotate-90',
+              style: { width: '36px', height: '36px' }
+            },
+              // Background circle
+              React.createElement('circle', {
+                cx: '18',
+                cy: '18',
+                r: '14',
+                stroke: darkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(203, 213, 225, 0.5)',
+                strokeWidth: '3',
+                fill: 'none'
+              }),
+              // Progress circle
+              React.createElement('circle', {
+                cx: '18',
+                cy: '18',
+                r: '14',
+                stroke: progress === 100 ? '#10b981' : '#3b82f6',
+                strokeWidth: '3',
+                fill: 'none',
+                strokeLinecap: 'round',
+                strokeDasharray: `${2 * Math.PI * 14}`,
+                strokeDashoffset: `${2 * Math.PI * 14 * (1 - progress / 100)}`,
+                style: { transition: 'stroke-dashoffset 0.3s ease' }
               })
-            : React.createElement('div', {
-                onClick: () => !isEditLocked && setEditingItem({ type: 'action', actionId: action.id }),
-                className: `flex-1 text-lg font-bold ${action.status === 'completed' ? 'line-through' : ''} ${darkMode ? 'text-gray-200' : 'text-gray-800'} cursor-pointer hover:text-green-500 transition-colors`
-              }, action.name),
+            ),
+            // Progress percentage text
+            React.createElement('div', {
+              className: `absolute inset-0 flex items-center justify-center text-[10px] font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+            }, `${progress}%`)
+          ),
           // Add Task Button (Templates style)
           !isEditLocked && React.createElement('button', {
             onClick: () => addTask(action.id),
@@ -997,10 +1029,15 @@ export function ActionPlan({
             disabled: isEditLocked,
             title: 'Delete'
           }, React.createElement('span', { className: 'text-sm' }, '🗑️'))
-        ),
-        // Second Row: Status, Priority, Dates, Stats
+        )
+      ),
+      // Content Area: Status, Priority, Dates, Dependencies, etc.
+      React.createElement('div', {
+        className: `p-3 ${darkMode ? 'bg-slate-800/30' : 'bg-blue-50/20'}`
+      },
+        // Row: Status, Priority, Dates
         React.createElement('div', {
-          className: 'flex items-center gap-3'
+          className: 'flex items-center gap-3 mb-3'
         },
           // Status dropdown
           renderStatusDropdown(action, 'action', ids),
@@ -1030,26 +1067,6 @@ export function ActionPlan({
               onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
               className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
               disabled: isEditLocked
-            })
-          ),
-          // Stats
-          totalTasks > 0 && React.createElement('div', {
-            className: `px-3 py-1.5 rounded-lg text-xs font-bold ${darkMode ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-blue-100 text-blue-700 border border-blue-200'}`
-          }, `${completedTasks}/${totalTasks} Tasks`),
-          totalTasks > 0 && React.createElement('div', {
-            className: `px-3 py-1.5 rounded-lg text-xs font-bold ${darkMode ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`
-          }, `${progress}%`)
-        ),
-        // Progress Bar
-        totalTasks > 0 && React.createElement('div', {
-          className: 'mt-4'
-        },
-          React.createElement('div', {
-            className: `w-full h-2.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`
-          },
-            React.createElement('div', {
-              className: `h-full transition-all duration-500 ${darkMode ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-green-500 to-emerald-500'}`,
-              style: { width: `${progress}%` }
             })
           )
         ),
