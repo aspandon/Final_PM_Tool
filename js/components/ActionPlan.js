@@ -926,28 +926,24 @@ export function ActionPlan({
           : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
       } border shadow-lg hover:shadow-2xl ${action.status === 'completed' ? 'opacity-70' : ''}`
     },
-      // Action Header - Modern sleek design with improved layout
+      // Action Header - Clean focused layout
       React.createElement('div', {
-        className: `p-5 ${
+        className: `p-4 ${
           darkMode
             ? 'bg-gradient-to-r from-slate-700/30 to-slate-800/30 border-b border-slate-700/50'
             : 'bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-b border-gray-200/50'
         }`
       },
-        // Row 1: Main info (expand, status, priority, name)
+        // Main Header Row: Arrow, Title, Buttons
         React.createElement('div', {
-          className: 'flex items-center gap-4 mb-3'
+          className: 'flex items-center gap-3 mb-3'
         },
-          // Expand/Collapse
+          // Expand/Collapse Arrow
           totalTasks > 0 && React.createElement('button', {
             onClick: () => setExpandedActions({ ...expandedActions, [action.id]: !isExpanded }),
             className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-green-400' : 'hover:bg-blue-100 text-blue-600'}`
           }, isExpanded ? '▼' : '▶'),
-          // Status dropdown
-          renderStatusDropdown(action, 'action', ids),
-          // Priority dropdown
-          renderPriorityDropdown(action, 'action', ids),
-          // Name
+          // Action Title
           isEditing
             ? React.createElement('input', {
                 type: 'text',
@@ -956,95 +952,95 @@ export function ActionPlan({
                 onBlur: () => setEditingItem(null),
                 onKeyDown: (e) => e.key === 'Enter' && setEditingItem(null),
                 autoFocus: true,
-                className: `flex-1 px-4 py-2 text-base font-bold border-2 rounded-lg ${darkMode ? 'border-green-500 bg-slate-800 text-gray-200' : 'border-green-400 bg-white'} focus:ring-2 focus:ring-green-500`,
+                className: `flex-1 px-4 py-2 text-lg font-bold border-2 rounded-lg ${darkMode ? 'border-green-500 bg-slate-800 text-gray-200' : 'border-green-400 bg-white'} focus:ring-2 focus:ring-green-500`,
                 disabled: isEditLocked
               })
             : React.createElement('div', {
                 onClick: () => !isEditLocked && setEditingItem({ type: 'action', actionId: action.id }),
-                className: `flex-1 text-base font-bold ${action.status === 'completed' ? 'line-through' : ''} ${darkMode ? 'text-gray-200' : 'text-gray-800'} cursor-pointer hover:text-green-500 transition-colors`
-              }, action.name)
+                className: `flex-1 text-lg font-bold ${action.status === 'completed' ? 'line-through' : ''} ${darkMode ? 'text-gray-200' : 'text-gray-800'} cursor-pointer hover:text-green-500 transition-colors`
+              }, action.name),
+          // Add Task Button (Templates style)
+          !isEditLocked && React.createElement('button', {
+            onClick: () => addTask(action.id),
+            className: `flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
+              darkMode
+                ? 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md'
+                : 'bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white shadow-md'
+            }`,
+            disabled: isEditLocked
+          }, '+ Task'),
+          // Dependencies Button
+          React.createElement('button', {
+            onClick: () => setShowDependencies({ ...showDependencies, [action.id]: !showDeps }),
+            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`,
+            disabled: isEditLocked,
+            title: 'Dependencies'
+          }, '🔗'),
+          // Move Up
+          React.createElement('button', {
+            onClick: () => moveItem('action', ids, 'up'),
+            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`,
+            disabled: isEditLocked,
+            title: 'Move up'
+          }, '↑'),
+          // Move Down
+          React.createElement('button', {
+            onClick: () => moveItem('action', ids, 'down'),
+            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`,
+            disabled: isEditLocked,
+            title: 'Move down'
+          }, '↓'),
+          // Delete Button (Project style)
+          !isEditLocked && React.createElement('button', {
+            onClick: () => deleteItem('action', ids),
+            className: `p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+            disabled: isEditLocked,
+            title: 'Delete'
+          }, React.createElement('span', { className: 'text-sm' }, '🗑️'))
         ),
-        // Row 2: Stats, Dates and Action buttons
+        // Second Row: Status, Priority, Dates, Stats
         React.createElement('div', {
-          className: 'flex items-center justify-between gap-4'
+          className: 'flex items-center gap-3'
         },
-          // Left: Stats and Dates
-          React.createElement('div', {
-            className: 'flex items-center gap-3'
-          },
-            totalTasks > 0 && React.createElement('div', {
-              className: `px-4 py-2 rounded-lg text-sm font-bold ${darkMode ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-blue-100 text-blue-700 border border-blue-200'}`
-            }, `${completedTasks}/${totalTasks} Tasks`),
-            totalTasks > 0 && React.createElement('div', {
-              className: `px-4 py-2 rounded-lg text-sm font-bold ${darkMode ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`
-            }, `${progress}% Complete`),
-            // Start Date
-            React.createElement('div', { className: 'flex flex-col gap-0.5' },
-              React.createElement('label', {
-                className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
-              }, 'Start'),
-              React.createElement('input', {
-                type: 'date',
-                value: action.startDate || '',
-                onChange: (e) => updateItem('action', ids, 'startDate', e.target.value),
-                className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
-                disabled: isEditLocked
-              })
-            ),
-            // Finish Date
-            React.createElement('div', { className: 'flex flex-col gap-0.5' },
-              React.createElement('label', {
-                className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
-              }, 'Finish'),
-              React.createElement('input', {
-                type: 'date',
-                value: action.finishDate || '',
-                onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
-                className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
-                disabled: isEditLocked
-              })
-            )
-          ),
-          // Right: Action buttons
-          React.createElement('div', {
-            className: 'flex items-center gap-2'
-          },
-            !isEditLocked && React.createElement('button', {
-              onClick: () => addTask(action.id),
-              className: `px-4 py-2 text-sm rounded-lg font-semibold transition-all shadow-sm hover:shadow-md ${darkMode ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`,
+          // Status dropdown
+          renderStatusDropdown(action, 'action', ids),
+          // Priority dropdown
+          renderPriorityDropdown(action, 'action', ids),
+          // Start Date
+          React.createElement('div', { className: 'flex flex-col gap-0.5' },
+            React.createElement('label', {
+              className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+            }, 'Start'),
+            React.createElement('input', {
+              type: 'date',
+              value: action.startDate || '',
+              onChange: (e) => updateItem('action', ids, 'startDate', e.target.value),
+              className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
               disabled: isEditLocked
-            }, '+ Add Task'),
-            React.createElement('div', {
-              className: `flex items-center gap-1 ${darkMode ? 'bg-slate-700/50' : 'bg-gray-100'} rounded-lg p-1`
-            },
-              React.createElement('button', {
-                onClick: () => moveItem('action', ids, 'up'),
-                className: `p-1.5 rounded transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-200 text-gray-600 hover:text-gray-800'}`,
-                disabled: isEditLocked,
-                title: 'Move up'
-              }, '↑'),
-              React.createElement('button', {
-                onClick: () => moveItem('action', ids, 'down'),
-                className: `p-1.5 rounded transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-200 text-gray-600 hover:text-gray-800'}`,
-                disabled: isEditLocked,
-                title: 'Move down'
-              }, '↓'),
-              React.createElement('button', {
-                onClick: () => setShowDependencies({ ...showDependencies, [action.id]: !showDeps }),
-                className: `p-1.5 rounded transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-200 text-gray-600 hover:text-gray-800'}`,
-                disabled: isEditLocked,
-                title: 'Dependencies'
-              }, '🔗'),
-              !isEditLocked && React.createElement('button', {
-                onClick: () => deleteItem('action', ids),
-                className: `p-1.5 rounded transition-all ${darkMode ? 'hover:bg-red-600 text-red-400 hover:text-white' : 'hover:bg-red-100 text-red-600 hover:text-red-700'}`,
-                disabled: isEditLocked,
-                title: 'Delete'
-              }, '×')
-            )
-          )
+            })
+          ),
+          // Finish Date
+          React.createElement('div', { className: 'flex flex-col gap-0.5' },
+            React.createElement('label', {
+              className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+            }, 'Finish'),
+            React.createElement('input', {
+              type: 'date',
+              value: action.finishDate || '',
+              onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
+              className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+              disabled: isEditLocked
+            })
+          ),
+          // Stats
+          totalTasks > 0 && React.createElement('div', {
+            className: `px-3 py-1.5 rounded-lg text-xs font-bold ${darkMode ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-blue-100 text-blue-700 border border-blue-200'}`
+          }, `${completedTasks}/${totalTasks} Tasks`),
+          totalTasks > 0 && React.createElement('div', {
+            className: `px-3 py-1.5 rounded-lg text-xs font-bold ${darkMode ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`
+          }, `${progress}%`)
         ),
-        // Row 3: Progress Bar
+        // Progress Bar
         totalTasks > 0 && React.createElement('div', {
           className: 'mt-4'
         },
