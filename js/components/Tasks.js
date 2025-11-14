@@ -8,6 +8,7 @@ const { useState, useEffect } = React;
 const TaskModal = ({ task, darkMode, onClose, onSave }) => {
   const [title, setTitle] = useState(task ? task.title : '');
   const [description, setDescription] = useState(task ? task.description : '');
+  const [priority, setPriority] = useState(task ? task.priority || 'medium' : 'medium');
   const titleInputRef = React.useRef(null);
 
   // Focus title input when modal opens
@@ -22,7 +23,7 @@ const TaskModal = ({ task, darkMode, onClose, onSave }) => {
       alert('Please enter a task title');
       return;
     }
-    onSave({ title: title.trim(), description: description.trim() });
+    onSave({ title: title.trim(), description: description.trim(), priority });
     onClose();
   };
 
@@ -116,7 +117,7 @@ const TaskModal = ({ task, darkMode, onClose, onSave }) => {
         ),
 
         // Description Input
-        React.createElement('div', { className: 'mb-2' },
+        React.createElement('div', { className: 'mb-4' },
           React.createElement('label', {
             className: `block text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
           }, 'Description'),
@@ -131,6 +132,59 @@ const TaskModal = ({ task, darkMode, onClose, onSave }) => {
                 : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
             } focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none`
           })
+        ),
+
+        // Priority Selector
+        React.createElement('div', { className: 'mb-2' },
+          React.createElement('label', {
+            className: `block text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+          }, 'Priority'),
+          React.createElement('div', {
+            className: 'flex gap-3'
+          },
+            // Low Priority
+            React.createElement('button', {
+              type: 'button',
+              onClick: () => setPriority('low'),
+              className: `flex-1 px-4 py-2.5 rounded-lg font-medium transition-all ${
+                priority === 'low'
+                  ? darkMode
+                    ? 'bg-blue-600 text-white ring-2 ring-blue-400'
+                    : 'bg-blue-500 text-white ring-2 ring-blue-400'
+                  : darkMode
+                    ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`
+            }, 'Low'),
+            // Medium Priority
+            React.createElement('button', {
+              type: 'button',
+              onClick: () => setPriority('medium'),
+              className: `flex-1 px-4 py-2.5 rounded-lg font-medium transition-all ${
+                priority === 'medium'
+                  ? darkMode
+                    ? 'bg-yellow-600 text-white ring-2 ring-yellow-400'
+                    : 'bg-yellow-500 text-white ring-2 ring-yellow-400'
+                  : darkMode
+                    ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`
+            }, 'Medium'),
+            // High Priority
+            React.createElement('button', {
+              type: 'button',
+              onClick: () => setPriority('high'),
+              className: `flex-1 px-4 py-2.5 rounded-lg font-medium transition-all ${
+                priority === 'high'
+                  ? darkMode
+                    ? 'bg-red-600 text-white ring-2 ring-red-400'
+                    : 'bg-red-500 text-white ring-2 ring-red-400'
+                  : darkMode
+                    ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`
+            }, 'High')
+          )
         ),
 
         React.createElement('p', {
@@ -163,8 +217,18 @@ const TaskModal = ({ task, darkMode, onClose, onSave }) => {
  * TaskCard Component
  */
 const TaskCard = ({ task, darkMode, onEdit, onDelete }) => {
+  // Priority badge colors
+  const priorityColors = {
+    'low': { bg: darkMode ? 'bg-blue-600/20 text-blue-400' : 'bg-blue-100 text-blue-700', label: 'Low', border: 'border-blue-500' },
+    'medium': { bg: darkMode ? 'bg-yellow-600/20 text-yellow-400' : 'bg-yellow-100 text-yellow-700', label: 'Medium', border: 'border-yellow-500' },
+    'high': { bg: darkMode ? 'bg-red-600/20 text-red-400' : 'bg-red-100 text-red-700', label: 'High', border: 'border-red-500' }
+  };
+
+  const priority = task.priority || 'medium';
+  const priorityStyle = priorityColors[priority];
+
   return React.createElement('div', {
-    className: `task-card ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border cursor-move hover:shadow-md transition-all group relative`,
+    className: `task-card ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border-l-4 ${priorityStyle.border} cursor-move hover:shadow-md transition-all group relative`,
     draggable: true,
     onDragStart: (e) => {
       e.dataTransfer.effectAllowed = 'move';
@@ -175,10 +239,17 @@ const TaskCard = ({ task, darkMode, onEdit, onDelete }) => {
       // Clean up after drag
     }
   },
-    // Task Title
+    // Task Title and Priority Badge
     React.createElement('div', {
-      className: `font-semibold mb-2 pr-16 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-    }, task.title),
+      className: 'flex items-start gap-2 mb-2 pr-16'
+    },
+      React.createElement('div', {
+        className: `font-semibold flex-1 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+      }, task.title),
+      React.createElement('span', {
+        className: `px-2 py-1 rounded text-xs font-semibold ${priorityStyle.bg} whitespace-nowrap`
+      }, priorityStyle.label)
+    ),
 
     // Task Description (if exists)
     task.description && React.createElement('div', {
