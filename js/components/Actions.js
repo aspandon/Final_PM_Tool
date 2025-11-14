@@ -187,17 +187,23 @@ export function Actions({
   return React.createElement('div', {
     className: 'space-y-4'
   },
-    // Header
+    // Header - Matching Kanban Board Style
     React.createElement('div', {
-      className: `p-4 rounded-lg ${darkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-indigo-50/50 border-indigo-200'} border-2 mb-6`
+      className: 'mb-6'
     },
       React.createElement('h2', {
-        className: `text-xl font-bold ${darkMode ? 'text-indigo-300' : 'text-indigo-900'} mb-2`
-      }, '📋 Project Action Plans'),
+        className: `text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-2`
+      },
+        React.createElement('div', {
+          className: 'w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full'
+        }),
+        'Project Action Plans'
+      ),
       React.createElement('p', {
-        className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-      }, `Manage actions, tasks, and subtasks for ${filteredProjects.length} ${filteredProjects.length === 1 ? 'project' : 'projects'}. Click on a project to expand and edit its action plan.`)
+        className: `mt-2 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+      }, 'Manage actions, tasks, and subtasks for each project. Click on a project to expand and edit its action plan.')
     ),
+
     // Project Cards
     filteredProjects.map((project, displayIndex) => renderProjectCard(project, displayIndex))
   );
