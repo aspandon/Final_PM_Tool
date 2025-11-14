@@ -365,7 +365,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
           e.stopPropagation();
           onOpenNotes(project, e);
         },
-        className: `p-1.5 rounded-lg transition-all ${
+        className: `p-1.5 rounded-lg transition-all flex-shrink-0 ${
           hasNotes
             ? darkMode
               ? 'bg-blue-600 text-white hover:bg-blue-700 notes-icon-pulse'
@@ -401,7 +401,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
           e.stopPropagation();
           onEditProject(project.name);
         },
-        className: `p-1.5 rounded-lg transition-all ${
+        className: `p-1.5 rounded-lg transition-all flex-shrink-0 ${
           darkMode
             ? 'bg-slate-600 text-gray-400 hover:bg-indigo-600 hover:text-white'
             : 'bg-gray-100 text-gray-400 hover:bg-indigo-500 hover:text-white'
