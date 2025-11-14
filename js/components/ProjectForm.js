@@ -1,7 +1,5 @@
 // js/components/ProjectForm.js
 
-import { ActionPlan } from './ActionPlan.js';
-
 /**
  * ProjectForm Component
  * Displays a comprehensive form for entering and editing project data including
@@ -597,15 +595,6 @@ export function ProjectForm({
           )
         )
       )
-    ),
-
-    // Action Plan Section
-    React.createElement(ActionPlan, {
-      project,
-      pIndex,
-      updateProject,
-      darkMode,
-      isEditLocked
-    })
+    )
   );
 }
