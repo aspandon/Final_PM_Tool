@@ -420,7 +420,11 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
           React.createElement('path', { d: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' }),
           React.createElement('path', { d: 'M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' })
         )
-      )
+      ),
+      // RAG Status Badge (conditional)
+      settings.showRAG && React.createElement('span', {
+        className: `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ragStatus.color} text-white`
+      }, ragStatus.label)
     ),
 
     // Project Name
@@ -442,15 +446,6 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
     settings.showBP && project.businessPartner && React.createElement('div', {
       className: `text-xs mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
     }, `BP: ${project.businessPartner}`),
-
-    // RAG Status Badge (conditional)
-    settings.showRAG && React.createElement('div', {
-      className: 'flex items-center justify-end mt-3 pt-3 border-t ' + (darkMode ? 'border-slate-600' : 'border-gray-200')
-    },
-      React.createElement('span', {
-        className: `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ragStatus.color} text-white`
-      }, ragStatus.label)
-    ),
 
     // Date info (conditional - show with RAG status)
     settings.showRAG && finishDate && React.createElement('div', {
