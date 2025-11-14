@@ -164,11 +164,15 @@ const TaskModal = ({ task, darkMode, onClose, onSave }) => {
  */
 const TaskCard = ({ task, darkMode, onEdit, onDelete }) => {
   return React.createElement('div', {
-    className: `${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border cursor-move hover:shadow-md transition-all group`,
+    className: `task-card ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border cursor-move hover:shadow-md transition-all group relative`,
     draggable: true,
     onDragStart: (e) => {
+      e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('taskId', task.id);
       e.dataTransfer.setData('fromColumn', task.status);
+    },
+    onDragEnd: (e) => {
+      // Clean up after drag
     }
   },
     // Task Title
@@ -183,7 +187,12 @@ const TaskCard = ({ task, darkMode, onEdit, onDelete }) => {
 
     // Action buttons
     React.createElement('div', {
-      className: 'absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'
+      className: 'absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity',
+      draggable: true,
+      onDragStart: (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     },
       // Edit button
       React.createElement('button', {
@@ -192,6 +201,9 @@ const TaskCard = ({ task, darkMode, onEdit, onDelete }) => {
           e.preventDefault();
           e.stopPropagation();
           onEdit(task);
+        },
+        onMouseDown: (e) => {
+          e.stopPropagation();
         },
         className: `p-1.5 rounded-lg transition-all ${
           darkMode
@@ -222,6 +234,9 @@ const TaskCard = ({ task, darkMode, onEdit, onDelete }) => {
           if (confirm('Are you sure you want to delete this task?')) {
             onDelete(task.id);
           }
+        },
+        onMouseDown: (e) => {
+          e.stopPropagation();
         },
         className: `p-1.5 rounded-lg transition-all ${
           darkMode
@@ -256,21 +271,29 @@ const TaskColumn = ({ title, tasks, status, darkMode, onDrop, onEdit, onDelete, 
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
     setIsDragOver(true);
   };
 
-  const handleDragLeave = () => {
+  const handleDragLeave = (e) => {
+    e.preventDefault();
     setIsDragOver(false);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(false);
     const taskId = e.dataTransfer.getData('taskId');
     const fromColumn = e.dataTransfer.getData('fromColumn');
     if (taskId && fromColumn !== status) {
       onDrop(taskId, status);
     }
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
   };
 
   // Column colors
@@ -283,8 +306,9 @@ const TaskColumn = ({ title, tasks, status, darkMode, onDrop, onEdit, onDelete, 
   const colors = columnColors[status];
 
   return React.createElement('div', {
-    className: `flex-1 min-w-[300px] ${darkMode ? colors.darkBg : colors.bg} rounded-xl p-4 ${isDragOver ? 'ring-2 ring-blue-500' : ''}`,
+    className: `flex-1 min-w-[300px] ${darkMode ? colors.darkBg : colors.bg} rounded-xl p-4 transition-all ${isDragOver ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`,
     onDragOver: handleDragOver,
+    onDragEnter: handleDragEnter,
     onDragLeave: handleDragLeave,
     onDrop: handleDrop
   },
