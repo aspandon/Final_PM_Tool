@@ -14,6 +14,7 @@ import { ResourcesChart } from './components/ResourcesChart.js';
 import { ActualsTimeline } from './components/ActualsTimeline.js';
 import { Reporting } from './components/Reporting.js';
 import { KanbanBoard } from './components/KanbanBoard.js';
+import { Tasks } from './components/Tasks.js';
 
 const { useState, useRef, useMemo, useEffect } = React;
 const { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
@@ -120,6 +121,19 @@ function GanttChart() {
     React.createElement('line', { x1: '16', x2: '8', y1: '13', y2: '13' }),
     React.createElement('line', { x1: '16', x2: '8', y1: '17', y2: '17' }),
     React.createElement('polyline', { points: '10 9 9 9 8 9' })
+  );
+
+  const CheckSquare = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('polyline', { points: '9 11 12 14 22 4' }),
+    React.createElement('path', { d: 'M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11' })
   );
 
   const Lock = ({ className }) => React.createElement('svg', {
@@ -899,6 +913,15 @@ function GanttChart() {
     });
   };
 
+  /**
+   * Render tasks view
+   */
+  const renderTasksView = () => {
+    return React.createElement(Tasks, {
+      darkMode
+    });
+  };
+
   // ===== MAIN RENDER =====
   
   return React.createElement('div', {
@@ -1005,6 +1028,7 @@ function GanttChart() {
           renderTabButton('projects', 'Projects', FolderKanban),
           renderTabButton('planner', 'Planner', Calendar),
           renderTabButton('kanban', 'Kanban', LayoutDashboard),
+          renderTabButton('tasks', 'Tasks', CheckSquare),
           renderTabButton('resources', 'Resources', Users),
           renderTabButton('overview', 'Divisions', PieChart),
           renderTabButton('actuals', 'Actuals', TrendingUp),
@@ -1029,6 +1053,7 @@ function GanttChart() {
           activeTab === 'projects' && renderProjectsView(),
           activeTab === 'planner' && renderPlannerView(),
           activeTab === 'kanban' && renderKanbanView(),
+          activeTab === 'tasks' && renderTasksView(),
           activeTab === 'overview' && renderOverviewView(),
           activeTab === 'resources' && renderResourcesView(),
           activeTab === 'actuals' && renderActualsView(),
