@@ -242,9 +242,10 @@ export function Reporting({
 
     // Report 2C: Heat Map Data
     const heatMapData = [];
+    const allKanbanColumns = ['onhold', 'backlog', 'psdpre', 'psdready', 'invapproved', 'procurement', 'implementation', 'uat', 'done'];
+
     divisions.forEach(division => {
-      const kanbanColumns = ['onhold', 'backlog', 'psdpre', 'psdready', 'invapproved', 'procurement', 'implementation', 'uat', 'done'];
-      kanbanColumns.forEach(column => {
+      allKanbanColumns.forEach(column => {
         const count = projectsWithRAG.filter(p =>
           p.division === division &&
           p.column === column &&
@@ -272,8 +273,7 @@ export function Reporting({
     });
 
     // Report 4: Projects by Kanban Status
-    const kanbanColumns = ['onhold', 'backlog', 'psdpre', 'psdready', 'invapproved', 'procurement', 'implementation', 'uat', 'done'];
-    const projectsByKanban = kanbanColumns.map(column => ({
+    const projectsByKanban = allKanbanColumns.map(column => ({
       status: getColumnDisplayName(column),
       count: projectsWithRAG.filter(p => p.column === column).length,
       columnKey: column
