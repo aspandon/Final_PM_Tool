@@ -731,90 +731,98 @@ export function Reporting({
         React.createElement('h4', {
           className: `text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
         }, 'At-Risk Projects by Division & Kanban Status'),
-        React.createElement(ResponsiveContainer, { width: '100%', height: 500 },
-          React.createElement(BarChart, {
-            data: analyticsData.ragByDivisionAndStatusCombined,
-            margin: { top: 5, right: 30, left: 120, bottom: 100 }
-          },
-            React.createElement(CartesianGrid, {
-              strokeDasharray: '3 3',
-              stroke: darkMode ? '#374151' : '#E5E7EB'
-            }),
-            React.createElement(XAxis, {
-              dataKey: 'key',
-              stroke: darkMode ? '#9CA3AF' : '#6B7280',
-              angle: -45,
-              textAnchor: 'end',
-              height: 120,
-              tick: ({ x, y, payload }) => {
-                const item = analyticsData.ragByDivisionAndStatusCombined.find(d => d.key === payload.value);
-                if (!item) return null;
-                return React.createElement('g', { transform: `translate(${x},${y})` },
-                  React.createElement('text', {
-                    x: 0,
-                    y: 0,
-                    dy: 16,
-                    textAnchor: 'end',
-                    fill: darkMode ? '#9CA3AF' : '#6B7280',
-                    transform: 'rotate(-45)',
-                    fontSize: 11
-                  }, `${item.division} - ${item.kanbanStatus}`)
-                );
-              }
-            }),
-            React.createElement(YAxis, {
-              stroke: darkMode ? '#9CA3AF' : '#6B7280'
-            }),
-            React.createElement(Tooltip, {
-              content: ({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  const data = payload[0].payload;
-                  return React.createElement('div', {
-                    className: `${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'} border rounded-lg shadow-lg p-3`
-                  },
-                    React.createElement('p', {
-                      className: `font-semibold mb-1 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-                    }, `${data.division} - ${data.kanbanStatus}`),
-                    React.createElement('p', {
-                      className: 'text-sm',
-                      style: { color: COLORS.Red }
-                    }, `Red: ${data.Red}`),
-                    React.createElement('p', {
-                      className: 'text-sm',
-                      style: { color: COLORS.Amber }
-                    }, `Amber: ${data.Amber}`)
-                  );
+        React.createElement('div', {
+          className: 'grid grid-cols-1 lg:grid-cols-2 gap-6'
+        },
+          React.createElement('div', null,
+            React.createElement(ResponsiveContainer, { width: '100%', height: 600 },
+              React.createElement(BarChart, {
+                data: analyticsData.ragByDivisionAndStatusCombined,
+                layout: 'vertical',
+                margin: { top: 5, right: 30, left: 180, bottom: 5 }
+              },
+                React.createElement(CartesianGrid, {
+                  strokeDasharray: '3 3',
+                  stroke: darkMode ? '#374151' : '#E5E7EB'
+                }),
+                React.createElement(XAxis, {
+                  type: 'number',
+                  stroke: darkMode ? '#9CA3AF' : '#6B7280'
+                }),
+                React.createElement(YAxis, {
+                  type: 'category',
+                  dataKey: 'key',
+                  stroke: darkMode ? '#9CA3AF' : '#6B7280',
+                  width: 170,
+                  tick: ({ x, y, payload }) => {
+                    const item = analyticsData.ragByDivisionAndStatusCombined.find(d => d.key === payload.value);
+                    if (!item) return null;
+                    return React.createElement('g', { transform: `translate(${x},${y})` },
+                      React.createElement('text', {
+                        x: 0,
+                        y: 0,
+                        dy: 4,
+                        textAnchor: 'end',
+                        fill: darkMode ? '#9CA3AF' : '#6B7280',
+                        fontSize: 10
+                      }, `${item.division} - ${item.kanbanStatus}`)
+                    );
+                  }
+                }),
+                React.createElement(Tooltip, {
+                  content: ({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return React.createElement('div', {
+                        className: `${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'} border rounded-lg shadow-lg p-3`
+                      },
+                        React.createElement('p', {
+                          className: `font-semibold mb-1 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+                        }, `${data.division} - ${data.kanbanStatus}`),
+                        React.createElement('p', {
+                          className: 'text-sm',
+                          style: { color: COLORS.Red }
+                        }, `Red: ${data.Red}`),
+                        React.createElement('p', {
+                          className: 'text-sm',
+                          style: { color: COLORS.Amber }
+                        }, `Amber: ${data.Amber}`)
+                      );
+                    }
+                    return null;
+                  }
+                }),
+                React.createElement(Legend),
+                React.createElement(Bar, {
+                  dataKey: 'Red',
+                  stackId: 'a',
+                  fill: COLORS.Red
+                }),
+                React.createElement(Bar, {
+                  dataKey: 'Amber',
+                  stackId: 'a',
+                  fill: COLORS.Amber
+                })
+              )
+            )
+          ),
+          React.createElement('div', null,
+            React.createElement(DataTable, {
+              title: 'At-Risk Projects by Division & Kanban Status Details',
+              data: analyticsData.ragByDivisionAndStatusCombined,
+              columns: [
+                { header: 'Division', key: 'division' },
+                { header: 'Kanban Status', key: 'kanbanStatus' },
+                { header: 'Red', key: 'Red' },
+                { header: 'Amber', key: 'Amber' },
+                {
+                  header: 'Total',
+                  render: (row) => row.Red + row.Amber
                 }
-                return null;
-              }
-            }),
-            React.createElement(Legend),
-            React.createElement(Bar, {
-              dataKey: 'Red',
-              stackId: 'a',
-              fill: COLORS.Red
-            }),
-            React.createElement(Bar, {
-              dataKey: 'Amber',
-              stackId: 'a',
-              fill: COLORS.Amber
+              ]
             })
           )
-        ),
-        React.createElement(DataTable, {
-          title: 'At-Risk Projects by Division & Kanban Status Details',
-          data: analyticsData.ragByDivisionAndStatusCombined,
-          columns: [
-            { header: 'Division', key: 'division' },
-            { header: 'Kanban Status', key: 'kanbanStatus' },
-            { header: 'Red', key: 'Red' },
-            { header: 'Amber', key: 'Amber' },
-            {
-              header: 'Total',
-              render: (row) => row.Red + row.Amber
-            }
-          ]
-        })
+        )
       ),
 
       // Report 2C: Heat Map
@@ -824,27 +832,116 @@ export function Reporting({
         React.createElement('h4', {
           className: `text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
         }, 'At-Risk Projects Heat Map (Division × Kanban Status)'),
-        React.createElement(DataTable, {
-          title: 'Heat Map Data',
-          data: analyticsData.heatMapData,
-          columns: [
-            { header: 'Division', key: 'division' },
-            { header: 'Kanban Status', key: 'column' },
-            {
-              header: 'Total At-Risk',
-              key: 'count',
-              render: (row) => React.createElement('span', {
-                className: `px-2 py-1 rounded ${
-                  row.count >= 5 ? 'bg-red-500 text-white' :
-                  row.count >= 3 ? 'bg-orange-500 text-white' :
-                  'bg-yellow-500 text-white'
-                }`
-              }, row.count)
+
+        // Create heat map visualization
+        React.createElement('div', {
+          className: `overflow-x-auto rounded-lg border ${darkMode ? 'border-slate-600' : 'border-gray-200'}`
+        },
+          React.createElement('div', {
+            className: 'inline-block min-w-full'
+          },
+            // Header row with Kanban statuses
+            React.createElement('div', {
+              className: `grid gap-1 p-2 ${darkMode ? 'bg-slate-700' : 'bg-gray-50'}`,
+              style: { gridTemplateColumns: `200px repeat(${allKanbanColumns.length}, 80px)` }
             },
-            { header: 'Red', key: 'red' },
-            { header: 'Amber', key: 'amber' }
-          ]
-        })
+              React.createElement('div', {
+                className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'} flex items-center justify-center`
+              }, 'Division'),
+              ...allKanbanColumns.map(col =>
+                React.createElement('div', {
+                  key: col,
+                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center justify-center text-center px-1`,
+                  style: { writingMode: 'vertical-rl', transform: 'rotate(180deg)', height: '100px' }
+                }, getColumnDisplayName(col))
+              )
+            ),
+
+            // Data rows for each division
+            ...analyticsData.divisions.map(division =>
+              React.createElement('div', {
+                key: division,
+                className: `grid gap-1 p-2 border-t ${darkMode ? 'border-slate-600' : 'border-gray-200'}`,
+                style: { gridTemplateColumns: `200px repeat(${allKanbanColumns.length}, 80px)` }
+              },
+                // Division name
+                React.createElement('div', {
+                  className: `font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'} flex items-center px-2`
+                }, division),
+
+                // Heat map cells
+                ...allKanbanColumns.map(col => {
+                  const cellData = analyticsData.heatMapData.find(d =>
+                    d.division === division && d.column === getColumnDisplayName(col)
+                  );
+                  const count = cellData ? cellData.count : 0;
+                  const red = cellData ? cellData.red : 0;
+                  const amber = cellData ? cellData.amber : 0;
+
+                  // Determine background color based on count
+                  let bgColor = darkMode ? 'bg-slate-800' : 'bg-white';
+                  if (count >= 5) {
+                    bgColor = 'bg-red-500';
+                  } else if (count >= 3) {
+                    bgColor = 'bg-orange-500';
+                  } else if (count > 0) {
+                    bgColor = 'bg-yellow-500';
+                  }
+
+                  return React.createElement('div', {
+                    key: col,
+                    className: `${bgColor} ${count > 0 ? 'text-white' : (darkMode ? 'text-gray-500' : 'text-gray-400')} rounded flex items-center justify-center font-semibold text-sm h-16 cursor-pointer transition-all hover:opacity-80`,
+                    title: count > 0 ? `${division} - ${getColumnDisplayName(col)}\nTotal: ${count}\nRed: ${red}, Amber: ${amber}` : '',
+                    onClick: count > 0 ? () => {
+                      setSelectedDivision(division);
+                      const columnKey = col;
+                      setSelectedKanbanStatus(columnKey);
+                    } : null
+                  }, count > 0 ? count : '');
+                })
+              )
+            )
+          )
+        ),
+
+        // Legend
+        React.createElement('div', {
+          className: 'mt-4 flex items-center gap-4 text-sm'
+        },
+          React.createElement('span', {
+            className: `font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+          }, 'Legend:'),
+          React.createElement('div', {
+            className: 'flex items-center gap-2'
+          },
+            React.createElement('div', {
+              className: 'w-8 h-8 bg-yellow-500 rounded'
+            }),
+            React.createElement('span', {
+              className: darkMode ? 'text-gray-400' : 'text-gray-600'
+            }, '1-2 projects')
+          ),
+          React.createElement('div', {
+            className: 'flex items-center gap-2'
+          },
+            React.createElement('div', {
+              className: 'w-8 h-8 bg-orange-500 rounded'
+            }),
+            React.createElement('span', {
+              className: darkMode ? 'text-gray-400' : 'text-gray-600'
+            }, '3-4 projects')
+          ),
+          React.createElement('div', {
+            className: 'flex items-center gap-2'
+          },
+            React.createElement('div', {
+              className: 'w-8 h-8 bg-red-500 rounded'
+            }),
+            React.createElement('span', {
+              className: darkMode ? 'text-gray-400' : 'text-gray-600'
+            }, '5+ projects')
+          )
+        )
       )
     ),
 
@@ -881,7 +978,8 @@ export function Reporting({
               React.createElement(YAxis, {
                 type: 'category',
                 dataKey: 'status',
-                stroke: darkMode ? '#9CA3AF' : '#6B7280'
+                stroke: darkMode ? '#9CA3AF' : '#6B7280',
+                tick: { fontSize: 11 }
               }),
               React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
               React.createElement(Bar, {
@@ -1016,72 +1114,6 @@ export function Reporting({
             header: 'Planned Finish',
             render: (row) => formatDate(row.plannedFinish)
           }
-        ]
-      })
-    ),
-
-    // SECTION 4: Monthly Trends (Report 9)
-    analyticsData.monthlyTrends.length > 0 && React.createElement('div', {
-      className: `rounded-lg p-6 ${darkMode ? 'bg-slate-800' : 'bg-white'} shadow-md`
-    },
-      React.createElement('h3', {
-        className: `text-2xl font-bold mb-6 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
-      }, '📊 Monthly Trends'),
-
-      React.createElement('h4', {
-        className: `text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-      }, 'Project Activity Over Time'),
-
-      React.createElement(ResponsiveContainer, { width: '100%', height: 400 },
-        React.createElement(LineChart, {
-          data: analyticsData.monthlyTrends,
-          margin: { top: 5, right: 30, left: 20, bottom: 5 }
-        },
-          React.createElement(CartesianGrid, {
-            strokeDasharray: '3 3',
-            stroke: darkMode ? '#374151' : '#E5E7EB'
-          }),
-          React.createElement(XAxis, {
-            dataKey: 'month',
-            stroke: darkMode ? '#9CA3AF' : '#6B7280'
-          }),
-          React.createElement(YAxis, {
-            stroke: darkMode ? '#9CA3AF' : '#6B7280'
-          }),
-          React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
-          React.createElement(Legend),
-          React.createElement(Line, {
-            type: 'monotone',
-            dataKey: 'started',
-            stroke: COLORS.Green,
-            name: 'Projects Started',
-            strokeWidth: 2
-          }),
-          React.createElement(Line, {
-            type: 'monotone',
-            dataKey: 'completed',
-            stroke: COLORS.Blue,
-            name: 'Projects Completed',
-            strokeWidth: 2
-          }),
-          React.createElement(Line, {
-            type: 'monotone',
-            dataKey: 'inProgress',
-            stroke: COLORS.Amber,
-            name: 'In Progress',
-            strokeWidth: 2
-          })
-        )
-      ),
-
-      React.createElement(DataTable, {
-        title: 'Monthly Activity Details',
-        data: analyticsData.monthlyTrends,
-        columns: [
-          { header: 'Month', key: 'month' },
-          { header: 'Started', key: 'started' },
-          { header: 'Completed', key: 'completed' },
-          { header: 'In Progress', key: 'inProgress' }
         ]
       })
     ),
