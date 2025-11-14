@@ -355,7 +355,8 @@ export function Reporting({
       projectsWithDelays,
       monthlyTrends,
       projectsWithRAG,
-      divisions
+      divisions,
+      allKanbanColumns
     };
   }, [filteredProjects]);
 
@@ -843,12 +844,12 @@ export function Reporting({
             // Header row with Kanban statuses
             React.createElement('div', {
               className: `grid gap-1 p-2 ${darkMode ? 'bg-slate-700' : 'bg-gray-50'}`,
-              style: { gridTemplateColumns: `200px repeat(${allKanbanColumns.length}, 80px)` }
+              style: { gridTemplateColumns: `200px repeat(${analyticsData.allKanbanColumns.length}, 80px)` }
             },
               React.createElement('div', {
                 className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'} flex items-center justify-center`
               }, 'Division'),
-              ...allKanbanColumns.map(col =>
+              ...analyticsData.allKanbanColumns.map(col =>
                 React.createElement('div', {
                   key: col,
                   className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center justify-center text-center px-1`,
@@ -862,7 +863,7 @@ export function Reporting({
               React.createElement('div', {
                 key: division,
                 className: `grid gap-1 p-2 border-t ${darkMode ? 'border-slate-600' : 'border-gray-200'}`,
-                style: { gridTemplateColumns: `200px repeat(${allKanbanColumns.length}, 80px)` }
+                style: { gridTemplateColumns: `200px repeat(${analyticsData.allKanbanColumns.length}, 80px)` }
               },
                 // Division name
                 React.createElement('div', {
@@ -870,7 +871,7 @@ export function Reporting({
                 }, division),
 
                 // Heat map cells
-                ...allKanbanColumns.map(col => {
+                ...analyticsData.allKanbanColumns.map(col => {
                   const cellData = analyticsData.heatMapData.find(d =>
                     d.division === division && d.column === getColumnDisplayName(col)
                   );
