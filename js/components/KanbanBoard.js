@@ -496,7 +496,7 @@ const KanbanColumn = ({ title, projects, column, darkMode, onDrop, kanbanSetting
 /**
  * Main KanbanBoard Component
  */
-export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings }) => {
+export const KanbanBoard = ({ projects, updateProjectByName, darkMode, kanbanSettings }) => {
   const { useEffect, useRef } = React;
 
   // Refs for scroll synchronization
@@ -535,14 +535,7 @@ export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings })
   // Handle saving notes
   const handleSaveNotes = (notes) => {
     if (!notesModalProject) return;
-
-    const updatedProjects = projects.map(project => {
-      if (project.name === notesModalProject.name) {
-        return { ...project, notes };
-      }
-      return project;
-    });
-    setProjects(updatedProjects);
+    updateProjectByName(notesModalProject.name, 'notes', notes);
   };
 
   // Safety check: ensure projects is an array
@@ -564,20 +557,12 @@ export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings })
       'approved': 'invapproved'
     };
 
-    let needsMigration = false;
-    const migratedProjects = projects.map(project => {
+    projects.forEach(project => {
       if (project.kanbanStatus && migrationMap[project.kanbanStatus]) {
-        needsMigration = true;
         console.log(`Migrating project "${project.name}" from "${project.kanbanStatus}" to "${migrationMap[project.kanbanStatus]}"`);
-        return { ...project, kanbanStatus: migrationMap[project.kanbanStatus] };
+        updateProjectByName(project.name, 'kanbanStatus', migrationMap[project.kanbanStatus]);
       }
-      return project;
     });
-
-    if (needsMigration) {
-      console.log('Migrating old kanbanStatus values to new format...');
-      setProjects(migratedProjects);
-    }
   }, []); // Run only once on mount
 
   // Sync scrollbars between top scroller and content
@@ -652,14 +637,7 @@ export const KanbanBoard = ({ projects, setProjects, darkMode, kanbanSettings })
 
   // Handle drag and drop to move projects between columns
   const handleDrop = (projectName, toColumn) => {
-    const updatedProjects = projects.map(project => {
-      if (project.name === projectName) {
-        // Update project's kanbanStatus to the new column
-        return { ...project, kanbanStatus: toColumn };
-      }
-      return project;
-    });
-    setProjects(updatedProjects);
+    updateProjectByName(projectName, 'kanbanStatus', toColumn);
   };
 
   return React.createElement('div', {

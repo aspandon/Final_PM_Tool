@@ -392,6 +392,20 @@ function GanttChart() {
   };
 
   /**
+   * Update a project by name (used by Kanban board)
+   * This ensures we update the project in the full projects array, not filtered
+   */
+  const updateProjectByName = (projectName, field, value) => {
+    const updatedProjects = projects.map(project => {
+      if (project.name === projectName) {
+        return { ...project, [field]: value };
+      }
+      return project;
+    });
+    setProjects(updatedProjects);
+  };
+
+  /**
    * Delete a project
    */
   const deleteProject = (index) => {
@@ -744,7 +758,7 @@ function GanttChart() {
   const renderKanbanView = () => {
     return React.createElement(KanbanBoard, {
       projects: filteredProjects,
-      setProjects: setProjects,
+      updateProjectByName: updateProjectByName,
       darkMode: darkMode,
       kanbanSettings: kanbanSettings
     });
