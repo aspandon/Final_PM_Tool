@@ -167,6 +167,7 @@ export function Reporting({
   const [selectedKanbanStatus, setSelectedKanbanStatus] = useState(null);
   const [selectedKPIFilter, setSelectedKPIFilter] = useState(null); // 'total', 'red', 'amber', 'green', 'onhold', 'completed'
   const [selectedRiskAlert, setSelectedRiskAlert] = useState(null); // 'critical', 'high', 'medium', 'onhold'
+  const [selectedPipelineStatus, setSelectedPipelineStatus] = useState(null); // kanban status key
 
   // Calculate all analytics data
   const analyticsData = useMemo(() => {
@@ -292,12 +293,27 @@ export function Reporting({
       });
     });
 
-    // Report 4: Projects by Kanban Status
-    const projectsByKanban = allKanbanColumns.map(column => ({
-      status: getColumnDisplayName(column),
-      count: projectsWithRAG.filter(p => p.column === column).length,
-      columnKey: column
-    })).filter(s => s.count > 0);
+    // Report 4: Projects by Kanban Status with Division Breakdown
+    const projectsByKanban = allKanbanColumns.map(column => {
+      const columnProjects = projectsWithRAG.filter(p => p.column === column);
+      const count = columnProjects.length;
+
+      // Calculate division breakdown for this status
+      const divisionBreakdown = divisions.map(division => ({
+        division,
+        count: columnProjects.filter(p => p.division === division).length
+      }))
+      .filter(d => d.count > 0)
+      .sort((a, b) => b.count - a.count); // Sort by count descending
+
+      return {
+        status: getColumnDisplayName(column),
+        count,
+        columnKey: column,
+        topDivisions: divisionBreakdown.slice(0, 3), // Top 3 divisions
+        allDivisions: divisionBreakdown
+      };
+    }).filter(s => s.count > 0);
 
     // Report 5: Projects by Division
     const projectsByDivision = divisions.map(division => ({
@@ -444,6 +460,11 @@ export function Reporting({
     setSelectedRiskAlert(selectedRiskAlert === alertType ? null : alertType);
   };
 
+  // Handle Pipeline Status card click
+  const handlePipelineStatusClick = (statusKey) => {
+    setSelectedPipelineStatus(selectedPipelineStatus === statusKey ? null : statusKey);
+  };
+
   // Get filtered projects based on selected risk alert
   const riskAlertFilteredProjects = useMemo(() => {
     if (!selectedRiskAlert) return [];
@@ -461,6 +482,21 @@ export function Reporting({
         return [];
     }
   }, [selectedRiskAlert, analyticsData.projectsWithRAG, analyticsData.criticalRiskProjects]);
+
+  // Get division breakdown and projects for selected pipeline status
+  const pipelineStatusData = useMemo(() => {
+    if (!selectedPipelineStatus) return null;
+
+    const statusData = analyticsData.projectsByKanban.find(s => s.columnKey === selectedPipelineStatus);
+    if (!statusData) return null;
+
+    const projects = analyticsData.projectsWithRAG.filter(p => p.column === selectedPipelineStatus);
+
+    return {
+      ...statusData,
+      projects
+    };
+  }, [selectedPipelineStatus, analyticsData.projectsByKanban, analyticsData.projectsWithRAG]);
 
   // KPI Card Component
   const KPICard = ({ title, value, percentage, color, icon, filterType, onClick }) => {
@@ -486,6 +522,96 @@ export function Reporting({
         React.createElement('div', {
           className: `text-3xl opacity-20`
         }, icon)
+      )
+    );
+  };
+
+  // Pipeline Status Card Component
+  const PipelineStatusCard = ({ status, count, percentage, columnKey, topDivisions, onClick }) => {
+    const isSelected = selectedPipelineStatus === columnKey;
+
+    // Define status colors and icons
+    const statusStyles = {
+      'onhold': { color: 'border-orange-500', icon: '⏸️', gradient: 'from-orange-500 to-orange-600' },
+      'backlog': { color: 'border-gray-500', icon: '📋', gradient: 'from-gray-500 to-gray-600' },
+      'psdpre': { color: 'border-blue-500', icon: '📝', gradient: 'from-blue-500 to-blue-600' },
+      'psdready': { color: 'border-cyan-500', icon: '✅', gradient: 'from-cyan-500 to-cyan-600' },
+      'invapproved': { color: 'border-green-500', icon: '💰', gradient: 'from-green-500 to-green-600' },
+      'procurement': { color: 'border-yellow-500', icon: '🛒', gradient: 'from-yellow-500 to-yellow-600' },
+      'implementation': { color: 'border-purple-500', icon: '⚙️', gradient: 'from-purple-500 to-purple-600' },
+      'uat': { color: 'border-pink-500', icon: '🧪', gradient: 'from-pink-500 to-pink-600' },
+      'done': { color: 'border-emerald-500', icon: '🎉', gradient: 'from-emerald-500 to-emerald-600' }
+    };
+
+    const style = statusStyles[columnKey] || { color: 'border-gray-500', icon: '📊', gradient: 'from-gray-500 to-gray-600' };
+
+    return React.createElement('div', {
+      className: `relative rounded-xl p-6 ${darkMode ? 'bg-slate-700' : 'bg-white'} border-2 ${style.color} shadow-lg cursor-pointer transition-all transform hover:scale-105 hover:shadow-2xl ${isSelected ? 'ring-4 ring-blue-500 scale-105' : ''}`,
+      onClick: () => onClick(columnKey)
+    },
+      // Icon badge
+      React.createElement('div', {
+        className: `absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-br ${style.gradient} rounded-full flex items-center justify-center text-2xl shadow-lg`
+      }, style.icon),
+
+      // Main content
+      React.createElement('div', {
+        className: 'mb-4'
+      },
+        React.createElement('div', {
+          className: `text-sm font-semibold uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`
+        }, status),
+        React.createElement('div', {
+          className: `text-4xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'} mb-1`
+        }, count),
+        React.createElement('div', {
+          className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`
+        }, `${percentage}% of total`)
+      ),
+
+      // Progress ring or bar
+      React.createElement('div', {
+        className: 'mb-4'
+      },
+        React.createElement('div', {
+          className: `w-full h-2 ${darkMode ? 'bg-slate-600' : 'bg-gray-200'} rounded-full overflow-hidden`
+        },
+          React.createElement('div', {
+            className: `h-full bg-gradient-to-r ${style.gradient} transition-all duration-500`,
+            style: { width: `${Math.min(percentage, 100)}%` }
+          })
+        )
+      ),
+
+      // Top 3 divisions
+      topDivisions && topDivisions.length > 0 && React.createElement('div', {
+        className: 'space-y-1'
+      },
+        React.createElement('div', {
+          className: `text-xs font-semibold uppercase ${darkMode ? 'text-gray-500' : 'text-gray-400'} mb-2`
+        }, 'Top Divisions'),
+        topDivisions.map((div, idx) =>
+          React.createElement('div', {
+            key: idx,
+            className: 'flex items-center justify-between text-sm'
+          },
+            React.createElement('span', {
+              className: `${darkMode ? 'text-gray-300' : 'text-gray-700'} truncate flex-1`
+            }, `${idx + 1}. ${div.division}`),
+            React.createElement('span', {
+              className: `font-bold ${darkMode ? 'text-gray-200' : 'text-gray-900'} ml-2`
+            }, div.count)
+          )
+        )
+      ),
+
+      // Click hint
+      React.createElement('div', {
+        className: `mt-4 pt-4 border-t ${darkMode ? 'border-slate-600' : 'border-gray-200'} text-center`
+      },
+        React.createElement('span', {
+          className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`
+        }, isSelected ? '↑ Click to close' : '↓ Click for full breakdown')
       )
     );
   };
@@ -931,92 +1057,151 @@ export function Reporting({
         className: `text-2xl font-bold mb-6 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
       }, '📈 Distribution & Pipeline'),
 
+      // Pipeline Status Cards Grid
       React.createElement('div', {
-        className: 'grid grid-cols-1 lg:grid-cols-2 gap-6'
+        className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6'
       },
-        // Report 4: Projects by Kanban Status
-        React.createElement('div', null,
-          React.createElement('h4', {
-            className: `text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-          }, 'Projects by Kanban Status'),
-          React.createElement(ResponsiveContainer, { width: '100%', height: 300 },
-            React.createElement(BarChart, {
-              data: analyticsData.projectsByKanban,
-              layout: 'vertical',
-              margin: { top: 5, right: 30, left: 180, bottom: 5 },
-              barSize: 15
-            },
-              React.createElement(CartesianGrid, {
-                strokeDasharray: '3 3',
-                stroke: darkMode ? '#374151' : '#E5E7EB'
-              }),
-              React.createElement(XAxis, {
-                type: 'number',
-                stroke: darkMode ? '#9CA3AF' : '#6B7280'
-              }),
-              React.createElement(YAxis, {
-                type: 'category',
-                dataKey: 'status',
-                stroke: darkMode ? '#9CA3AF' : '#6B7280',
-                width: 170,
-                tick: { fontSize: 12 }
-              }),
-              React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
-              React.createElement(Bar, {
-                dataKey: 'count',
-                fill: COLORS.Blue,
-                onClick: (data) => setSelectedKanbanStatus(data.columnKey)
-              })
-            )
-          )
-        ),
-
-        // Report 5: Projects by Division (Pie Chart)
-        React.createElement('div', null,
-          React.createElement('h4', {
-            className: `text-lg font-semibold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-          }, 'Projects by Division'),
-          React.createElement(ResponsiveContainer, { width: '100%', height: 300 },
-            React.createElement(PieChart, null,
-              React.createElement(Pie, {
-                data: analyticsData.projectsByDivision,
-                dataKey: 'count',
-                nameKey: 'division',
-                cx: '50%',
-                cy: '50%',
-                outerRadius: 100,
-                label: (entry) => `${entry.division}: ${entry.count}`,
-                onClick: (data) => setSelectedDivision(data.division)
-              },
-                analyticsData.projectsByDivision.map((entry, index) =>
-                  React.createElement(Cell, {
-                    key: `cell-${index}`,
-                    fill: Object.values(COLORS)[index % Object.values(COLORS).length]
-                  })
-                )
-              ),
-              React.createElement(Tooltip)
-            )
-          )
+        analyticsData.projectsByKanban.map((statusData, index) =>
+          React.createElement(PipelineStatusCard, {
+            key: statusData.columnKey,
+            status: statusData.status,
+            count: statusData.count,
+            percentage: analyticsData.totalProjects > 0 ? Math.round((statusData.count / analyticsData.totalProjects) * 100) : 0,
+            columnKey: statusData.columnKey,
+            topDivisions: statusData.topDivisions,
+            onClick: handlePipelineStatusClick
+          })
         )
       ),
 
-      // Combined table for distribution
-      React.createElement('div', {
-        className: 'mt-6'
+      // Expandable section for Pipeline Status details
+      pipelineStatusData && React.createElement('div', {
+        className: `mt-6 rounded-lg overflow-hidden transition-all duration-300 ease-in-out ${darkMode ? 'bg-slate-700' : 'bg-gray-50'} shadow-lg border-2 border-blue-500`
       },
-        React.createElement(DataTable, {
-          title: 'Distribution Summary',
-          data: analyticsData.projectsByDivision,
-          columns: [
-            { header: 'Division', key: 'division' },
-            { header: 'Total Projects', key: 'count' },
-            {
-              header: '% of Total',
-              render: (row) => `${Math.round((row.count / analyticsData.totalProjects) * 100)}%`
-            }
-          ]
-        })
+        // Header with title and close button
+        React.createElement('div', {
+          className: `flex items-center justify-between p-4 ${darkMode ? 'bg-slate-600 border-b border-slate-500' : 'bg-blue-50 border-b border-blue-200'}`
+        },
+          React.createElement('h3', {
+            className: `text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
+          }, `${pipelineStatusData.status} - Full Division Breakdown (${pipelineStatusData.count} projects)`),
+          React.createElement('button', {
+            onClick: () => setSelectedPipelineStatus(null),
+            className: `px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${darkMode ? 'bg-slate-700 text-gray-200 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
+          }, 'Close ✕')
+        ),
+
+        // Division breakdown table
+        React.createElement('div', {
+          className: 'p-4'
+        },
+          React.createElement('div', {
+            className: 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'
+          },
+            // Division breakdown chart
+            React.createElement('div', null,
+              React.createElement('h4', {
+                className: `text-md font-semibold mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+              }, 'Division Distribution'),
+              React.createElement(DataTable, {
+                data: pipelineStatusData.allDivisions,
+                columns: [
+                  { header: 'Division', key: 'division' },
+                  { header: 'Projects', key: 'count' },
+                  {
+                    header: '% of Status',
+                    render: (row) => `${Math.round((row.count / pipelineStatusData.count) * 100)}%`
+                  }
+                ]
+              })
+            ),
+
+            // Summary stats
+            React.createElement('div', {
+              className: 'space-y-4'
+            },
+              React.createElement('h4', {
+                className: `text-md font-semibold mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+              }, 'Summary Statistics'),
+              React.createElement('div', {
+                className: `p-4 rounded-lg ${darkMode ? 'bg-slate-600' : 'bg-white'} border ${darkMode ? 'border-slate-500' : 'border-gray-200'}`
+              },
+                React.createElement('div', {
+                  className: 'space-y-3'
+                },
+                  React.createElement('div', {
+                    className: 'flex items-center justify-between'
+                  },
+                    React.createElement('span', {
+                      className: `${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+                    }, 'Total Projects:'),
+                    React.createElement('span', {
+                      className: `text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
+                    }, pipelineStatusData.count)
+                  ),
+                  React.createElement('div', {
+                    className: 'flex items-center justify-between'
+                  },
+                    React.createElement('span', {
+                      className: `${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+                    }, 'Divisions Involved:'),
+                    React.createElement('span', {
+                      className: `text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
+                    }, pipelineStatusData.allDivisions.length)
+                  ),
+                  React.createElement('div', {
+                    className: 'flex items-center justify-between'
+                  },
+                    React.createElement('span', {
+                      className: `${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+                    }, '% of Total Portfolio:'),
+                    React.createElement('span', {
+                      className: `text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
+                    }, `${Math.round((pipelineStatusData.count / analyticsData.totalProjects) * 100)}%`)
+                  ),
+                  React.createElement('div', {
+                    className: 'flex items-center justify-between'
+                  },
+                    React.createElement('span', {
+                      className: `${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+                    }, 'Top Division:'),
+                    React.createElement('span', {
+                      className: `font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
+                    }, pipelineStatusData.allDivisions[0]?.division || 'N/A')
+                  )
+                )
+              )
+            )
+          ),
+
+          // All projects in this status
+          React.createElement('div', {
+            className: 'mt-6'
+          },
+            React.createElement('h4', {
+              className: `text-md font-semibold mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+            }, 'All Projects in this Status'),
+            React.createElement(DataTable, {
+              data: pipelineStatusData.projects,
+              columns: [
+                { header: 'Project', key: 'name' },
+                { header: 'Division', key: 'division' },
+                {
+                  header: 'RAG Status',
+                  render: (row) => React.createElement('span', {
+                    className: `px-2 py-1 rounded text-white text-xs font-semibold ${row.ragStatus.color}`
+                  }, row.ragStatus.label)
+                },
+                {
+                  header: 'Due Date',
+                  render: (row) => formatDate(row.finishDate)
+                },
+                { header: 'PM', key: 'projectManager' },
+                { header: 'BP', key: 'businessPartner' }
+              ]
+            })
+          )
+        )
       )
     ),
 
