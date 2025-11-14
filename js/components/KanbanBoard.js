@@ -345,7 +345,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
   const hasNotes = project.notes && project.notes.trim().length > 0;
 
   return React.createElement('div', {
-    className: `${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border-l-4 ${ragStatus.borderColor} hover:shadow-md transition-shadow cursor-move relative`,
+    className: `kanban-card ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'} rounded-lg p-4 mb-3 shadow-sm border-l-4 ${ragStatus.borderColor} cursor-move relative`,
     draggable: true,
     onDragStart: (e) => {
       e.dataTransfer.setData('projectName', project.name);
@@ -363,8 +363,8 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
       className: `absolute top-2 right-2 p-1.5 rounded-lg transition-all ${
         hasNotes
           ? darkMode
-            ? 'bg-blue-600 text-white hover:bg-blue-700'
-            : 'bg-blue-500 text-white hover:bg-blue-600'
+            ? 'bg-blue-600 text-white hover:bg-blue-700 notes-icon-pulse'
+            : 'bg-blue-500 text-white hover:bg-blue-600 notes-icon-pulse'
           : darkMode
             ? 'bg-slate-600 text-gray-400 hover:bg-slate-500 hover:text-gray-300'
             : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
