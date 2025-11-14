@@ -322,7 +322,7 @@ const NotesModal = ({ project, darkMode, onClose, onSave, position }) => {
 /**
  * KanbanCard Component
  */
-const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings, onOpenNotes }) => {
+const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings, onOpenNotes, onEditProject }) => {
   // Default kanban settings if not provided
   const settings = kanbanSettings || {
     showRAG: true,
@@ -353,41 +353,74 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
       e.dataTransfer.setData('fromColumn', column);
     }
   },
-    // Notes Icon Button (top-right corner)
-    React.createElement('button', {
-      type: 'button',
-      onClick: (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onOpenNotes(project, e);
-      },
-      className: `absolute top-2 right-2 p-1.5 rounded-lg transition-all ${
-        hasNotes
-          ? darkMode
-            ? 'bg-blue-600 text-white hover:bg-blue-700 notes-icon-pulse'
-            : 'bg-blue-500 text-white hover:bg-blue-600 notes-icon-pulse'
-          : darkMode
-            ? 'bg-slate-600 text-gray-400 hover:bg-slate-500 hover:text-gray-300'
-            : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
-      }`,
-      title: hasNotes ? 'View/Edit Notes' : 'Add Notes'
+    // Action buttons container (top-right corner)
+    React.createElement('div', {
+      className: 'absolute top-2 right-2 flex flex-col gap-1'
     },
-      React.createElement('svg', {
-        className: 'w-4 h-4',
-        fill: 'none',
-        stroke: 'currentColor',
-        strokeWidth: 2,
-        strokeLinecap: 'round',
-        strokeLinejoin: 'round',
-        viewBox: '0 0 24 24'
+      // Notes Icon Button
+      React.createElement('button', {
+        type: 'button',
+        onClick: (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onOpenNotes(project, e);
+        },
+        className: `p-1.5 rounded-lg transition-all ${
+          hasNotes
+            ? darkMode
+              ? 'bg-blue-600 text-white hover:bg-blue-700 notes-icon-pulse'
+              : 'bg-blue-500 text-white hover:bg-blue-600 notes-icon-pulse'
+            : darkMode
+              ? 'bg-slate-600 text-gray-400 hover:bg-slate-500 hover:text-gray-300'
+              : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
+        }`,
+        title: hasNotes ? 'View/Edit Notes' : 'Add Notes'
       },
-        React.createElement('path', { d: 'M12 20h9' }),
-        React.createElement('path', { d: 'M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' })
+        React.createElement('svg', {
+          className: 'w-4 h-4',
+          fill: 'none',
+          stroke: 'currentColor',
+          strokeWidth: 2,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+          viewBox: '0 0 24 24'
+        },
+          React.createElement('path', { d: 'M12 20h9' }),
+          React.createElement('path', { d: 'M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' })
+        ),
+        // Badge indicator when notes exist
+        hasNotes && React.createElement('span', {
+          className: 'absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border-2 border-white'
+        })
       ),
-      // Badge indicator when notes exist
-      hasNotes && React.createElement('span', {
-        className: 'absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border-2 border-white'
-      })
+      // Edit Icon Button
+      React.createElement('button', {
+        type: 'button',
+        onClick: (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onEditProject(project.name);
+        },
+        className: `p-1.5 rounded-lg transition-all ${
+          darkMode
+            ? 'bg-slate-600 text-gray-400 hover:bg-indigo-600 hover:text-white'
+            : 'bg-gray-100 text-gray-400 hover:bg-indigo-500 hover:text-white'
+        }`,
+        title: 'Edit in Projects Tab'
+      },
+        React.createElement('svg', {
+          className: 'w-4 h-4',
+          fill: 'none',
+          stroke: 'currentColor',
+          strokeWidth: 2,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+          viewBox: '0 0 24 24'
+        },
+          React.createElement('path', { d: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' }),
+          React.createElement('path', { d: 'M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' })
+        )
+      )
     ),
 
     // Project Name
@@ -432,7 +465,7 @@ const KanbanCard = ({ project, column, darkMode, onStatusChange, kanbanSettings,
 /**
  * KanbanColumn Component
  */
-const KanbanColumn = ({ title, projects, column, darkMode, onDrop, kanbanSettings, onOpenNotes }) => {
+const KanbanColumn = ({ title, projects, column, darkMode, onDrop, kanbanSettings, onOpenNotes, onEditProject }) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragOver = (e) => {
@@ -484,7 +517,8 @@ const KanbanColumn = ({ title, projects, column, darkMode, onDrop, kanbanSetting
               column,
               darkMode,
               kanbanSettings,
-              onOpenNotes
+              onOpenNotes,
+              onEditProject
             })
           )
         : React.createElement('div', {
@@ -497,7 +531,7 @@ const KanbanColumn = ({ title, projects, column, darkMode, onDrop, kanbanSetting
 /**
  * Main KanbanBoard Component
  */
-export const KanbanBoard = ({ projects, updateProjectByName, darkMode, kanbanSettings }) => {
+export const KanbanBoard = ({ projects, updateProjectByName, navigateToProject, darkMode, kanbanSettings }) => {
   const { useEffect, useRef } = React;
 
   // Refs for scroll synchronization
@@ -730,7 +764,8 @@ export const KanbanBoard = ({ projects, updateProjectByName, darkMode, kanbanSet
           darkMode,
           onDrop: handleDrop,
           kanbanSettings: settings,
-          onOpenNotes: handleOpenNotes
+          onOpenNotes: handleOpenNotes,
+          onEditProject: navigateToProject
         })
       )
     ),
