@@ -303,43 +303,41 @@ export function Reporting({
       .sort((a, b) => (b.delay || 0) - (a.delay || 0));
 
     // Report 9: Monthly Trends
-    const monthlyTrends = useMemo(() => {
-      const monthlyData = {};
+    const monthlyData = {};
 
-      filteredProjects.forEach(project => {
-        // Track project starts (Implementation start)
-        if (project.implementation?.start) {
-          const startDate = new Date(project.implementation.start);
-          const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`;
-          if (!monthlyData[monthKey]) {
-            monthlyData[monthKey] = { month: monthKey, started: 0, completed: 0, inProgress: 0 };
-          }
-          monthlyData[monthKey].started++;
+    filteredProjects.forEach(project => {
+      // Track project starts (Implementation start)
+      if (project.implementation?.start) {
+        const startDate = new Date(project.implementation.start);
+        const monthKey = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`;
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = { month: monthKey, started: 0, completed: 0, inProgress: 0 };
         }
+        monthlyData[monthKey].started++;
+      }
 
-        // Track project completions (Implementation finish)
-        if (project.implementation?.finish) {
-          const finishDate = new Date(project.implementation.finish);
-          const monthKey = `${finishDate.getFullYear()}-${String(finishDate.getMonth() + 1).padStart(2, '0')}`;
-          if (!monthlyData[monthKey]) {
-            monthlyData[monthKey] = { month: monthKey, started: 0, completed: 0, inProgress: 0 };
-          }
-          monthlyData[monthKey].completed++;
+      // Track project completions (Implementation finish)
+      if (project.implementation?.finish) {
+        const finishDate = new Date(project.implementation.finish);
+        const monthKey = `${finishDate.getFullYear()}-${String(finishDate.getMonth() + 1).padStart(2, '0')}`;
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = { month: monthKey, started: 0, completed: 0, inProgress: 0 };
         }
-      });
+        monthlyData[monthKey].completed++;
+      }
+    });
 
-      // Convert to array and sort by month
-      const trendsArray = Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
+    // Convert to array and sort by month
+    const trendsArray = Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
 
-      // Calculate running in-progress count
-      let runningInProgress = 0;
-      trendsArray.forEach(item => {
-        runningInProgress += item.started - item.completed;
-        item.inProgress = Math.max(0, runningInProgress);
-      });
+    // Calculate running in-progress count
+    let runningInProgress = 0;
+    trendsArray.forEach(item => {
+      runningInProgress += item.started - item.completed;
+      item.inProgress = Math.max(0, runningInProgress);
+    });
 
-      return trendsArray;
-    }, [filteredProjects]);
+    const monthlyTrends = trendsArray;
 
     return {
       totalProjects,
