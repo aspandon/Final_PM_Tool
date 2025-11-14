@@ -318,7 +318,7 @@ export function ProjectForm({
               className: `text-xs font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-1 mb-1`
             },
               '📅 ',
-              React.createElement('span', null, 'Planned (Inv. Proposal)')
+              React.createElement('span', null, 'PM Plan (In. Proposal)')
             ),
             React.createElement('input', {
               type: 'date',
@@ -343,7 +343,7 @@ export function ProjectForm({
               className: `text-xs font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-1 mb-1`
             },
               '📅 ',
-              React.createElement('span', null, 'Actual Implementation Phase')
+              React.createElement('span', null, 'Initial Official Plan')
             ),
             React.createElement('input', {
               type: 'date',
