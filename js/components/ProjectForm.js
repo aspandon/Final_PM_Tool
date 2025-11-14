@@ -30,6 +30,94 @@ export function ProjectForm({
     React.createElement('path', { d: 'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16' })
   );
 
+  // Get Kanban status display name
+  const getStatusDisplay = (kanbanStatus) => {
+    const statusMap = {
+      'onhold': 'On Hold',
+      'backlog': 'Backlog',
+      'psdpre': 'PSD & Inv. Prop Pre',
+      'psdready': 'PSD & Inv. Prop. Ready',
+      'invapproved': 'Inv. Prop. Approved',
+      'procurement': 'Procurement',
+      'implementation': 'Implementation',
+      'uat': 'UAT',
+      'done': 'Done'
+    };
+    return statusMap[kanbanStatus] || 'Backlog';
+  };
+
+  // Get status badge color for light mode
+  const getStatusColorLight = (kanbanStatus) => {
+    const colorMap = {
+      'onhold': 'bg-yellow-500/20 text-yellow-700 border-yellow-500',
+      'backlog': 'bg-gray-500/20 text-gray-700 border-gray-500',
+      'psdpre': 'bg-blue-500/20 text-blue-700 border-blue-500',
+      'psdready': 'bg-cyan-500/20 text-cyan-700 border-cyan-500',
+      'invapproved': 'bg-green-500/20 text-green-700 border-green-500',
+      'procurement': 'bg-purple-500/20 text-purple-700 border-purple-500',
+      'implementation': 'bg-indigo-500/20 text-indigo-700 border-indigo-500',
+      'uat': 'bg-orange-500/20 text-orange-700 border-orange-500',
+      'done': 'bg-emerald-500/20 text-emerald-700 border-emerald-500'
+    };
+    return colorMap[kanbanStatus] || 'bg-gray-500/20 text-gray-700 border-gray-500';
+  };
+
+  // Get status badge color for dark mode
+  const getStatusColorDark = (kanbanStatus) => {
+    const colorMap = {
+      'onhold': 'bg-yellow-500/30 text-yellow-300 border-yellow-400',
+      'backlog': 'bg-gray-500/30 text-gray-300 border-gray-400',
+      'psdpre': 'bg-blue-500/30 text-blue-300 border-blue-400',
+      'psdready': 'bg-cyan-500/30 text-cyan-300 border-cyan-400',
+      'invapproved': 'bg-green-500/30 text-green-300 border-green-400',
+      'procurement': 'bg-purple-500/30 text-purple-300 border-purple-400',
+      'implementation': 'bg-indigo-500/30 text-indigo-300 border-indigo-400',
+      'uat': 'bg-orange-500/30 text-orange-300 border-orange-400',
+      'done': 'bg-emerald-500/30 text-emerald-300 border-emerald-400'
+    };
+    return colorMap[kanbanStatus] || 'bg-gray-500/30 text-gray-300 border-gray-400';
+  };
+
+  // Calculate budget totals
+  const calculateBudgetTotals = () => {
+    const capexYear1 = parseFloat(project.capexYear1) || 0;
+    const capexYear2 = parseFloat(project.capexYear2) || 0;
+    const capexYear3 = parseFloat(project.capexYear3) || 0;
+    const capexYear4 = parseFloat(project.capexYear4) || 0;
+    const capexYear5 = parseFloat(project.capexYear5) || 0;
+
+    const opexYear1 = parseFloat(project.opexYear1) || 0;
+    const opexYear2 = parseFloat(project.opexYear2) || 0;
+    const opexYear3 = parseFloat(project.opexYear3) || 0;
+    const opexYear4 = parseFloat(project.opexYear4) || 0;
+    const opexYear5 = parseFloat(project.opexYear5) || 0;
+
+    const totalCapex = capexYear1 + capexYear2 + capexYear3 + capexYear4 + capexYear5;
+    const totalOpex = opexYear1 + opexYear2 + opexYear3 + opexYear4 + opexYear5;
+    const totalBudget = totalCapex + totalOpex;
+
+    const totalYear1 = capexYear1 + opexYear1;
+    const totalYear2 = capexYear2 + opexYear2;
+    const totalYear3 = capexYear3 + opexYear3;
+    const totalYear4 = capexYear4 + opexYear4;
+    const totalYear5 = capexYear5 + opexYear5;
+
+    return {
+      totalCapex,
+      totalOpex,
+      totalBudget,
+      totalYear1,
+      totalYear2,
+      totalYear3,
+      totalYear4,
+      totalYear5
+    };
+  };
+
+  const budgetTotals = calculateBudgetTotals();
+  const firstYear = parseInt(project.budgetFirstYear) || new Date().getFullYear();
+  const currentStatus = project.kanbanStatus || 'backlog';
+
   return React.createElement('div', {
     key: pIndex,
     className: `relative border-4 card-modern card-glow ${
@@ -42,10 +130,10 @@ export function ProjectForm({
     // Compact Header
     React.createElement('div', {
       className: 'px-3 py-2',
-      style: { 
-        background: darkMode 
-          ? 'linear-gradient(to right, rgba(51, 65, 85, 0.85), rgba(71, 85, 105, 0.85))' 
-          : 'linear-gradient(to right, rgba(147, 197, 253, 0.85), rgba(165, 180, 252, 0.85))' 
+      style: {
+        background: darkMode
+          ? 'linear-gradient(to right, rgba(51, 65, 85, 0.85), rgba(71, 85, 105, 0.85))'
+          : 'linear-gradient(to right, rgba(147, 197, 253, 0.85), rgba(165, 180, 252, 0.85))'
       }
     },
       React.createElement('div', {
@@ -62,6 +150,9 @@ export function ProjectForm({
           placeholder: 'Project Name',
           disabled: isEditLocked
         }),
+        React.createElement('div', {
+          className: `px-3 py-1.5 text-xs font-bold rounded-lg border-2 ${darkMode ? getStatusColorDark(currentStatus) : getStatusColorLight(currentStatus)} whitespace-nowrap ${isEditLocked ? 'opacity-60' : ''}`
+        }, getStatusDisplay(currentStatus)),
         React.createElement('input', {
           type: 'text',
           value: project.division,
@@ -359,6 +450,148 @@ export function ProjectForm({
               className: `w-full px-1.5 py-0.5 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-200 bg-white'} rounded focus:ring-1 focus:ring-purple-500 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
               disabled: isEditLocked
             })
+          )
+        )
+      )
+    ),
+
+    // Budget Section - Full Width
+    React.createElement('div', {
+      className: `p-3 border-t-2 ${darkMode ? 'border-slate-600' : 'border-gray-200'}`
+    },
+      React.createElement('div', {
+        className: `rounded-lg border ${darkMode ? 'border-slate-600 bg-slate-700/50' : 'border-green-200 bg-green-50/50'} p-3`
+      },
+        // Budget Header
+        React.createElement('div', {
+          className: `text-sm font-bold ${darkMode ? 'text-green-300' : 'text-green-900'} mb-2 flex items-center gap-2`
+        },
+          React.createElement('div', {
+            className: 'w-0.5 h-3 bg-green-600 rounded'
+          }),
+          '💰 Project Budget'
+        ),
+
+        // Budget Grid
+        React.createElement('div', {
+          className: 'grid grid-cols-6 gap-2'
+        },
+          // Year Labels Row
+          React.createElement('div', {
+            className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center`
+          }, ''),
+          ...[1, 2, 3, 4, 5].map(yearNum =>
+            React.createElement('div', {
+              key: `year-label-${yearNum}`,
+              className: `text-xs font-bold ${darkMode ? 'text-green-300' : 'text-green-800'} text-center`
+            }, firstYear + yearNum - 1)
+          ),
+
+          // CAPEX Row
+          React.createElement('div', {
+            className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center`
+          }, '💵 CAPEX'),
+          ...[1, 2, 3, 4, 5].map(yearNum =>
+            React.createElement('input', {
+              key: `capex-year-${yearNum}`,
+              type: 'number',
+              step: '0.01',
+              value: project[`capexYear${yearNum}`] || '',
+              onChange: (e) => updateProject(pIndex, `capexYear${yearNum}`, e.target.value),
+              className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-green-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+              placeholder: '0',
+              disabled: isEditLocked
+            })
+          ),
+
+          // OPEX Row
+          React.createElement('div', {
+            className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center`
+          }, '📊 OPEX'),
+          ...[1, 2, 3, 4, 5].map(yearNum =>
+            React.createElement('input', {
+              key: `opex-year-${yearNum}`,
+              type: 'number',
+              step: '0.01',
+              value: project[`opexYear${yearNum}`] || '',
+              onChange: (e) => updateProject(pIndex, `opexYear${yearNum}`, e.target.value),
+              className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-green-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+              placeholder: '0',
+              disabled: isEditLocked
+            })
+          ),
+
+          // Total per Year Row (read-only calculated)
+          React.createElement('div', {
+            className: `text-xs font-bold ${darkMode ? 'text-green-300' : 'text-green-800'} flex items-center`
+          }, '💎 Total/Year'),
+          ...[1, 2, 3, 4, 5].map(yearNum =>
+            React.createElement('div', {
+              key: `total-year-${yearNum}`,
+              className: `px-2 py-1 text-sm font-bold text-center rounded ${darkMode ? 'bg-slate-800 text-green-300' : 'bg-green-100 text-green-800'}`
+            }, budgetTotals[`totalYear${yearNum}`].toFixed(2))
+          )
+        ),
+
+        // Summary Totals
+        React.createElement('div', {
+          className: `mt-3 pt-3 border-t ${darkMode ? 'border-slate-600' : 'border-green-300'} grid grid-cols-4 gap-3`
+        },
+          // First Year Selector
+          React.createElement('div', {
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-green-200'} flex flex-col`
+          },
+            React.createElement('div', {
+              className: `text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+            }, '📅 First Budget Year'),
+            React.createElement('select', {
+              value: project.budgetFirstYear || new Date().getFullYear(),
+              onChange: (e) => updateProject(pIndex, 'budgetFirstYear', e.target.value),
+              className: `flex-1 px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-green-300 bg-white'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+              disabled: isEditLocked
+            },
+              // Generate year options from current year - 5 to current year + 10
+              Array.from({ length: 16 }, (_, i) => {
+                const year = new Date().getFullYear() - 5 + i;
+                return React.createElement('option', { key: year, value: year }, year);
+              })
+            )
+          ),
+
+          // Total CAPEX
+          React.createElement('div', {
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-green-200'}`
+          },
+            React.createElement('div', {
+              className: `text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+            }, 'Total CAPEX'),
+            React.createElement('div', {
+              className: `text-lg font-bold ${darkMode ? 'text-green-300' : 'text-green-700'}`
+            }, budgetTotals.totalCapex.toFixed(2))
+          ),
+
+          // Total OPEX
+          React.createElement('div', {
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-green-200'}`
+          },
+            React.createElement('div', {
+              className: `text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+            }, 'Total OPEX'),
+            React.createElement('div', {
+              className: `text-lg font-bold ${darkMode ? 'text-blue-300' : 'text-blue-700'}`
+            }, budgetTotals.totalOpex.toFixed(2))
+          ),
+
+          // Total Budget
+          React.createElement('div', {
+            className: `p-2 rounded ${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700' : 'bg-gradient-to-br from-green-100 to-blue-100'} border-2 ${darkMode ? 'border-green-500' : 'border-green-400'}`
+          },
+            React.createElement('div', {
+              className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`
+            }, '💰 TOTAL BUDGET'),
+            React.createElement('div', {
+              className: `text-xl font-bold ${darkMode ? 'text-green-400' : 'text-green-800'}`
+            }, budgetTotals.totalBudget.toFixed(2))
           )
         )
       )

@@ -14,6 +14,7 @@ import { ResourcesChart } from './components/ResourcesChart.js';
 import { ActualsTimeline } from './components/ActualsTimeline.js';
 import { Reporting } from './components/Reporting.js';
 import { KanbanBoard } from './components/KanbanBoard.js';
+import { Actions } from './components/Actions.js';
 import { Tasks } from './components/Tasks.js';
 
 const { useState, useRef, useMemo, useEffect } = React;
@@ -134,6 +135,23 @@ function GanttChart() {
   },
     React.createElement('polyline', { points: '9 11 12 14 22 4' }),
     React.createElement('path', { d: 'M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11' })
+  );
+
+  const ClipboardList = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('rect', { width: '8', height: '4', x: '8', y: '2', rx: '1', ry: '1' }),
+    React.createElement('path', { d: 'M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2' }),
+    React.createElement('path', { d: 'M12 11h4' }),
+    React.createElement('path', { d: 'M12 16h4' }),
+    React.createElement('path', { d: 'M8 11h.01' }),
+    React.createElement('path', { d: 'M8 16h.01' })
   );
 
   const Lock = ({ className }) => React.createElement('svg', {
@@ -383,6 +401,7 @@ function GanttChart() {
    * Add a new empty project
    */
   const addProject = () => {
+    const currentYear = new Date().getFullYear();
     const newProject = {
       name: '',
       division: '',
@@ -399,7 +418,21 @@ function GanttChart() {
       psd: { start: '', finish: '' },
       investment: { start: '', finish: '' },
       procurement: { start: '', finish: '' },
-      implementation: { start: '', finish: '' }
+      implementation: { start: '', finish: '' },
+      // Budget fields
+      budgetFirstYear: currentYear,
+      capexYear1: '',
+      capexYear2: '',
+      capexYear3: '',
+      capexYear4: '',
+      capexYear5: '',
+      opexYear1: '',
+      opexYear2: '',
+      opexYear3: '',
+      opexYear4: '',
+      opexYear5: '',
+      // Action plan
+      actionPlan: []
     };
     setProjects([...projects, newProject]);
   };
@@ -922,6 +955,19 @@ function GanttChart() {
     });
   };
 
+  /**
+   * Render actions view
+   */
+  const renderActionsView = () => {
+    return React.createElement(Actions, {
+      projects,
+      filteredProjects,
+      updateProject,
+      darkMode,
+      isEditLocked
+    });
+  };
+
   // ===== MAIN RENDER =====
   
   return React.createElement('div', {
@@ -1028,6 +1074,7 @@ function GanttChart() {
           renderTabButton('projects', 'Projects', FolderKanban),
           renderTabButton('planner', 'Planner', Calendar),
           renderTabButton('kanban', 'Kanban', LayoutDashboard),
+          renderTabButton('actions', 'Actions', ClipboardList),
           renderTabButton('tasks', 'Tasks', CheckSquare),
           renderTabButton('resources', 'Resources', Users),
           renderTabButton('overview', 'Divisions', PieChart),
@@ -1053,6 +1100,7 @@ function GanttChart() {
           activeTab === 'projects' && renderProjectsView(),
           activeTab === 'planner' && renderPlannerView(),
           activeTab === 'kanban' && renderKanbanView(),
+          activeTab === 'actions' && renderActionsView(),
           activeTab === 'tasks' && renderTasksView(),
           activeTab === 'overview' && renderOverviewView(),
           activeTab === 'resources' && renderResourcesView(),
