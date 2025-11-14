@@ -97,6 +97,7 @@ const getProjectColumn = (project) => {
  */
 const getRelevantFinishDate = (project, column) => {
   switch (column) {
+    case 'backlog':
     case 'psdpre':
     case 'psdready':
       return project.psd?.finish;
@@ -590,8 +591,8 @@ export const KanbanBoard = ({ projects, updateProjectByName, darkMode, kanbanSet
   }, [projects.length]); // Re-sync when projects change
 
   const columns = [
-    { key: 'backlog', title: 'Backlog' },
     { key: 'onhold', title: 'On Hold' },
+    { key: 'backlog', title: 'Backlog' },
     { key: 'psdpre', title: 'PSD & Inv. Prop Pre' },
     { key: 'psdready', title: 'PSD & Inv. Prop. Ready' },
     { key: 'invapproved', title: 'Inv. Prop. Approved' },
