@@ -1,4 +1,6 @@
 // js/components/Tasks.js
+import { saveTasks, loadTasks } from '../utils/storage.js';
+
 const { useState, useEffect } = React;
 
 /**
@@ -503,26 +505,56 @@ export const Tasks = ({ darkMode }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
 
-  // Load tasks from localStorage on mount
+  // Load tasks from Supabase/localStorage on mount
   useEffect(() => {
-    const savedTasks = localStorage.getItem('pmtool_personal_tasks');
-    if (savedTasks) {
-      try {
-        const parsed = JSON.parse(savedTasks);
-        setTasks(parsed);
-        console.log('Loaded', parsed.length, 'personal tasks from localStorage');
-      } catch (error) {
-        console.error('Error loading tasks:', error);
+    const loadData = async () => {
+      const savedTasks = await loadTasks();
+      if (savedTasks && savedTasks.length > 0) {
+        setTasks(savedTasks);
+        console.log('Loaded', savedTasks.length, 'personal tasks');
       }
-    }
+    };
+    loadData();
   }, []);
 
-  // Save tasks to localStorage whenever they change
+  // Save tasks to Supabase and localStorage whenever they change
   useEffect(() => {
     if (tasks.length >= 0) {
-      localStorage.setItem('pmtool_personal_tasks', JSON.stringify(tasks));
-      console.log('Saved', tasks.length, 'personal tasks to localStorage');
+      const saveData = async () => {
+        const success = await saveTasks(tasks);
+        if (success) {
+          console.log('Auto-saved', tasks.length, 'personal tasks to Supabase');
+        } else {
+          console.error('Failed to save personal tasks');
+        }
+      };
+      saveData();
     }
+  }, [tasks]);
+
+  // Auto-refresh: Periodically fetch latest data from Supabase
+  // Runs every 45 seconds to check for updates from other users
+  useEffect(() => {
+    const refreshInterval = setInterval(async () => {
+      try {
+        const latestTasks = await loadTasks();
+        if (latestTasks && latestTasks.length >= 0) {
+          // Check if data has actually changed by comparing JSON strings
+          const currentJSON = JSON.stringify(tasks);
+          const latestJSON = JSON.stringify(latestTasks);
+
+          if (currentJSON !== latestJSON) {
+            console.log('🔄 Auto-refresh: New tasks data detected from Supabase');
+            setTasks(latestTasks);
+          }
+        }
+      } catch (error) {
+        console.error('Error during tasks auto-refresh:', error);
+      }
+    }, 45000); // Refresh every 45 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(refreshInterval);
   }, [tasks]);
 
   // Add or update task
