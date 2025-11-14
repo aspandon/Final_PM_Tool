@@ -11,6 +11,8 @@ export const exportToExcel = (projects) => {
     'BP Implementation Allocation (Man Days)': p.bpImplementationAllocation,
     'PM External Allocation (FTEs)': p.pmExternalAllocation,
     'QA External Allocation (FTEs)': p.qaExternalAllocation,
+    'Kanban Status': p.kanbanStatus || 'backlog',
+    'Notes': p.notes || '',
     'BP Implementation Start': p.bpImplementation.start ? new Date(p.bpImplementation.start) : '',
     'BP Implementation Finish': p.bpImplementation.finish ? new Date(p.bpImplementation.finish) : '',
     'PM Plan (In. Proposal) Start': p.plannedInvestment.start ? new Date(p.plannedInvestment.start) : '',
@@ -28,8 +30,9 @@ export const exportToExcel = (projects) => {
   }));
 
   const ws = XLSX.utils.json_to_sheet(data, { cellDates: true, dateNF: 'yyyy-mm-dd' });
-  
-  const dateColumns = ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W'];
+
+  // Date columns: L through Y (Kanban Status and Notes are J and K now)
+  const dateColumns = ['L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'];
   const range = XLSX.utils.decode_range(ws['!ref']);
   
   for (let row = range.s.r + 1; row <= range.e.r; row++) {
@@ -87,29 +90,31 @@ export const importFromExcel = (file, callback) => {
         bpImplementationAllocation: row['BP Implementation Allocation (Man Days)'] || '',
         pmExternalAllocation: row['PM External Allocation (FTEs)'] || '',
         qaExternalAllocation: row['QA External Allocation (FTEs)'] || '',
-        bpImplementation: { 
-          start: formatDate(row['BP Implementation Start']), 
-          finish: formatDate(row['BP Implementation Finish']) 
+        kanbanStatus: row['Kanban Status'] || 'backlog',
+        notes: row['Notes'] || '',
+        bpImplementation: {
+          start: formatDate(row['BP Implementation Start']),
+          finish: formatDate(row['BP Implementation Finish'])
         },
         plannedInvestment: {
           start: formatDate(row['PM Plan (In. Proposal) Start']),
           finish: formatDate(row['PM Plan (In. Proposal) Finish'])
         },
-        actualDates: { 
-          start: formatDate(row['Actual Start Date']), 
-          finish: formatDate(row['Actual Finish Date']) 
+        actualDates: {
+          start: formatDate(row['Actual Start Date']),
+          finish: formatDate(row['Actual Finish Date'])
         },
-        psd: { 
-          start: formatDate(row['PSD Start']), 
-          finish: formatDate(row['PSD Finish']) 
+        psd: {
+          start: formatDate(row['PSD Start']),
+          finish: formatDate(row['PSD Finish'])
         },
-        investment: { 
-          start: formatDate(row['Investment Proposal Start']), 
-          finish: formatDate(row['Investment Proposal Finish']) 
+        investment: {
+          start: formatDate(row['Investment Proposal Start']),
+          finish: formatDate(row['Investment Proposal Finish'])
         },
-        procurement: { 
-          start: formatDate(row['Procurement Start']), 
-          finish: formatDate(row['Procurement Finish']) 
+        procurement: {
+          start: formatDate(row['Procurement Start']),
+          finish: formatDate(row['Procurement Finish'])
         },
         implementation: {
           start: formatDate(row['Implementation (Actual) Start']),
