@@ -25,6 +25,7 @@ export function ActionPlan({
   const [showTemplates, setShowTemplates] = React.useState(false);
   const [filters, setFilters] = React.useState({ status: [], priority: [], search: '' });
   const [draggedAction, setDraggedAction] = React.useState(null);
+  const [draggedTask, setDraggedTask] = React.useState(null);
 
   // Modern status workflow (4 states, no Review)
   const STATUSES = {
@@ -1144,7 +1145,6 @@ export function ActionPlan({
   // Board View (Kanban) - Phase 4 - Modern PM Tool Style with Drag & Drop
   const renderBoardView = () => {
     const statuses = ['not-started', 'blocked', 'in-progress', 'completed'];
-    const [draggedTask, setDraggedTask] = React.useState(null);
 
     // Handle drag start
     const handleDragStart = (task) => {
