@@ -153,14 +153,6 @@ export function ProjectForm({
         React.createElement('div', {
           className: `px-3 py-1.5 text-xs font-bold rounded-lg border-2 ${darkMode ? getStatusColorDark(currentStatus) : getStatusColorLight(currentStatus)} whitespace-nowrap ${isEditLocked ? 'opacity-60' : ''}`
         }, getStatusDisplay(currentStatus)),
-        React.createElement('input', {
-          type: 'text',
-          value: project.division,
-          onChange: (e) => updateProject(pIndex, 'division', e.target.value),
-          className: `w-36 text-sm font-semibold px-3 py-1.5 border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white input-glow'} rounded-lg placeholder-gray-400 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
-          placeholder: 'Division',
-          disabled: isEditLocked
-        }),
         React.createElement('button', {
           onClick: () => deleteProject(pIndex),
           className: `p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
