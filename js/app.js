@@ -892,6 +892,9 @@ function GanttChart() {
     return React.createElement(Reporting, {
       filteredProjects,
       projects,
+      isFilterActive,
+      filterStartDate,
+      filterEndDate,
       darkMode
     });
   };
