@@ -24,6 +24,7 @@ export function ActionPlan({
   const [currentView, setCurrentView] = React.useState('list'); // list, board, table
   const [showTemplates, setShowTemplates] = React.useState(false);
   const [filters, setFilters] = React.useState({ status: [], priority: [], search: '' });
+  const [draggedAction, setDraggedAction] = React.useState(null);
 
   // Modern status workflow (4 states, no Review)
   const STATUSES = {
@@ -405,6 +406,29 @@ export function ActionPlan({
       });
       updateActionPlan(newActionPlan);
     }
+  };
+
+  // Drag and drop handlers for Actions
+  const handleActionDragStart = (action) => {
+    setDraggedAction(action);
+  };
+
+  const handleActionDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleActionDrop = (targetAction) => {
+    if (!draggedAction || isEditLocked || draggedAction.id === targetAction.id) return;
+
+    const draggedIndex = actionPlan.findIndex(a => a.id === draggedAction.id);
+    const targetIndex = actionPlan.findIndex(a => a.id === targetAction.id);
+
+    const newActionPlan = [...actionPlan];
+    newActionPlan.splice(draggedIndex, 1);
+    newActionPlan.splice(targetIndex, 0, draggedAction);
+
+    updateActionPlan(newActionPlan);
+    setDraggedAction(null);
   };
 
   // Get all items for dependency selection
@@ -920,11 +944,17 @@ export function ActionPlan({
 
     return React.createElement('div', {
       key: action.id,
+      draggable: !isEditLocked,
+      onDragStart: () => handleActionDragStart(action),
+      onDragOver: handleActionDragOver,
+      onDrop: () => handleActionDrop(action),
       className: `group mb-4 rounded-xl overflow-hidden transition-all ${
         darkMode
           ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700/50'
           : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
-      } border shadow-lg hover:shadow-2xl ${action.status === 'completed' ? 'opacity-70' : ''}`
+      } border shadow-lg hover:shadow-2xl ${action.status === 'completed' ? 'opacity-70' : ''} ${
+        !isEditLocked ? 'cursor-grab active:cursor-grabbing' : ''
+      }`
     },
       // Action Header - Project-style with gradient background
       React.createElement('div', {
@@ -991,6 +1021,15 @@ export function ActionPlan({
               className: `absolute inset-0 flex items-center justify-center text-[10px] font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
             }, `${progress}%`)
           ),
+          // Task Count Badge
+          totalTasks > 0 && React.createElement('div', {
+            className: `px-2.5 py-1 rounded-lg text-xs font-bold ${
+              darkMode
+                ? 'bg-slate-600/50 text-gray-200 border border-slate-500'
+                : 'bg-blue-100 text-blue-700 border border-blue-300'
+            }`,
+            title: `${completedTasks}/${totalTasks} Tasks Complete`
+          }, `${totalTasks} ${totalTasks === 1 ? 'Task' : 'Tasks'}`),
           // Add Task Button (Templates style)
           !isEditLocked && React.createElement('button', {
             onClick: () => addTask(action.id),
@@ -1008,20 +1047,6 @@ export function ActionPlan({
             disabled: isEditLocked,
             title: 'Dependencies'
           }, '🔗'),
-          // Move Up
-          React.createElement('button', {
-            onClick: () => moveItem('action', ids, 'up'),
-            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`,
-            disabled: isEditLocked,
-            title: 'Move up'
-          }, '↑'),
-          // Move Down
-          React.createElement('button', {
-            onClick: () => moveItem('action', ids, 'down'),
-            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`,
-            disabled: isEditLocked,
-            title: 'Move down'
-          }, '↓'),
           // Delete Button (Project style)
           !isEditLocked && React.createElement('button', {
             onClick: () => deleteItem('action', ids),
@@ -1111,10 +1136,10 @@ export function ActionPlan({
         onClick: addAction,
         className: `px-6 py-3 rounded-xl font-bold shadow-lg transition-all transform hover:scale-105 ${
           darkMode
-            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white'
-            : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white'
+            ? 'bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white'
+            : 'bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white'
         }`
-      }, '✨ Add Action')
+      }, '+ Add Action')
     );
   }
 
@@ -1820,10 +1845,10 @@ export function ActionPlan({
         onClick: addAction,
         className: `w-full py-4 rounded-xl border-2 border-dashed font-bold transition-all shadow-sm hover:shadow-md ${
           darkMode
-            ? 'border-emerald-400/50 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:border-emerald-400'
-            : 'border-emerald-400 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:border-emerald-500'
+            ? 'border-sky-400/50 bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:border-sky-400'
+            : 'border-sky-400 bg-sky-50 hover:bg-sky-100 text-sky-700 hover:border-sky-500'
         }`
-      }, '✨ Add Action')
+      }, '+ Add Action')
     )
   );
 }
