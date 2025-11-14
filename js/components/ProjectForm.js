@@ -30,6 +30,54 @@ export function ProjectForm({
     React.createElement('path', { d: 'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16' })
   );
 
+  // Get Kanban status display name
+  const getStatusDisplay = (kanbanStatus) => {
+    const statusMap = {
+      'onhold': 'On Hold',
+      'backlog': 'Backlog',
+      'psdpre': 'PSD & Inv. Prop Pre',
+      'psdready': 'PSD & Inv. Prop. Ready',
+      'invapproved': 'Inv. Prop. Approved',
+      'procurement': 'Procurement',
+      'implementation': 'Implementation',
+      'uat': 'UAT',
+      'done': 'Done'
+    };
+    return statusMap[kanbanStatus] || 'Backlog';
+  };
+
+  // Get status badge color for light mode
+  const getStatusColorLight = (kanbanStatus) => {
+    const colorMap = {
+      'onhold': 'bg-yellow-500/20 text-yellow-700 border-yellow-500',
+      'backlog': 'bg-gray-500/20 text-gray-700 border-gray-500',
+      'psdpre': 'bg-blue-500/20 text-blue-700 border-blue-500',
+      'psdready': 'bg-cyan-500/20 text-cyan-700 border-cyan-500',
+      'invapproved': 'bg-green-500/20 text-green-700 border-green-500',
+      'procurement': 'bg-purple-500/20 text-purple-700 border-purple-500',
+      'implementation': 'bg-indigo-500/20 text-indigo-700 border-indigo-500',
+      'uat': 'bg-orange-500/20 text-orange-700 border-orange-500',
+      'done': 'bg-emerald-500/20 text-emerald-700 border-emerald-500'
+    };
+    return colorMap[kanbanStatus] || 'bg-gray-500/20 text-gray-700 border-gray-500';
+  };
+
+  // Get status badge color for dark mode
+  const getStatusColorDark = (kanbanStatus) => {
+    const colorMap = {
+      'onhold': 'bg-yellow-500/30 text-yellow-300 border-yellow-400',
+      'backlog': 'bg-gray-500/30 text-gray-300 border-gray-400',
+      'psdpre': 'bg-blue-500/30 text-blue-300 border-blue-400',
+      'psdready': 'bg-cyan-500/30 text-cyan-300 border-cyan-400',
+      'invapproved': 'bg-green-500/30 text-green-300 border-green-400',
+      'procurement': 'bg-purple-500/30 text-purple-300 border-purple-400',
+      'implementation': 'bg-indigo-500/30 text-indigo-300 border-indigo-400',
+      'uat': 'bg-orange-500/30 text-orange-300 border-orange-400',
+      'done': 'bg-emerald-500/30 text-emerald-300 border-emerald-400'
+    };
+    return colorMap[kanbanStatus] || 'bg-gray-500/30 text-gray-300 border-gray-400';
+  };
+
   // Calculate budget totals
   const calculateBudgetTotals = () => {
     const capexYear1 = parseFloat(project.capexYear1) || 0;
@@ -68,6 +116,7 @@ export function ProjectForm({
 
   const budgetTotals = calculateBudgetTotals();
   const firstYear = parseInt(project.budgetFirstYear) || new Date().getFullYear();
+  const currentStatus = project.kanbanStatus || 'backlog';
 
   return React.createElement('div', {
     key: pIndex,
@@ -101,6 +150,9 @@ export function ProjectForm({
           placeholder: 'Project Name',
           disabled: isEditLocked
         }),
+        React.createElement('div', {
+          className: `px-3 py-1.5 text-xs font-bold rounded-lg border-2 ${darkMode ? getStatusColorDark(currentStatus) : getStatusColorLight(currentStatus)} whitespace-nowrap ${isEditLocked ? 'opacity-60' : ''}`
+        }, getStatusDisplay(currentStatus)),
         React.createElement('input', {
           type: 'text',
           value: project.division,
