@@ -431,8 +431,13 @@ function GanttChart() {
       opexYear3: '',
       opexYear4: '',
       opexYear5: '',
-      // Action plan
-      actionPlan: []
+      // Action plan with enhanced structure
+      actionPlan: [],
+      // Action plan settings
+      actionPlanSettings: {
+        automationRules: [],
+        templates: []
+      }
     };
     setProjects([...projects, newProject]);
   };
