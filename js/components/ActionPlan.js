@@ -1060,12 +1060,10 @@ export function ActionPlan({
       React.createElement('div', {
         className: `p-3 ${darkMode ? 'bg-slate-800/30' : 'bg-blue-50/20'}`
       },
-        // Row: Status, Priority, Dates
+        // Row: Priority, Dates
         React.createElement('div', {
           className: 'flex items-center gap-3 mb-3'
         },
-          // Status dropdown
-          renderStatusDropdown(action, 'action', ids),
           // Priority dropdown
           renderPriorityDropdown(action, 'action', ids),
           // Start Date
