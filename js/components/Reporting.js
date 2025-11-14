@@ -165,6 +165,7 @@ export function Reporting({
   const [selectedDivision, setSelectedDivision] = useState(null);
   const [selectedRAGStatus, setSelectedRAGStatus] = useState(null);
   const [selectedKanbanStatus, setSelectedKanbanStatus] = useState(null);
+  const [selectedKPIFilter, setSelectedKPIFilter] = useState(null); // 'total', 'red', 'amber', 'green', 'onhold', 'completed'
 
   // Calculate all analytics data
   const analyticsData = useMemo(() => {
@@ -386,10 +387,40 @@ export function Reporting({
     setSelectedKanbanStatus(null);
   };
 
+  // Handle KPI card click
+  const handleKPICardClick = (filterType) => {
+    // Toggle: if same card clicked, close it; otherwise open new one
+    setSelectedKPIFilter(selectedKPIFilter === filterType ? null : filterType);
+  };
+
+  // Get filtered projects based on selected KPI
+  const kpiFilteredProjects = useMemo(() => {
+    if (!selectedKPIFilter) return [];
+
+    switch (selectedKPIFilter) {
+      case 'total':
+        return analyticsData.projectsWithRAG;
+      case 'red':
+        return analyticsData.projectsWithRAG.filter(p => p.ragStatus.label === 'Red');
+      case 'amber':
+        return analyticsData.projectsWithRAG.filter(p => p.ragStatus.label === 'Amber');
+      case 'green':
+        return analyticsData.projectsWithRAG.filter(p => p.ragStatus.label === 'Green');
+      case 'onhold':
+        return analyticsData.projectsWithRAG.filter(p => p.column === 'onhold');
+      case 'completed':
+        return analyticsData.projectsWithRAG.filter(p => p.column === 'done');
+      default:
+        return [];
+    }
+  }, [selectedKPIFilter, analyticsData.projectsWithRAG]);
+
   // KPI Card Component
-  const KPICard = ({ title, value, percentage, color, icon }) => {
+  const KPICard = ({ title, value, percentage, color, icon, filterType, onClick }) => {
+    const isSelected = selectedKPIFilter === filterType;
     return React.createElement('div', {
-      className: `rounded-lg p-4 ${darkMode ? 'bg-slate-700' : 'bg-white'} border-l-4 ${color} shadow-md`
+      className: `rounded-lg p-4 ${darkMode ? 'bg-slate-700' : 'bg-white'} border-l-4 ${color} shadow-md cursor-pointer transition-all transform hover:scale-105 hover:shadow-xl ${isSelected ? 'ring-2 ring-blue-500 scale-105' : ''}`,
+      onClick: () => onClick(filterType)
     },
       React.createElement('div', {
         className: 'flex items-center justify-between'
@@ -558,43 +589,108 @@ export function Reporting({
         title: 'Total Projects',
         value: analyticsData.totalProjects,
         color: 'border-blue-500',
-        icon: '📊'
+        icon: '📊',
+        filterType: 'total',
+        onClick: handleKPICardClick
       }),
       React.createElement(KPICard, {
         title: 'Red RAG',
         value: analyticsData.redCount,
         percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.redCount / analyticsData.totalProjects) * 100) : 0,
         color: 'border-red-500',
-        icon: '🔴'
+        icon: '🔴',
+        filterType: 'red',
+        onClick: handleKPICardClick
       }),
       React.createElement(KPICard, {
         title: 'Amber RAG',
         value: analyticsData.amberCount,
         percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.amberCount / analyticsData.totalProjects) * 100) : 0,
         color: 'border-yellow-500',
-        icon: '🟡'
+        icon: '🟡',
+        filterType: 'amber',
+        onClick: handleKPICardClick
       }),
       React.createElement(KPICard, {
         title: 'Green RAG',
         value: analyticsData.greenCount,
         percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.greenCount / analyticsData.totalProjects) * 100) : 0,
         color: 'border-green-500',
-        icon: '🟢'
+        icon: '🟢',
+        filterType: 'green',
+        onClick: handleKPICardClick
       }),
       React.createElement(KPICard, {
         title: 'On Hold',
         value: analyticsData.onHoldCount,
         percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.onHoldCount / analyticsData.totalProjects) * 100) : 0,
         color: 'border-orange-500',
-        icon: '⏸️'
+        icon: '⏸️',
+        filterType: 'onhold',
+        onClick: handleKPICardClick
       }),
       React.createElement(KPICard, {
         title: 'Completed',
         value: analyticsData.completedCount,
         percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.completedCount / analyticsData.totalProjects) * 100) : 0,
         color: 'border-emerald-500',
-        icon: '✅'
+        icon: '✅',
+        filterType: 'completed',
+        onClick: handleKPICardClick
       })
+    ),
+
+    // Expandable section for KPI details
+    selectedKPIFilter && React.createElement('div', {
+      className: `mt-6 rounded-lg overflow-hidden transition-all duration-300 ease-in-out ${darkMode ? 'bg-slate-800' : 'bg-white'} shadow-lg border-2 border-blue-500`
+    },
+      // Header with title and close button
+      React.createElement('div', {
+        className: `flex items-center justify-between p-4 ${darkMode ? 'bg-slate-700 border-b border-slate-600' : 'bg-blue-50 border-b border-blue-200'}`
+      },
+        React.createElement('h3', {
+          className: `text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
+        },
+          selectedKPIFilter === 'total' ? `All Projects (${kpiFilteredProjects.length})` :
+          selectedKPIFilter === 'red' ? `Red RAG Projects (${kpiFilteredProjects.length})` :
+          selectedKPIFilter === 'amber' ? `Amber RAG Projects (${kpiFilteredProjects.length})` :
+          selectedKPIFilter === 'green' ? `Green RAG Projects (${kpiFilteredProjects.length})` :
+          selectedKPIFilter === 'onhold' ? `On Hold Projects (${kpiFilteredProjects.length})` :
+          selectedKPIFilter === 'completed' ? `Completed Projects (${kpiFilteredProjects.length})` : ''
+        ),
+        React.createElement('button', {
+          onClick: () => setSelectedKPIFilter(null),
+          className: `px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${darkMode ? 'bg-slate-600 text-gray-200 hover:bg-slate-500' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
+        }, 'Close ✕')
+      ),
+      // Projects table
+      React.createElement('div', {
+        className: 'p-4'
+      },
+        React.createElement(DataTable, {
+          data: kpiFilteredProjects,
+          columns: [
+            { header: 'Project', key: 'name' },
+            { header: 'Division', key: 'division' },
+            {
+              header: 'Kanban Status',
+              render: (row) => getColumnDisplayName(row.column)
+            },
+            {
+              header: 'RAG Status',
+              render: (row) => React.createElement('span', {
+                className: `px-2 py-1 rounded text-white text-xs font-semibold ${row.ragStatus.color}`
+              }, row.ragStatus.label)
+            },
+            {
+              header: 'Due Date',
+              render: (row) => formatDate(row.finishDate)
+            },
+            { header: 'PM', key: 'projectManager' },
+            { header: 'BP', key: 'businessPartner' }
+          ]
+        })
+      )
     ),
 
     // SECTION 1: Risk Analysis
