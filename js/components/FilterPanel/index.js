@@ -43,7 +43,7 @@ export function FilterPanel({
   phases
 }) {
   return React.createElement('div', {
-    className: `mb-6 p-4 rounded-xl shadow-lg ${darkMode ? 'glass-dark border-animated-dark' : 'glass border-animated'}`,
+    className: `mb-6 p-4 rounded-xl shadow-lg relative z-50 ${darkMode ? 'glass-dark border-animated-dark' : 'glass border-animated'}`,
     style: {
       background: darkMode
         ? 'linear-gradient(to right, rgba(51, 65, 85, 0.85), rgba(71, 85, 105, 0.85))'
