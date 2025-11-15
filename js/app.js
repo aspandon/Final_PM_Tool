@@ -868,9 +868,9 @@ function GanttChart() {
   };
 
   /**
-   * Render overview with consolidated metrics
+   * Render resources view
    */
-  const renderOverviewView = () => {
+  const renderResourcesView = () => {
     if (filteredProjects.length === 0) {
       return React.createElement('div', {
         className: `text-center py-12 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
@@ -880,6 +880,25 @@ function GanttChart() {
     }
 
     return React.createElement('div', null,
+      // Resources Chart
+      React.createElement(ResourcesChart, {
+        filteredProjects,
+        filteredProjectsForExternal,
+        earliestDate: earliest,
+        latestDate: latest,
+        isFilterActive,
+        filterStartDate,
+        filterEndDate,
+        pmBAU,
+        bpBAU,
+        setPmBAU,
+        setBpBAU,
+        showExternalPM,
+        showExternalQA,
+        darkMode,
+        colors
+      }),
+
       // Divisions Chart
       React.createElement(DivisionsChart, {
         filteredProjects,
@@ -893,37 +912,6 @@ function GanttChart() {
         divisionColors
       })
     );
-  };
-
-  /**
-   * Render resources view
-   */
-  const renderResourcesView = () => {
-    if (filteredProjects.length === 0) {
-      return React.createElement('div', {
-        className: `text-center py-12 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
-      },
-        React.createElement('p', { className: 'text-lg' }, '📊 No projects to display')
-      );
-    }
-
-    return React.createElement(ResourcesChart, {
-      filteredProjects,
-      filteredProjectsForExternal,
-      earliestDate: earliest,
-      latestDate: latest,
-      isFilterActive,
-      filterStartDate,
-      filterEndDate,
-      pmBAU,
-      bpBAU,
-      setPmBAU,
-      setBpBAU,
-      showExternalPM,
-      showExternalQA,
-      darkMode,
-      colors
-    });
   };
 
   /**
@@ -1084,7 +1072,6 @@ function GanttChart() {
           renderTabButton('actions', 'Actions', ClipboardList),
           renderTabButton('tasks', 'Tasks', CheckSquare),
           renderTabButton('resources', 'Resources', Users),
-          renderTabButton('overview', 'Divisions', PieChart),
           renderTabButton('actuals', 'Actuals', TrendingUp),
           renderTabButton('reporting', 'Reporting', FileText),
 
@@ -1109,7 +1096,6 @@ function GanttChart() {
           activeTab === 'kanban' && renderKanbanView(),
           activeTab === 'actions' && renderActionsView(),
           activeTab === 'tasks' && renderTasksView(),
-          activeTab === 'overview' && renderOverviewView(),
           activeTab === 'resources' && renderResourcesView(),
           activeTab === 'actuals' && renderActualsView(),
           activeTab === 'reporting' && renderReportingView()
