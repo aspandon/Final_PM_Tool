@@ -492,10 +492,8 @@ function GanttChart() {
    * Delete a project
    */
   const deleteProject = (index) => {
-    if (confirm('Are you sure you want to delete this project?')) {
-      const updatedProjects = projects.filter((_, i) => i !== index);
-      setProjects(updatedProjects);
-    }
+    const updatedProjects = projects.filter((_, i) => i !== index);
+    setProjects(updatedProjects);
   };
 
   // ===== EXCEL IMPORT/EXPORT FUNCTIONS =====
