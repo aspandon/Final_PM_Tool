@@ -554,9 +554,13 @@ export function ActionPlan({
     return React.createElement('select', {
       value: priority,
       onChange: (e) => updateItem(type, ids, 'priority', e.target.value, priority),
-      className: `px-3 py-2 text-xs rounded-lg font-bold border-2 ${priorityInfo.border} ${priorityInfo.bg} ${priorityInfo.text} ${priorityInfo.hover} transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg transform hover:scale-105 ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+      className: `px-2.5 py-2.5 text-xs rounded-lg font-bold border flex items-center ${
+        darkMode
+          ? 'bg-slate-600/50 text-gray-200 border-slate-500'
+          : 'bg-blue-100 text-blue-700 border-blue-300'
+      } transition-all cursor-pointer ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
       disabled: isEditLocked,
-      style: { minWidth: '120px' }
+      style: { minWidth: '110px' }
     },
       Object.entries(PRIORITIES).map(([key, val]) =>
         React.createElement('option', { key, value: key }, `${val.icon} ${val.label}`)
@@ -689,107 +693,142 @@ export function ActionPlan({
   // Render subtask
   const renderSubtask = (subtask, actionId, taskId) => {
     const ids = { actionId, taskId, subtaskId: subtask.id };
-    const isEditing = editingItem?.type === 'subtask' && editingItem?.subtaskId === subtask.id;
     const showDeps = showDependencies[subtask.id];
 
     return React.createElement('div', {
       key: subtask.id,
-      className: `group ml-6 mb-2 p-3 rounded-lg transition-all ${
-        darkMode ? 'bg-slate-700/50 hover:bg-slate-700 border-slate-600' : 'bg-gray-50 hover:bg-gray-100 border-gray-200'
-      } border-l-2 ${subtask.status === 'completed' ? 'opacity-60' : ''}`
+      className: `group mb-2 rounded-lg overflow-hidden transition-all ${
+        darkMode
+          ? 'bg-gradient-to-br from-slate-600 to-slate-700 border-slate-500/50'
+          : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200'
+      } border shadow-sm hover:shadow-md ${subtask.status === 'completed' ? 'opacity-70' : ''}`
     },
       // Subtask Header
       React.createElement('div', {
-        className: 'flex items-center gap-2'
+        className: 'px-3 py-1.5',
+        style: {
+          background: darkMode
+            ? 'linear-gradient(to right, rgba(71, 85, 105, 0.6), rgba(100, 116, 139, 0.6))'
+            : 'linear-gradient(to right, rgba(221, 214, 254, 0.6), rgba(199, 210, 254, 0.6))'
+        }
       },
-        // Status dropdown (Phase 1)
-        renderStatusDropdown(subtask, 'subtask', ids),
-        // Name
-        isEditing
-          ? React.createElement('input', {
-              type: 'text',
-              value: subtask.name,
-              onChange: (e) => updateItem('subtask', ids, 'name', e.target.value),
-              onBlur: () => setEditingItem(null),
-              onKeyDown: (e) => e.key === 'Enter' && setEditingItem(null),
-              autoFocus: true,
-              className: `flex-1 px-2 py-1 text-sm font-medium border ${darkMode ? 'border-slate-500 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
-              disabled: isEditLocked
-            })
-          : React.createElement('div', {
-              onClick: () => !isEditLocked && setEditingItem({ type: 'subtask', actionId, taskId, subtaskId: subtask.id }),
-              className: `flex-1 text-sm font-medium ${subtask.status === 'completed' ? 'line-through' : ''} ${darkMode ? 'text-gray-200' : 'text-gray-800'} cursor-pointer`
-            }, subtask.name),
-        // Start Date
-        React.createElement('div', { className: 'flex flex-col gap-0.5' },
+        React.createElement('div', {
+          className: 'flex items-center gap-2'
+        },
+          // Subtask Title (always visible input)
+          React.createElement('input', {
+            type: 'text',
+            value: subtask.name,
+            onChange: (e) => updateItem('subtask', ids, 'name', e.target.value),
+            className: `flex-1 text-sm font-semibold px-2 py-1 border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-purple-300 bg-white'} rounded-lg placeholder-gray-400 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''} ${subtask.status === 'completed' ? 'line-through' : ''}`,
+            placeholder: 'Subtask Name',
+            disabled: isEditLocked
+          }),
+          // Status dropdown
+          renderStatusDropdown(subtask, 'subtask', ids),
+          // Priority dropdown
+          renderPriorityDropdown(subtask, 'subtask', ids),
+          // Dependencies Button
+          React.createElement('button', {
+            onClick: () => setShowDependencies({ ...showDependencies, [subtask.id]: !showDeps }),
+            className: `p-1.5 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-purple-200 text-gray-600 hover:text-gray-800'}`,
+            disabled: isEditLocked,
+            title: 'Dependencies'
+          },
+            React.createElement('svg', {
+              className: 'w-3.5 h-3.5',
+              xmlns: 'http://www.w3.org/2000/svg',
+              width: '24',
+              height: '24',
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: '2',
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round'
+            },
+              React.createElement('path', { d: 'M9 17H7A5 5 0 0 1 7 7h2' }),
+              React.createElement('path', { d: 'M15 7h2a5 5 0 1 1 0 10h-2' }),
+              React.createElement('line', { x1: '8', x2: '16', y1: '12', y2: '12' })
+            )
+          ),
+          // Delete Button
+          !isEditLocked && React.createElement('button', {
+            onClick: () => deleteItem('subtask', ids),
+            className: `p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+            disabled: isEditLocked,
+            title: 'Delete'
+          },
+            React.createElement('svg', {
+              className: 'w-3.5 h-3.5',
+              xmlns: 'http://www.w3.org/2000/svg',
+              width: '24',
+              height: '24',
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: '2',
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round'
+            },
+              React.createElement('path', { d: 'M3 6h18' }),
+              React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
+              React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' }),
+              React.createElement('line', { x1: '10', x2: '10', y1: '11', y2: '17' }),
+              React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
+            )
+          )
+        )
+      ),
+      // Content Area
+      React.createElement('div', {
+        className: `p-2 ${darkMode ? 'bg-slate-700/30' : 'bg-purple-50/20'}`
+      },
+        // Dates and Assignee in single row
+        React.createElement('div', {
+          className: 'flex gap-2 items-center text-xs'
+        },
           React.createElement('label', {
-            className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
-          }, 'Start'),
+            className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+          }, 'Dates:'),
+          // Start Date
           React.createElement('input', {
             type: 'date',
             value: subtask.startDate || '',
             onChange: (e) => updateItem('subtask', ids, 'startDate', e.target.value),
-            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-purple-300 bg-white'} rounded`,
             disabled: isEditLocked
-          })
-        ),
-        // Finish Date
-        React.createElement('div', { className: 'flex flex-col gap-0.5' },
-          React.createElement('label', {
-            className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
-          }, 'Finish'),
+          }),
+          React.createElement('span', { className: `${darkMode ? 'text-gray-500' : 'text-gray-400'}` }, '→'),
+          // Finish Date
           React.createElement('input', {
             type: 'date',
             value: subtask.finishDate || '',
             onChange: (e) => updateItem('subtask', ids, 'finishDate', e.target.value),
-            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-purple-300 bg-white'} rounded`,
             disabled: isEditLocked
-          })
+          }),
+          React.createElement('div', { className: 'ml-auto flex items-center gap-2' },
+            React.createElement('label', {
+              className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+            }, 'Assignee:'),
+            // Assignee
+            React.createElement('input', {
+              type: 'text',
+              value: subtask.assignee || '',
+              onChange: (e) => updateItem('subtask', ids, 'assignee', e.target.value),
+              placeholder: 'Assignee',
+              className: `w-28 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-purple-300 bg-white'} rounded`,
+              disabled: isEditLocked
+            })
+          )
         ),
-        // Assignee
-        React.createElement('input', {
-          type: 'text',
-          value: subtask.assignee || '',
-          onChange: (e) => updateItem('subtask', ids, 'assignee', e.target.value),
-          placeholder: 'Assignee',
-          className: `w-24 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
-          disabled: isEditLocked
-        }),
-        // Actions (shown on hover)
-        React.createElement('div', {
-          className: 'flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'
-        },
-          React.createElement('button', {
-            onClick: () => moveItem('subtask', ids, 'up'),
-            className: `p-1 rounded ${darkMode ? 'hover:bg-slate-600 text-gray-400' : 'hover:bg-gray-200 text-gray-600'}`,
-            disabled: isEditLocked,
-            title: 'Move up'
-          }, '↑'),
-          React.createElement('button', {
-            onClick: () => moveItem('subtask', ids, 'down'),
-            className: `p-1 rounded ${darkMode ? 'hover:bg-slate-600 text-gray-400' : 'hover:bg-gray-200 text-gray-600'}`,
-            disabled: isEditLocked,
-            title: 'Move down'
-          }, '↓'),
-          React.createElement('button', {
-            onClick: () => setShowDependencies({ ...showDependencies, [subtask.id]: !showDeps }),
-            className: `p-1 rounded ${darkMode ? 'hover:bg-slate-600 text-gray-400' : 'hover:bg-gray-200 text-gray-600'}`,
-            disabled: isEditLocked,
-            title: 'Dependencies'
-          }, '🔗'),
-          React.createElement('button', {
-            onClick: () => deleteItem('subtask', ids),
-            className: `p-1 rounded ${darkMode ? 'hover:bg-red-600 text-red-400' : 'hover:bg-red-100 text-red-600'}`,
-            disabled: isEditLocked,
-            title: 'Delete'
-          }, '×')
-        )
-      ),
-      // Dependencies
-      (subtask.dependencies || []).length > 0 && React.createElement('div', {
-        className: 'mt-2 flex flex-wrap gap-1'
-      }, renderDependencyTags(subtask, 'subtask', ids)),
-      showDeps && renderDependencySelector(subtask, 'subtask', ids)
+        // Dependencies
+        (subtask.dependencies || []).length > 0 && React.createElement('div', {
+          className: 'mt-2 flex flex-wrap gap-1'
+        }, renderDependencyTags(subtask, 'subtask', ids)),
+        showDeps && renderDependencySelector(subtask, 'subtask', ids)
+      )
     );
   };
 
@@ -797,139 +836,241 @@ export function ActionPlan({
   const renderTask = (task, actionId) => {
     const ids = { actionId, taskId: task.id };
     const isExpanded = expandedTasks[task.id];
-    const isEditing = editingItem?.type === 'task' && editingItem?.taskId === task.id;
     const showDeps = showDependencies[task.id];
     const completedSubtasks = task.subtasks.filter(s => s.status === 'completed').length;
     const totalSubtasks = task.subtasks.length;
 
     return React.createElement('div', {
       key: task.id,
-      className: `group mb-3 rounded-lg overflow-hidden transition-all ${
+      className: `group mb-3 rounded-xl overflow-hidden transition-all ${
         darkMode
-          ? 'bg-slate-700/50 border-l-4 border-blue-500/50 shadow-md'
-          : 'bg-white border-l-4 border-blue-400 shadow-md'
-      } hover:shadow-lg ${task.completed ? 'opacity-70' : ''}`
+          ? 'bg-gradient-to-br from-slate-700 to-slate-800 border-slate-600/50'
+          : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200'
+      } border shadow-md hover:shadow-lg ${task.status === 'completed' ? 'opacity-70' : ''}`
     },
       // Task Header
       React.createElement('div', {
-        className: `p-3 ${
-          darkMode
-            ? 'bg-slate-700/30'
-            : 'bg-gradient-to-r from-blue-50/30 to-indigo-50/30'
-        }`
+        className: 'px-3 py-2',
+        style: {
+          background: darkMode
+            ? 'linear-gradient(to right, rgba(51, 65, 85, 0.7), rgba(71, 85, 105, 0.7))'
+            : 'linear-gradient(to right, rgba(191, 219, 254, 0.7), rgba(199, 210, 254, 0.7))'
+        }
       },
         React.createElement('div', {
           className: 'flex items-center gap-2'
         },
-          // Expand/Collapse
+          // Expand/Collapse Arrow
           totalSubtasks > 0 && React.createElement('button', {
             onClick: () => setExpandedTasks({ ...expandedTasks, [task.id]: !isExpanded }),
-            className: `p-1 rounded ${darkMode ? 'hover:bg-slate-600' : 'hover:bg-blue-100'}`
+            className: `p-1.5 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600/50 text-blue-300' : 'hover:bg-blue-200/50 text-blue-700'}`
           }, isExpanded ? '▼' : '▶'),
-          // Status dropdown (Phase 1)
-          renderStatusDropdown(task, 'task', ids),
-          // Priority dropdown (Phase 1)
-          renderPriorityDropdown(task, 'task', ids),
-          // Name
-          isEditing
-            ? React.createElement('input', {
-                type: 'text',
-                value: task.name,
-                onChange: (e) => updateItem('task', ids, 'name', e.target.value),
-                onBlur: () => setEditingItem(null),
-                onKeyDown: (e) => e.key === 'Enter' && setEditingItem(null),
-                autoFocus: true,
-                className: `flex-1 px-2 py-1 text-sm font-semibold border ${darkMode ? 'border-slate-500 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded`,
-                disabled: isEditLocked
-              })
-            : React.createElement('div', {
-                onClick: () => !isEditLocked && setEditingItem({ type: 'task', actionId, taskId: task.id }),
-                className: `flex-1 text-sm font-semibold ${task.status === 'completed' ? 'line-through' : ''} ${darkMode ? 'text-gray-200' : 'text-gray-800'} cursor-pointer`
-              }, task.name),
-          // Subtask count
+          // Task Title (always visible input)
+          React.createElement('input', {
+            type: 'text',
+            value: task.name,
+            onChange: (e) => updateItem('task', ids, 'name', e.target.value),
+            className: `flex-1 text-sm font-bold px-3 py-1.5 border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-blue-300 bg-white input-glow'} rounded-lg placeholder-gray-400 ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''} ${task.status === 'completed' ? 'line-through' : ''}`,
+            placeholder: 'Task Name',
+            disabled: isEditLocked
+          }),
+          // Subtask Count Badge
           totalSubtasks > 0 && React.createElement('div', {
-            className: `px-2 py-0.5 rounded-full text-xs font-semibold ${darkMode ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-700'}`
-          }, `${completedSubtasks}/${totalSubtasks}`),
-          // Start Date
-          React.createElement('div', { className: 'flex flex-col gap-0.5' },
+            className: `px-2.5 py-2.5 rounded-lg text-xs font-bold flex items-center ${
+              darkMode
+                ? 'bg-slate-600/50 text-gray-200 border border-slate-500'
+                : 'bg-blue-100 text-blue-700 border border-blue-300'
+            }`,
+            title: `${completedSubtasks}/${totalSubtasks} Subtasks Complete`
+          }, `${totalSubtasks} ${totalSubtasks === 1 ? 'Sub' : 'Subs'}`),
+          // Status dropdown
+          renderStatusDropdown(task, 'task', ids),
+          // Priority dropdown
+          renderPriorityDropdown(task, 'task', ids),
+          // Add Subtask Button
+          !isEditLocked && React.createElement('button', {
+            onClick: () => addSubtask(actionId, task.id),
+            className: `flex items-center gap-2 px-3 py-2.5 rounded-lg font-semibold text-xs transition-all transform hover:scale-105 ${
+              darkMode
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md'
+                : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-md'
+            }`,
+            disabled: isEditLocked
+          }, '+ Sub'),
+          // Dependencies Button
+          React.createElement('button', {
+            onClick: () => setShowDependencies({ ...showDependencies, [task.id]: !showDeps }),
+            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-blue-200 text-gray-600 hover:text-gray-800'}`,
+            disabled: isEditLocked,
+            title: 'Dependencies'
+          },
+            React.createElement('svg', {
+              className: 'w-4 h-4',
+              xmlns: 'http://www.w3.org/2000/svg',
+              width: '24',
+              height: '24',
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: '2',
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round'
+            },
+              React.createElement('path', { d: 'M9 17H7A5 5 0 0 1 7 7h2' }),
+              React.createElement('path', { d: 'M15 7h2a5 5 0 1 1 0 10h-2' }),
+              React.createElement('line', { x1: '8', x2: '16', y1: '12', y2: '12' })
+            )
+          ),
+          // Activity Log Button
+          React.createElement('button', {
+            onClick: () => {
+              const key = ids.actionId + ids.taskId;
+              setShowActivityLog({ ...showActivityLog, [key]: !showActivityLog[key] });
+            },
+            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-blue-200 text-gray-600 hover:text-gray-800'}`,
+            disabled: isEditLocked,
+            title: `Activity Log (${(task.activityLog || []).length})`
+          },
+            React.createElement('svg', {
+              className: 'w-4 h-4',
+              xmlns: 'http://www.w3.org/2000/svg',
+              width: '24',
+              height: '24',
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: '2',
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round'
+            },
+              React.createElement('path', { d: 'M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z' }),
+              React.createElement('polyline', { points: '14 2 14 8 20 8' }),
+              React.createElement('line', { x1: '16', x2: '8', y1: '13', y2: '13' }),
+              React.createElement('line', { x1: '16', x2: '8', y1: '17', y2: '17' }),
+              React.createElement('line', { x1: '10', x2: '8', y1: '9', y2: '9' })
+            )
+          ),
+          // Delete Button
+          !isEditLocked && React.createElement('button', {
+            onClick: () => deleteItem('task', ids),
+            className: `p-2 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+            disabled: isEditLocked,
+            title: 'Delete'
+          },
+            React.createElement('svg', {
+              className: 'w-4 h-4',
+              xmlns: 'http://www.w3.org/2000/svg',
+              width: '24',
+              height: '24',
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: '2',
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round'
+            },
+              React.createElement('path', { d: 'M3 6h18' }),
+              React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
+              React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' }),
+              React.createElement('line', { x1: '10', x2: '10', y1: '11', y2: '17' }),
+              React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
+            )
+          )
+        )
+      ),
+      // Content Area
+      React.createElement('div', {
+        className: `p-3 ${darkMode ? 'bg-slate-800/30' : 'bg-blue-50/20'}`
+      },
+        // Main Row: Description (left) and Dates + Assignee (right)
+        React.createElement('div', {
+          className: 'flex gap-3 mb-3'
+        },
+          // Description (left side, flex-1)
+          React.createElement('div', { className: 'flex-1' },
+            React.createElement('textarea', {
+              value: task.description || '',
+              onChange: (e) => updateItem('task', ids, 'description', e.target.value),
+              placeholder: 'Add detailed description...',
+              className: `w-full px-3 py-2 text-sm border-2 rounded-lg transition-all focus:ring-2 ${
+                darkMode
+                  ? 'border-slate-600 bg-slate-800/50 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20'
+                  : 'border-blue-200 bg-white text-gray-800 focus:border-indigo-400 focus:ring-indigo-400/20'
+              }`,
+              rows: 2,
+              disabled: isEditLocked
+            })
+          ),
+          // Dates and Assignee (right side)
+          React.createElement('div', { className: 'flex flex-col gap-2' },
             React.createElement('label', {
-              className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
-            }, 'Start'),
+              className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold mb-1`
+            }, 'Start / Finish Date'),
+            // Start Date
             React.createElement('input', {
               type: 'date',
               value: task.startDate || '',
               onChange: (e) => updateItem('task', ids, 'startDate', e.target.value),
-              className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded`,
+              className: `w-36 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded-lg`,
               disabled: isEditLocked
-            })
-          ),
-          // Finish Date
-          React.createElement('div', { className: 'flex flex-col gap-0.5' },
-            React.createElement('label', {
-              className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
-            }, 'Finish'),
+            }),
+            // Finish Date
             React.createElement('input', {
               type: 'date',
               value: task.finishDate || '',
               onChange: (e) => updateItem('task', ids, 'finishDate', e.target.value),
-              className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded`,
+              className: `w-36 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded-lg`,
+              disabled: isEditLocked
+            }),
+            // Assignee
+            React.createElement('input', {
+              type: 'text',
+              value: task.assignee || '',
+              onChange: (e) => updateItem('task', ids, 'assignee', e.target.value),
+              placeholder: 'Assignee',
+              className: `w-36 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded-lg`,
               disabled: isEditLocked
             })
-          ),
-          // Assignee
-          React.createElement('input', {
-            type: 'text',
-            value: task.assignee || '',
-            onChange: (e) => updateItem('task', ids, 'assignee', e.target.value),
-            placeholder: 'Assignee',
-            className: `w-24 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded`,
-            disabled: isEditLocked
-          }),
-          // Actions
-          React.createElement('div', {
-            className: 'flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'
-          },
-            React.createElement('button', {
-              onClick: () => addSubtask(actionId, task.id),
-              className: `px-2 py-1 text-xs rounded ${darkMode ? 'bg-slate-600 hover:bg-slate-500 text-gray-200' : 'bg-blue-100 hover:bg-blue-200 text-blue-700'} font-semibold`,
-              disabled: isEditLocked
-            }, '+ Sub'),
-            React.createElement('button', {
-              onClick: () => moveItem('task', ids, 'up'),
-              className: `p-1 rounded ${darkMode ? 'hover:bg-slate-600 text-gray-400' : 'hover:bg-blue-100 text-gray-600'}`,
-              disabled: isEditLocked
-            }, '↑'),
-            React.createElement('button', {
-              onClick: () => moveItem('task', ids, 'down'),
-              className: `p-1 rounded ${darkMode ? 'hover:bg-slate-600 text-gray-400' : 'hover:bg-blue-100 text-gray-600'}`,
-              disabled: isEditLocked
-            }, '↓'),
-            React.createElement('button', {
-              onClick: () => setShowDependencies({ ...showDependencies, [task.id]: !showDeps }),
-              className: `p-1 rounded ${darkMode ? 'hover:bg-slate-600 text-gray-400' : 'hover:bg-blue-100 text-gray-600'}`,
-              disabled: isEditLocked
-            }, '🔗'),
-            React.createElement('button', {
-              onClick: () => deleteItem('task', ids),
-              className: `p-1 rounded ${darkMode ? 'hover:bg-red-600 text-red-400' : 'hover:bg-red-100 text-red-600'}`,
-              disabled: isEditLocked
-            }, '×')
           )
         ),
+        // Activity Log Content (if expanded)
+        (() => {
+          const key = ids.actionId + ids.taskId;
+          const isLogExpanded = showActivityLog[key];
+          const activities = task.activityLog || [];
+          return isLogExpanded && React.createElement('div', { className: `mb-3 max-h-32 overflow-y-auto ${darkMode ? 'bg-slate-900/50' : 'bg-blue-50'} rounded p-2 space-y-1` },
+            activities.slice().reverse().map((activity, i) =>
+              React.createElement('div', { key: i, className: 'text-xs' },
+                React.createElement('span', { className: `font-semibold ${darkMode ? 'text-green-400' : 'text-green-600'}` }, activity.user),
+                React.createElement('span', { className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}` }, ` ${activity.details}`),
+                React.createElement('span', { className: `text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'} ml-2` },
+                  new Date(activity.timestamp).toLocaleString()
+                )
+              )
+            )
+          );
+        })(),
         // Dependencies
         (task.dependencies || []).length > 0 && React.createElement('div', {
           className: 'mt-2 flex flex-wrap gap-1'
         }, renderDependencyTags(task, 'task', ids)),
-        showDeps && renderDependencySelector(task, 'task', ids),
-        // Description
-        renderDescription(task, 'task', ids),
-        // Activity Log
-        renderActivityLog(task, ids)
+        showDeps && renderDependencySelector(task, 'task', ids)
       ),
       // Subtasks
-      isExpanded && task.subtasks.length > 0 && React.createElement('div', {
-        className: `p-3 ${darkMode ? 'bg-slate-800/20' : 'bg-indigo-50/20'}`
-      }, task.subtasks.map(subtask => renderSubtask(subtask, actionId, task.id)))
+      isExpanded && React.createElement('div', {
+        className: `p-3 ${darkMode ? 'bg-slate-900/30' : 'bg-indigo-50/50'}`
+      },
+        task.subtasks.map(subtask => renderSubtask(subtask, actionId, task.id)),
+        // Add Subtask button
+        !isEditLocked && React.createElement('button', {
+          onClick: () => addSubtask(actionId, task.id),
+          className: `w-full py-2 rounded-lg border-2 border-dashed font-bold transition-all shadow-sm hover:shadow-md text-sm ${
+            darkMode
+              ? 'border-purple-400/50 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 hover:border-purple-400'
+              : 'border-purple-400 bg-purple-50 hover:bg-purple-100 text-purple-700 hover:border-purple-500'
+          }`
+        }, '+ Sub Task')
+      )
     );
   };
 
@@ -1067,28 +1208,73 @@ export function ActionPlan({
               React.createElement('line', { x1: '8', x2: '16', y1: '12', y2: '12' })
             )
           ),
+          // Activity Log Button
+          React.createElement('button', {
+            onClick: () => {
+              const key = ids.actionId + (ids.taskId || '');
+              setShowActivityLog({ ...showActivityLog, [key]: !showActivityLog[key] });
+            },
+            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`,
+            disabled: isEditLocked,
+            title: `Activity Log (${(action.activityLog || []).length})`
+          },
+            React.createElement('svg', {
+              className: 'w-5 h-5',
+              xmlns: 'http://www.w3.org/2000/svg',
+              width: '24',
+              height: '24',
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: '2',
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round'
+            },
+              React.createElement('path', { d: 'M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z' }),
+              React.createElement('polyline', { points: '14 2 14 8 20 8' }),
+              React.createElement('line', { x1: '16', x2: '8', y1: '13', y2: '13' }),
+              React.createElement('line', { x1: '16', x2: '8', y1: '17', y2: '17' }),
+              React.createElement('line', { x1: '10', x2: '8', y1: '9', y2: '9' })
+            )
+          ),
           // Delete Button (Project style)
           !isEditLocked && React.createElement('button', {
             onClick: () => deleteItem('action', ids),
-            className: `p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+            className: `p-2 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
             disabled: isEditLocked,
             title: 'Delete'
-          }, React.createElement('span', { className: 'text-sm' }, '🗑️'))
+          },
+            React.createElement('svg', {
+              className: 'w-5 h-5',
+              xmlns: 'http://www.w3.org/2000/svg',
+              width: '24',
+              height: '24',
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: '2',
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round'
+            },
+              React.createElement('path', { d: 'M3 6h18' }),
+              React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
+              React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' }),
+              React.createElement('line', { x1: '10', x2: '10', y1: '11', y2: '17' }),
+              React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
+            )
+          )
         )
       ),
       // Content Area: Description, Dates, Dependencies, etc.
       React.createElement('div', {
         className: `p-3 ${darkMode ? 'bg-slate-800/30' : 'bg-blue-50/20'}`
       },
-        // Main Row: Description (left) and Dates + Activity Log (right)
+        // Main Row: Description (left) and Dates (right)
         React.createElement('div', {
           className: 'flex gap-3 mb-3'
         },
           // Description (left side, flex-1)
           React.createElement('div', { className: 'flex-1' },
-            React.createElement('label', {
-              className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold mb-1 block`
-            }, 'Description'),
             React.createElement('textarea', {
               value: action.description || '',
               onChange: (e) => updateItem('action', ids, 'description', e.target.value),
@@ -1102,46 +1288,27 @@ export function ActionPlan({
               disabled: isEditLocked
             })
           ),
-          // Dates and Activity Log (right side)
+          // Dates (right side)
           React.createElement('div', { className: 'flex flex-col gap-2' },
+            React.createElement('label', {
+              className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold mb-1`
+            }, 'Start / Finish Date'),
             // Start Date
-            React.createElement('div', { className: 'flex flex-col gap-1' },
-              React.createElement('label', {
-                className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
-              }, 'Start Date'),
-              React.createElement('input', {
-                type: 'date',
-                value: action.startDate || '',
-                onChange: (e) => updateItem('action', ids, 'startDate', e.target.value),
-                className: `w-44 px-3 py-2 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg`,
-                disabled: isEditLocked
-              })
-            ),
+            React.createElement('input', {
+              type: 'date',
+              value: action.startDate || '',
+              onChange: (e) => updateItem('action', ids, 'startDate', e.target.value),
+              className: `w-40 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg`,
+              disabled: isEditLocked
+            }),
             // Finish Date
-            React.createElement('div', { className: 'flex flex-col gap-1' },
-              React.createElement('label', {
-                className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
-              }, 'Finish Date'),
-              React.createElement('input', {
-                type: 'date',
-                value: action.finishDate || '',
-                onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
-                className: `w-44 px-3 py-2 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg`,
-                disabled: isEditLocked
-              })
-            ),
-            // Activity Log Button
-            React.createElement('button', {
-              onClick: () => {
-                const key = ids.actionId + (ids.taskId || '');
-                setShowActivityLog({ ...showActivityLog, [key]: !showActivityLog[key] });
-              },
-              className: `px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                darkMode
-                  ? 'bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-400/30'
-                  : 'bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200'
-              }`
-            }, `📋 Activity Log (${(action.activityLog || []).length})`)
+            React.createElement('input', {
+              type: 'date',
+              value: action.finishDate || '',
+              onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
+              className: `w-40 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg`,
+              disabled: isEditLocked
+            })
           )
         ),
         // Activity Log Content (if expanded)
