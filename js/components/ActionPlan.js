@@ -26,6 +26,7 @@ export function ActionPlan({
   const [filters, setFilters] = React.useState({ status: [], priority: [], search: '' });
   const [draggedAction, setDraggedAction] = React.useState(null);
   const [draggedTask, setDraggedTask] = React.useState(null);
+  const [deleteConfirm, setDeleteConfirm] = React.useState(null); // { type, ids }
 
   // Modern status workflow (4 states, no Review)
   const STATUSES = {
@@ -343,8 +344,6 @@ export function ActionPlan({
 
   // Delete item
   const deleteItem = (type, ids) => {
-    if (!confirm(`Delete this ${type}?`)) return;
-
     const newActionPlan = actionPlan.map(action => {
       if (type === 'action' && action.id === ids.actionId) return null;
       if (action.id === ids.actionId) {
@@ -365,6 +364,17 @@ export function ActionPlan({
       return action;
     }).filter(Boolean);
     updateActionPlan(newActionPlan);
+    setDeleteConfirm(null);
+  };
+
+  // Check if delete confirmation is showing for this item
+  const isDeletePending = (type, ids) => {
+    if (!deleteConfirm) return false;
+    if (deleteConfirm.type !== type) return false;
+    if (type === 'action') return deleteConfirm.ids.actionId === ids.actionId;
+    if (type === 'task') return deleteConfirm.ids.actionId === ids.actionId && deleteConfirm.ids.taskId === ids.taskId;
+    if (type === 'subtask') return deleteConfirm.ids.actionId === ids.actionId && deleteConfirm.ids.taskId === ids.taskId && deleteConfirm.ids.subtaskId === ids.subtaskId;
+    return false;
   };
 
   // Move item up/down
@@ -752,31 +762,47 @@ export function ActionPlan({
               React.createElement('line', { x1: '8', x2: '16', y1: '12', y2: '12' })
             )
           ),
-          // Delete Button
-          !isEditLocked && React.createElement('button', {
-            onClick: () => deleteItem('subtask', ids),
-            className: `p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
-            disabled: isEditLocked,
-            title: 'Delete'
-          },
-            React.createElement('svg', {
-              className: 'w-3.5 h-3.5',
-              xmlns: 'http://www.w3.org/2000/svg',
-              width: '24',
-              height: '24',
-              viewBox: '0 0 24 24',
-              fill: 'none',
-              stroke: 'currentColor',
-              strokeWidth: '2',
-              strokeLinecap: 'round',
-              strokeLinejoin: 'round'
-            },
-              React.createElement('path', { d: 'M3 6h18' }),
-              React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
-              React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' }),
-              React.createElement('line', { x1: '10', x2: '10', y1: '11', y2: '17' }),
-              React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
-            )
+          // Delete Button (inline confirmation)
+          !isEditLocked && (isDeletePending('subtask', ids)
+            ? React.createElement('div', {
+                className: 'flex items-center gap-1 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded-lg'
+              },
+                React.createElement('span', {
+                  className: 'text-[10px] font-semibold text-red-700 dark:text-red-300'
+                }, 'Delete?'),
+                React.createElement('button', {
+                  onClick: () => deleteItem('subtask', ids),
+                  className: 'px-1.5 py-0.5 text-[10px] bg-red-500 hover:bg-red-600 text-white rounded font-semibold'
+                }, 'Yes'),
+                React.createElement('button', {
+                  onClick: () => setDeleteConfirm(null),
+                  className: 'px-1.5 py-0.5 text-[10px] bg-gray-500 hover:bg-gray-600 text-white rounded font-semibold'
+                }, 'No')
+              )
+            : React.createElement('button', {
+                onClick: () => setDeleteConfirm({ type: 'subtask', ids }),
+                className: `p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all`,
+                title: 'Delete'
+              },
+                React.createElement('svg', {
+                  className: 'w-3.5 h-3.5',
+                  xmlns: 'http://www.w3.org/2000/svg',
+                  width: '24',
+                  height: '24',
+                  viewBox: '0 0 24 24',
+                  fill: 'none',
+                  stroke: 'currentColor',
+                  strokeWidth: '2',
+                  strokeLinecap: 'round',
+                  strokeLinejoin: 'round'
+                },
+                  React.createElement('path', { d: 'M3 6h18' }),
+                  React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
+                  React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' }),
+                  React.createElement('line', { x1: '10', x2: '10', y1: '11', y2: '17' }),
+                  React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
+                )
+              )
           )
         )
       ),
@@ -860,8 +886,8 @@ export function ActionPlan({
         React.createElement('div', {
           className: 'flex items-center gap-2'
         },
-          // Expand/Collapse Arrow
-          totalSubtasks > 0 && React.createElement('button', {
+          // Expand/Collapse Arrow (always show if not locked, to access + Sub Task button)
+          !isEditLocked && React.createElement('button', {
             onClick: () => setExpandedTasks({ ...expandedTasks, [task.id]: !isExpanded }),
             className: `p-1.5 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600/50 text-blue-300' : 'hover:bg-blue-200/50 text-blue-700'}`
           }, isExpanded ? '▼' : '▶'),
@@ -950,31 +976,47 @@ export function ActionPlan({
               React.createElement('line', { x1: '10', x2: '8', y1: '9', y2: '9' })
             )
           ),
-          // Delete Button
-          !isEditLocked && React.createElement('button', {
-            onClick: () => deleteItem('task', ids),
-            className: `p-2 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
-            disabled: isEditLocked,
-            title: 'Delete'
-          },
-            React.createElement('svg', {
-              className: 'w-4 h-4',
-              xmlns: 'http://www.w3.org/2000/svg',
-              width: '24',
-              height: '24',
-              viewBox: '0 0 24 24',
-              fill: 'none',
-              stroke: 'currentColor',
-              strokeWidth: '2',
-              strokeLinecap: 'round',
-              strokeLinejoin: 'round'
-            },
-              React.createElement('path', { d: 'M3 6h18' }),
-              React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
-              React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' }),
-              React.createElement('line', { x1: '10', x2: '10', y1: '11', y2: '17' }),
-              React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
-            )
+          // Delete Button (inline confirmation)
+          !isEditLocked && (isDeletePending('task', ids)
+            ? React.createElement('div', {
+                className: 'flex items-center gap-1 bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded-lg'
+              },
+                React.createElement('span', {
+                  className: 'text-xs font-semibold text-red-700 dark:text-red-300'
+                }, 'Delete?'),
+                React.createElement('button', {
+                  onClick: () => deleteItem('task', ids),
+                  className: 'px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded font-semibold'
+                }, 'Yes'),
+                React.createElement('button', {
+                  onClick: () => setDeleteConfirm(null),
+                  className: 'px-2 py-1 text-xs bg-gray-500 hover:bg-gray-600 text-white rounded font-semibold'
+                }, 'No')
+              )
+            : React.createElement('button', {
+                onClick: () => setDeleteConfirm({ type: 'task', ids }),
+                className: `p-2 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all`,
+                title: 'Delete'
+              },
+                React.createElement('svg', {
+                  className: 'w-4 h-4',
+                  xmlns: 'http://www.w3.org/2000/svg',
+                  width: '24',
+                  height: '24',
+                  viewBox: '0 0 24 24',
+                  fill: 'none',
+                  stroke: 'currentColor',
+                  strokeWidth: '2',
+                  strokeLinecap: 'round',
+                  strokeLinejoin: 'round'
+                },
+                  React.createElement('path', { d: 'M3 6h18' }),
+                  React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
+                  React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' }),
+                  React.createElement('line', { x1: '10', x2: '10', y1: '11', y2: '17' }),
+                  React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
+                )
+              )
           )
         )
       ),
@@ -1237,31 +1279,47 @@ export function ActionPlan({
               React.createElement('line', { x1: '10', x2: '8', y1: '9', y2: '9' })
             )
           ),
-          // Delete Button (Project style)
-          !isEditLocked && React.createElement('button', {
-            onClick: () => deleteItem('action', ids),
-            className: `p-2 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
-            disabled: isEditLocked,
-            title: 'Delete'
-          },
-            React.createElement('svg', {
-              className: 'w-5 h-5',
-              xmlns: 'http://www.w3.org/2000/svg',
-              width: '24',
-              height: '24',
-              viewBox: '0 0 24 24',
-              fill: 'none',
-              stroke: 'currentColor',
-              strokeWidth: '2',
-              strokeLinecap: 'round',
-              strokeLinejoin: 'round'
-            },
-              React.createElement('path', { d: 'M3 6h18' }),
-              React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
-              React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' }),
-              React.createElement('line', { x1: '10', x2: '10', y1: '11', y2: '17' }),
-              React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
-            )
+          // Delete Button (inline confirmation)
+          !isEditLocked && (isDeletePending('action', ids)
+            ? React.createElement('div', {
+                className: 'flex items-center gap-1 bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded-lg'
+              },
+                React.createElement('span', {
+                  className: 'text-xs font-semibold text-red-700 dark:text-red-300'
+                }, 'Delete?'),
+                React.createElement('button', {
+                  onClick: () => deleteItem('action', ids),
+                  className: 'px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded font-semibold'
+                }, 'Yes'),
+                React.createElement('button', {
+                  onClick: () => setDeleteConfirm(null),
+                  className: 'px-2 py-1 text-xs bg-gray-500 hover:bg-gray-600 text-white rounded font-semibold'
+                }, 'No')
+              )
+            : React.createElement('button', {
+                onClick: () => setDeleteConfirm({ type: 'action', ids }),
+                className: `p-2 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake transition-all`,
+                title: 'Delete'
+              },
+                React.createElement('svg', {
+                  className: 'w-5 h-5',
+                  xmlns: 'http://www.w3.org/2000/svg',
+                  width: '24',
+                  height: '24',
+                  viewBox: '0 0 24 24',
+                  fill: 'none',
+                  stroke: 'currentColor',
+                  strokeWidth: '2',
+                  strokeLinecap: 'round',
+                  strokeLinejoin: 'round'
+                },
+                  React.createElement('path', { d: 'M3 6h18' }),
+                  React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
+                  React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' }),
+                  React.createElement('line', { x1: '10', x2: '10', y1: '11', y2: '17' }),
+                  React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
+                )
+              )
           )
         )
       ),
