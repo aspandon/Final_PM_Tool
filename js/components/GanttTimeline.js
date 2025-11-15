@@ -77,6 +77,25 @@ export function GanttTimeline({
       'Projects Timeline'
     ),
 
+    // Phase Legend
+    React.createElement('div', {
+      className: `mb-4 flex gap-3 flex-wrap items-center ${darkMode ? 'bg-slate-800/50' : 'bg-blue-50/50'} p-3 rounded-lg border ${darkMode ? 'border-slate-600' : 'border-blue-200'}`
+    },
+      phases.map((phase) =>
+        React.createElement('div', {
+          key: phase.key,
+          className: 'flex items-center gap-1.5'
+        },
+          React.createElement('div', {
+            className: `w-3 h-3 ${phase.color} rounded shadow-sm`
+          }),
+          React.createElement('span', {
+            className: `text-xs font-medium ${darkMode ? 'text-gray-200' : 'text-black'}`
+          }, phase.label)
+        )
+      )
+    ),
+
     // Chart container
     React.createElement('div', {
       className: `overflow-x-auto ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-xl shadow-md p-4 border ${darkMode ? 'border-slate-700' : 'border-gray-200'}`
