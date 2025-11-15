@@ -1057,9 +1057,20 @@ export function ActionPlan({
         showDeps && renderDependencySelector(task, 'task', ids)
       ),
       // Subtasks
-      isExpanded && task.subtasks.length > 0 && React.createElement('div', {
+      isExpanded && React.createElement('div', {
         className: `p-3 ${darkMode ? 'bg-slate-900/30' : 'bg-indigo-50/50'}`
-      }, task.subtasks.map(subtask => renderSubtask(subtask, actionId, task.id)))
+      },
+        task.subtasks.map(subtask => renderSubtask(subtask, actionId, task.id)),
+        // Add Subtask button
+        !isEditLocked && React.createElement('button', {
+          onClick: () => addSubtask(actionId, task.id),
+          className: `w-full py-2 rounded-lg border-2 border-dashed font-bold transition-all shadow-sm hover:shadow-md text-sm ${
+            darkMode
+              ? 'border-purple-400/50 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 hover:border-purple-400'
+              : 'border-purple-400 bg-purple-50 hover:bg-purple-100 text-purple-700 hover:border-purple-500'
+          }`
+        }, '+ Sub Task')
+      )
     );
   };
 
