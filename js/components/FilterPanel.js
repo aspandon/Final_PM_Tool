@@ -153,14 +153,33 @@ export function FilterPanel({
         : 'linear-gradient(to right, rgba(147, 197, 253, 0.85), rgba(165, 180, 252, 0.85))'
     }
   },
-    // Header
-    React.createElement('h3', {
-      className: `text-base font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-3 flex items-center gap-2`
+    // Header with Apply and Clear buttons
+    React.createElement('div', {
+      className: `mb-3 flex items-center justify-between gap-4`
     },
+      React.createElement('h3', {
+        className: `text-base font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-2`
+      },
+        React.createElement('div', {
+          className: 'w-1 h-5 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full'
+        }),
+        'Global Filters'
+      ),
+      // Apply and Clear buttons
       React.createElement('div', {
-        className: 'w-1 h-5 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full'
-      }),
-      'Global Filters'
+        className: 'flex gap-2'
+      },
+        // Apply Button
+        React.createElement('button', {
+          onClick: applyFilter,
+          className: 'px-4 py-2 text-xs bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-medium shadow-md btn-modern btn-gradient-flow btn-pulse ripple'
+        }, 'Apply'),
+        // Clear Button
+        React.createElement('button', {
+          onClick: clearFilter,
+          className: 'px-4 py-2 text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 font-medium shadow-md btn-modern btn-pulse ripple'
+        }, 'Clear')
+      )
     ),
 
     // Main filter controls
@@ -475,57 +494,40 @@ export function FilterPanel({
       )
     ),
 
-    // Active Filter Display with Apply and Clear buttons
-    React.createElement('div', {
+    // Active Filter Display
+    isFilterActive && React.createElement('div', {
       className: `border-t ${darkMode ? 'border-slate-600' : 'border-white/40'} pt-4 mt-4`
     },
       React.createElement('div', {
-        className: 'flex gap-3 flex-wrap items-center'
+        className: `text-sm ${darkMode ? 'text-blue-300 bg-slate-700' : 'text-blue-700 bg-blue-50'} font-medium px-4 py-2 rounded-lg`
       },
-        // Active Filter Display (ribbon)
-        isFilterActive && React.createElement('div', {
-          className: `flex-1 text-sm ${darkMode ? 'text-blue-300 bg-slate-700' : 'text-blue-700 bg-blue-50'} font-medium px-4 py-2 rounded-lg`
-        },
-          '📅 ',
-          selectedProjects.length > 0 && `Projects: ${selectedProjects.length} selected | `,
-          filterDivisions.length > 0 && `Divisions: ${filterDivisions.join(', ')} | `,
-          selectedPMs.length > 0 && `PMs: ${selectedPMs.join(', ')} | `,
-          selectedBPs.length > 0 && `BPs: ${selectedBPs.join(', ')} | `,
-          filterStartDate || 'Beginning',
-          ' to ',
-          filterEndDate || 'End'
-        ),
+        '📅 ',
+        selectedProjects.length > 0 && `Projects: ${selectedProjects.length} selected | `,
+        filterDivisions.length > 0 && `Divisions: ${filterDivisions.join(', ')} | `,
+        selectedPMs.length > 0 && `PMs: ${selectedPMs.join(', ')} | `,
+        selectedBPs.length > 0 && `BPs: ${selectedBPs.join(', ')} | `,
+        filterStartDate || 'Beginning',
+        ' to ',
+        filterEndDate || 'End'
+      )
+    ),
 
-        // Apply and Clear buttons
-        React.createElement('div', {
-          className: `flex gap-2 ${!isFilterActive && hideProjectFields && projects.length > 0 ? '' : !isFilterActive ? 'ml-auto' : ''}`
+    // Project fields hidden notice
+    hideProjectFields && projects.length > 0 && React.createElement('div', {
+      className: `border-t ${darkMode ? 'border-slate-600' : 'border-white/40'} pt-4 mt-4`
+    },
+      React.createElement('div', {
+        className: `border ${darkMode ? 'border-slate-600 bg-slate-700' : 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50'} rounded-lg px-4 py-2 shadow-sm`
+      },
+        React.createElement('p', {
+          className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-800'} flex items-center justify-center gap-1.5 whitespace-nowrap`
         },
-          // Apply Button
-          React.createElement('button', {
-            onClick: applyFilter,
-            className: 'px-4 py-2 text-xs bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-medium shadow-md btn-modern btn-gradient-flow btn-pulse ripple'
-          }, 'Apply'),
-
-          // Clear Button
-          React.createElement('button', {
-            onClick: clearFilter,
-            className: 'px-4 py-2 text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 font-medium shadow-md btn-modern btn-pulse ripple'
-          }, 'Clear')
-        ),
-
-        hideProjectFields && projects.length > 0 && React.createElement('div', {
-          className: `border ${darkMode ? 'border-slate-600 bg-slate-700' : 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50'} rounded-lg px-4 py-2 shadow-sm`
-        },
-          React.createElement('p', {
-            className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-800'} flex items-center justify-center gap-1.5 whitespace-nowrap`
+          React.createElement('span', { className: 'text-sm' }, '📋'),
+          React.createElement('span', null, 'Project data entry fields hidden'),
+          React.createElement('span', {
+            className: `${darkMode ? 'text-blue-400' : 'text-blue-700'} font-normal`
           },
-            React.createElement('span', { className: 'text-sm' }, '📋'),
-            React.createElement('span', null, 'Project data entry fields hidden'),
-            React.createElement('span', {
-              className: `${darkMode ? 'text-blue-400' : 'text-blue-700'} font-normal`
-            },
-              `${projects.length} project${projects.length !== 1 ? 's' : ''} loaded. Click "Show Fields" to edit.`
-            )
+            `${projects.length} project${projects.length !== 1 ? 's' : ''} loaded. Click "Show Fields" to edit.`
           )
         )
       )
