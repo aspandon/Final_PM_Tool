@@ -540,27 +540,13 @@ export function FilterPanel({
       filterEndDate || 'End'
     ),
 
-    // Phase Legend (only show in projects/planner view)
+    // Apply and Clear buttons
     React.createElement('div', {
       className: `border-t ${darkMode ? 'border-slate-600' : 'border-white/40'} pt-4 mt-4`
     },
       React.createElement('div', {
         className: 'flex gap-3 flex-wrap items-center'
       },
-        phases.map((phase) =>
-          React.createElement('div', {
-            key: phase.key,
-            className: 'flex items-center gap-1.5'
-          },
-            React.createElement('div', {
-              className: `w-3 h-3 ${phase.color} rounded shadow-sm`
-            }),
-            React.createElement('span', {
-              className: `text-xs font-medium ${darkMode ? 'text-gray-200' : 'text-black'}`
-            }, phase.label)
-          )
-        ),
-
         // Apply and Clear buttons
         React.createElement('div', {
           className: `flex gap-2 ${hideProjectFields && projects.length > 0 ? '' : 'ml-auto'}`
