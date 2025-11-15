@@ -264,7 +264,7 @@ export function ProjectForm({
             React.createElement(Users, {
               className: `w-4 h-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
             }),
-            'Team'
+            'Project Team'
           ),
 
           // Team 2x2 Grid
