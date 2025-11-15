@@ -554,9 +554,13 @@ export function ActionPlan({
     return React.createElement('select', {
       value: priority,
       onChange: (e) => updateItem(type, ids, 'priority', e.target.value, priority),
-      className: `px-3 py-2 text-xs rounded-lg font-bold border-2 ${priorityInfo.border} ${priorityInfo.bg} ${priorityInfo.text} ${priorityInfo.hover} transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg transform hover:scale-105 ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+      className: `px-2.5 py-2.5 text-xs rounded-lg font-bold border flex items-center ${
+        darkMode
+          ? 'bg-slate-600/50 text-gray-200 border-slate-500'
+          : 'bg-blue-100 text-blue-700 border-blue-300'
+      } transition-all cursor-pointer ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
       disabled: isEditLocked,
-      style: { minWidth: '120px' }
+      style: { minWidth: '110px' }
     },
       Object.entries(PRIORITIES).map(([key, val]) =>
         React.createElement('option', { key, value: key }, `${val.icon} ${val.label}`)
@@ -1067,6 +1071,35 @@ export function ActionPlan({
               React.createElement('line', { x1: '8', x2: '16', y1: '12', y2: '12' })
             )
           ),
+          // Activity Log Button
+          React.createElement('button', {
+            onClick: () => {
+              const key = ids.actionId + (ids.taskId || '');
+              setShowActivityLog({ ...showActivityLog, [key]: !showActivityLog[key] });
+            },
+            className: `p-2 rounded-lg transition-all ${darkMode ? 'hover:bg-slate-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`,
+            disabled: isEditLocked,
+            title: `Activity Log (${(action.activityLog || []).length})`
+          },
+            React.createElement('svg', {
+              className: 'w-5 h-5',
+              xmlns: 'http://www.w3.org/2000/svg',
+              width: '24',
+              height: '24',
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: '2',
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round'
+            },
+              React.createElement('path', { d: 'M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z' }),
+              React.createElement('polyline', { points: '14 2 14 8 20 8' }),
+              React.createElement('line', { x1: '16', x2: '8', y1: '13', y2: '13' }),
+              React.createElement('line', { x1: '16', x2: '8', y1: '17', y2: '17' }),
+              React.createElement('line', { x1: '10', x2: '8', y1: '9', y2: '9' })
+            )
+          ),
           // Delete Button (Project style)
           !isEditLocked && React.createElement('button', {
             onClick: () => deleteItem('action', ids),
@@ -1099,15 +1132,12 @@ export function ActionPlan({
       React.createElement('div', {
         className: `p-3 ${darkMode ? 'bg-slate-800/30' : 'bg-blue-50/20'}`
       },
-        // Main Row: Description (left) and Dates + Activity Log (right)
+        // Main Row: Description (left) and Dates (right)
         React.createElement('div', {
           className: 'flex gap-3 mb-3'
         },
           // Description (left side, flex-1)
           React.createElement('div', { className: 'flex-1' },
-            React.createElement('label', {
-              className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold mb-1 block`
-            }, 'Description'),
             React.createElement('textarea', {
               value: action.description || '',
               onChange: (e) => updateItem('action', ids, 'description', e.target.value),
@@ -1121,46 +1151,27 @@ export function ActionPlan({
               disabled: isEditLocked
             })
           ),
-          // Dates and Activity Log (right side)
+          // Dates (right side)
           React.createElement('div', { className: 'flex flex-col gap-2' },
+            React.createElement('label', {
+              className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold mb-1`
+            }, 'Start / Finish Date'),
             // Start Date
-            React.createElement('div', { className: 'flex flex-col gap-1' },
-              React.createElement('label', {
-                className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
-              }, 'Start Date'),
-              React.createElement('input', {
-                type: 'date',
-                value: action.startDate || '',
-                onChange: (e) => updateItem('action', ids, 'startDate', e.target.value),
-                className: `w-44 px-3 py-2 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg`,
-                disabled: isEditLocked
-              })
-            ),
+            React.createElement('input', {
+              type: 'date',
+              value: action.startDate || '',
+              onChange: (e) => updateItem('action', ids, 'startDate', e.target.value),
+              className: `w-40 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg`,
+              disabled: isEditLocked
+            }),
             // Finish Date
-            React.createElement('div', { className: 'flex flex-col gap-1' },
-              React.createElement('label', {
-                className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
-              }, 'Finish Date'),
-              React.createElement('input', {
-                type: 'date',
-                value: action.finishDate || '',
-                onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
-                className: `w-44 px-3 py-2 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg`,
-                disabled: isEditLocked
-              })
-            ),
-            // Activity Log Button
-            React.createElement('button', {
-              onClick: () => {
-                const key = ids.actionId + (ids.taskId || '');
-                setShowActivityLog({ ...showActivityLog, [key]: !showActivityLog[key] });
-              },
-              className: `px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                darkMode
-                  ? 'bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-400/30'
-                  : 'bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200'
-              }`
-            }, `📋 Activity Log (${(action.activityLog || []).length})`)
+            React.createElement('input', {
+              type: 'date',
+              value: action.finishDate || '',
+              onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
+              className: `w-40 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg`,
+              disabled: isEditLocked
+            })
           )
         ),
         // Activity Log Content (if expanded)
