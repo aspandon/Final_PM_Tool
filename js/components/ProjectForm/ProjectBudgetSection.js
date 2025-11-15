@@ -28,6 +28,12 @@ export function ProjectBudgetSection({
     const opexYear4 = parseFloat(project.opexYear4) || 0;
     const opexYear5 = parseFloat(project.opexYear5) || 0;
 
+    const invoicedYear1 = parseFloat(project.invoicedYear1) || 0;
+    const invoicedYear2 = parseFloat(project.invoicedYear2) || 0;
+    const invoicedYear3 = parseFloat(project.invoicedYear3) || 0;
+    const invoicedYear4 = parseFloat(project.invoicedYear4) || 0;
+    const invoicedYear5 = parseFloat(project.invoicedYear5) || 0;
+
     const totalCapex = capexYear1 + capexYear2 + capexYear3 + capexYear4 + capexYear5;
     const totalOpex = opexYear1 + opexYear2 + opexYear3 + opexYear4 + opexYear5;
     const totalBudget = totalCapex + totalOpex;
@@ -38,6 +44,12 @@ export function ProjectBudgetSection({
     const totalYear4 = capexYear4 + opexYear4;
     const totalYear5 = capexYear5 + opexYear5;
 
+    const remainingYear1 = totalYear1 - invoicedYear1;
+    const remainingYear2 = totalYear2 - invoicedYear2;
+    const remainingYear3 = totalYear3 - invoicedYear3;
+    const remainingYear4 = totalYear4 - invoicedYear4;
+    const remainingYear5 = totalYear5 - invoicedYear5;
+
     return {
       totalCapex,
       totalOpex,
@@ -46,7 +58,12 @@ export function ProjectBudgetSection({
       totalYear2,
       totalYear3,
       totalYear4,
-      totalYear5
+      totalYear5,
+      remainingYear1,
+      remainingYear2,
+      remainingYear3,
+      remainingYear4,
+      remainingYear5
     };
   };
 
@@ -164,6 +181,26 @@ export function ProjectBudgetSection({
             placeholder: '0',
             disabled: isEditLocked
           })
+        ),
+
+        // Remaining Budget Row (read-only calculated: Total/Year - Invoiced)
+        React.createElement('div', {
+          className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} flex items-center gap-1`
+        },
+          React.createElement(DollarSign, {
+            className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
+          }),
+          'Remaining Budget'
+        ),
+        ...[1, 2, 3, 4, 5].map(yearNum =>
+          React.createElement('div', {
+            key: `remaining-year-${yearNum}`,
+            className: `px-2 py-1 text-sm font-bold text-center rounded ${
+              budgetTotals[`remainingYear${yearNum}`] < 0
+                ? darkMode ? 'bg-red-900/30 text-red-300 border border-red-500' : 'bg-red-100 text-red-700 border border-red-400'
+                : darkMode ? 'bg-slate-800 text-emerald-300' : 'bg-emerald-50/50 text-emerald-700'
+            }`
+          }, budgetTotals[`remainingYear${yearNum}`].toFixed(2))
         )
       ),
 
