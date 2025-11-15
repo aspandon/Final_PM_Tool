@@ -95,6 +95,20 @@ function GanttChart() {
     React.createElement('path', { d: 'M22 12A10 10 0 0 0 12 2v10z' })
   );
 
+  const BarChart = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('line', { x1: '12', x2: '12', y1: '20', y2: '10' }),
+    React.createElement('line', { x1: '18', x2: '18', y1: '20', y2: '4' }),
+    React.createElement('line', { x1: '6', x2: '6', y1: '20', y2: '16' })
+  );
+
   const TrendingUp = ({ className }) => React.createElement('svg', {
     className,
     fill: 'none',
@@ -1071,7 +1085,7 @@ function GanttChart() {
           renderTabButton('kanban', 'Kanban', LayoutDashboard),
           renderTabButton('actions', 'Actions', ClipboardList),
           renderTabButton('tasks', 'Tasks', CheckSquare),
-          renderTabButton('resources', 'Charts', Users),
+          renderTabButton('resources', 'Charts', BarChart),
           renderTabButton('actuals', 'Actuals', TrendingUp),
           renderTabButton('reporting', 'Reporting', FileText),
 
