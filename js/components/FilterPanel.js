@@ -43,6 +43,7 @@ export function FilterPanel({
   const [showDivisionDropdown, setShowDivisionDropdown] = React.useState(false);
   const [showPMDropdown, setShowPMDropdown] = React.useState(false);
   const [showBPDropdown, setShowBPDropdown] = React.useState(false);
+  const [showBAUTooltip, setShowBAUTooltip] = React.useState(false);
 
   // Helper functions
   const toggleDivisionSelection = (division) => {
@@ -154,13 +155,34 @@ export function FilterPanel({
     }
   },
     // Header
-    React.createElement('h3', {
-      className: `text-base font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-3 flex items-center gap-2`
+    React.createElement('div', {
+      className: `text-base font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-3 flex items-center justify-between gap-2`
     },
       React.createElement('div', {
-        className: 'w-1 h-5 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full'
-      }),
-      'Global Filters'
+        className: 'flex items-center gap-2'
+      },
+        React.createElement('div', {
+          className: 'w-1 h-5 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full'
+        }),
+        'Global Filters'
+      ),
+      // Info icon with tooltip
+      React.createElement('div', {
+        className: 'relative',
+        onMouseEnter: () => setShowBAUTooltip(true),
+        onMouseLeave: () => setShowBAUTooltip(false)
+      },
+        React.createElement('div', {
+          className: `w-5 h-5 rounded-full flex items-center justify-center cursor-help ${darkMode ? 'bg-blue-500 text-white' : 'bg-blue-500 text-white'} hover:bg-blue-600 transition-colors`
+        }, 'ℹ'),
+        // Tooltip
+        showBAUTooltip && React.createElement('div', {
+          className: `absolute right-0 top-7 z-50 w-80 p-3 rounded-lg shadow-xl ${darkMode ? 'bg-slate-800 border-slate-600 text-gray-200' : 'bg-white border-gray-200 text-gray-700'} border text-xs leading-relaxed`
+        },
+          React.createElement('strong', null, 'Note: '),
+          'BAU allocation in FTE (Full-Time Equivalent) is added to each team member for every month within the filtered date range. If no date filter is active, BAU is applied across the entire project timeline. 1 FTE = 22 working days per month.'
+        )
+      )
     ),
 
     // Main filter controls
@@ -190,7 +212,8 @@ export function FilterPanel({
         
         // Division Dropdown
         showDivisionDropdown && React.createElement('div', {
-          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'} border rounded-lg shadow-xl max-h-60 overflow-y-auto dropdown-enter`
+          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'} border rounded-lg shadow-xl max-h-60 overflow-y-auto dropdown-enter`,
+          onMouseLeave: () => setShowDivisionDropdown(false)
         },
           // Dropdown header with buttons
           React.createElement('div', {
@@ -248,7 +271,8 @@ export function FilterPanel({
         
         // BP Dropdown
         showBPDropdown && React.createElement('div', {
-          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`
+          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`,
+          onMouseLeave: () => setShowBPDropdown(false)
         },
           React.createElement('div', {
             className: `sticky top-0 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-100 border-gray-300'} p-2 border-b flex gap-2`
@@ -300,7 +324,8 @@ export function FilterPanel({
         
         // PM Dropdown
         showPMDropdown && React.createElement('div', {
-          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`
+          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`,
+          onMouseLeave: () => setShowPMDropdown(false)
         },
           React.createElement('div', {
             className: `sticky top-0 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-100 border-gray-300'} p-2 border-b flex gap-2`
@@ -404,7 +429,8 @@ export function FilterPanel({
         
         // Project Dropdown
         showProjectDropdown && React.createElement('div', {
-          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`
+          className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`,
+          onMouseLeave: () => setShowProjectDropdown(false)
         },
           React.createElement('div', {
             className: `sticky top-0 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-100 border-gray-300'} p-2 border-b flex gap-2`
@@ -516,40 +542,33 @@ export function FilterPanel({
             placeholder: 'e.g., 0.5'
           })
         )
-      ),
-      // BAU Note
-      React.createElement('div', {
-        className: `mt-2 text-xs ${darkMode ? 'text-gray-300 bg-slate-800' : 'text-gray-600 bg-blue-50'} p-2 rounded-lg`
-      },
-        React.createElement('strong', null, 'Note:'),
-        ' BAU allocation in FTE (Full-Time Equivalent) is added to each team member for every month within the filtered date range. If no date filter is active, BAU is applied across the entire project timeline. 1 FTE = 22 working days per month.'
       )
     ),
 
-    // Active Filter Display
-    isFilterActive && React.createElement('div', {
-      className: `mt-3 text-sm ${darkMode ? 'text-blue-300 bg-slate-700' : 'text-blue-700 bg-blue-50'} font-medium px-4 py-2 rounded-lg`
-    },
-      '📅 ',
-      selectedProjects.length > 0 && `Projects: ${selectedProjects.length} selected | `,
-      filterDivisions.length > 0 && `Divisions: ${filterDivisions.join(', ')} | `,
-      selectedPMs.length > 0 && `PMs: ${selectedPMs.join(', ')} | `,
-      selectedBPs.length > 0 && `BPs: ${selectedBPs.join(', ')} | `,
-      filterStartDate || 'Beginning',
-      ' to ',
-      filterEndDate || 'End'
-    ),
-
-    // Apply and Clear buttons
+    // Active Filter Display with Apply and Clear buttons
     React.createElement('div', {
       className: `border-t ${darkMode ? 'border-slate-600' : 'border-white/40'} pt-4 mt-4`
     },
       React.createElement('div', {
         className: 'flex gap-3 flex-wrap items-center'
       },
+        // Active Filter Display (ribbon)
+        isFilterActive && React.createElement('div', {
+          className: `flex-1 text-sm ${darkMode ? 'text-blue-300 bg-slate-700' : 'text-blue-700 bg-blue-50'} font-medium px-4 py-2 rounded-lg`
+        },
+          '📅 ',
+          selectedProjects.length > 0 && `Projects: ${selectedProjects.length} selected | `,
+          filterDivisions.length > 0 && `Divisions: ${filterDivisions.join(', ')} | `,
+          selectedPMs.length > 0 && `PMs: ${selectedPMs.join(', ')} | `,
+          selectedBPs.length > 0 && `BPs: ${selectedBPs.join(', ')} | `,
+          filterStartDate || 'Beginning',
+          ' to ',
+          filterEndDate || 'End'
+        ),
+
         // Apply and Clear buttons
         React.createElement('div', {
-          className: `flex gap-2 ${hideProjectFields && projects.length > 0 ? '' : 'ml-auto'}`
+          className: `flex gap-2 ${!isFilterActive && hideProjectFields && projects.length > 0 ? '' : !isFilterActive ? 'ml-auto' : ''}`
         },
           // Apply Button
           React.createElement('button', {
