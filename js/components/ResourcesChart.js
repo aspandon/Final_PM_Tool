@@ -16,12 +16,17 @@ export function ResourcesChart({
   filterEndDate,
   pmBAU,
   bpBAU,
+  setPmBAU,
+  setBpBAU,
   showExternalPM,
   showExternalQA,
   darkMode,
   colors
 }) {
   const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+
+  // State for BAU tooltip
+  const [showBAUTooltip, setShowBAUTooltip] = React.useState(false);
 
   /**
    * Calculate resource effort data
@@ -310,14 +315,88 @@ export function ResourcesChart({
   const yAxisMax = Math.ceil(maxValue * 1.1 * 4) / 4; // Round up to nearest 0.25 with 10% padding
 
   return React.createElement('div', { className: 'border-t pt-6 mt-6' },
-    // Header
-    React.createElement('h2', {
-      className: `text-xl font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-2`
+    // Header with info icon
+    React.createElement('div', {
+      className: `text-xl font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center justify-between gap-2`
     },
       React.createElement('div', {
-        className: 'w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full'
-      }),
-      'Resource Effort per Person (FTE)'
+        className: 'flex items-center gap-2'
+      },
+        React.createElement('div', {
+          className: 'w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full'
+        }),
+        'Resource Effort per Person (FTE)'
+      ),
+      // Info icon with tooltip
+      React.createElement('div', {
+        className: 'relative',
+        onMouseEnter: () => setShowBAUTooltip(true),
+        onMouseLeave: () => setShowBAUTooltip(false)
+      },
+        React.createElement('div', {
+          className: `w-5 h-5 rounded-full flex items-center justify-center cursor-help ${darkMode ? 'bg-blue-500 text-white' : 'bg-blue-500 text-white'} hover:bg-blue-600 transition-colors`
+        }, 'ℹ'),
+        // Tooltip
+        showBAUTooltip && React.createElement('div', {
+          className: `absolute right-0 top-7 z-50 w-80 p-3 rounded-lg shadow-xl ${darkMode ? 'bg-slate-800 border-slate-600 text-gray-200' : 'bg-white border-gray-200 text-gray-700'} border text-xs leading-relaxed`
+        },
+          React.createElement('strong', null, 'Note: '),
+          'BAU allocation in FTE (Full-Time Equivalent) is added to each team member for every month within the filtered date range. If no date filter is active, BAU is applied across the entire project timeline. 1 FTE = 22 working days per month.'
+        )
+      )
+    ),
+
+    // BAU Allocation Section
+    React.createElement('div', {
+      className: `mb-6 p-4 rounded-xl shadow-lg ${darkMode ? 'glass-dark border-animated-dark' : 'glass border-animated'}`,
+      style: {
+        background: darkMode
+          ? 'linear-gradient(to right, rgba(51, 65, 85, 0.85), rgba(71, 85, 105, 0.85))'
+          : 'linear-gradient(to right, rgba(147, 197, 253, 0.85), rgba(165, 180, 252, 0.85))'
+      }
+    },
+      React.createElement('div', {
+        className: 'grid grid-cols-2 gap-4'
+      },
+        // PM BAU
+        React.createElement('div', null,
+          React.createElement('label', {
+            className: `block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'} mb-1`
+          },
+            'PM BAU Allocation (FTE/Month)',
+            React.createElement('span', {
+              className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} ml-1 font-normal`
+            }, '(applies to all PMs universally)')
+          ),
+          React.createElement('input', {
+            type: 'number',
+            step: '0.1',
+            value: pmBAU,
+            onChange: (e) => setPmBAU(e.target.value),
+            className: `w-full px-3 py-2 text-sm border rounded-lg shadow-sm ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white text-gray-900 input-glow'}`,
+            placeholder: 'e.g., 0.5'
+          })
+        ),
+        // BP BAU
+        React.createElement('div', null,
+          React.createElement('label', {
+            className: `block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'} mb-1`
+          },
+            'BP BAU Allocation (FTE/Month)',
+            React.createElement('span', {
+              className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} ml-1 font-normal`
+            }, '(applies to all BPs universally)')
+          ),
+          React.createElement('input', {
+            type: 'number',
+            step: '0.1',
+            value: bpBAU,
+            onChange: (e) => setBpBAU(e.target.value),
+            className: `w-full px-3 py-2 text-sm border rounded-lg shadow-sm ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-gray-300 bg-white text-gray-900 input-glow'}`,
+            placeholder: 'e.g., 0.5'
+          })
+        )
+      )
     ),
 
     // Chart container

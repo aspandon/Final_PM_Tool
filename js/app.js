@@ -95,6 +95,20 @@ function GanttChart() {
     React.createElement('path', { d: 'M22 12A10 10 0 0 0 12 2v10z' })
   );
 
+  const BarChart = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('line', { x1: '12', x2: '12', y1: '20', y2: '10' }),
+    React.createElement('line', { x1: '18', x2: '18', y1: '20', y2: '4' }),
+    React.createElement('line', { x1: '6', x2: '6', y1: '20', y2: '16' })
+  );
+
   const TrendingUp = ({ className }) => React.createElement('svg', {
     className,
     fill: 'none',
@@ -868,9 +882,9 @@ function GanttChart() {
   };
 
   /**
-   * Render overview with consolidated metrics
+   * Render resources view
    */
-  const renderOverviewView = () => {
+  const renderResourcesView = () => {
     if (filteredProjects.length === 0) {
       return React.createElement('div', {
         className: `text-center py-12 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
@@ -880,6 +894,25 @@ function GanttChart() {
     }
 
     return React.createElement('div', null,
+      // Resources Chart
+      React.createElement(ResourcesChart, {
+        filteredProjects,
+        filteredProjectsForExternal,
+        earliestDate: earliest,
+        latestDate: latest,
+        isFilterActive,
+        filterStartDate,
+        filterEndDate,
+        pmBAU,
+        bpBAU,
+        setPmBAU,
+        setBpBAU,
+        showExternalPM,
+        showExternalQA,
+        darkMode,
+        colors
+      }),
+
       // Divisions Chart
       React.createElement(DivisionsChart, {
         filteredProjects,
@@ -893,35 +926,6 @@ function GanttChart() {
         divisionColors
       })
     );
-  };
-
-  /**
-   * Render resources view
-   */
-  const renderResourcesView = () => {
-    if (filteredProjects.length === 0) {
-      return React.createElement('div', {
-        className: `text-center py-12 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
-      },
-        React.createElement('p', { className: 'text-lg' }, '📊 No projects to display')
-      );
-    }
-
-    return React.createElement(ResourcesChart, {
-      filteredProjects,
-      filteredProjectsForExternal,
-      earliestDate: earliest,
-      latestDate: latest,
-      isFilterActive,
-      filterStartDate,
-      filterEndDate,
-      pmBAU,
-      bpBAU,
-      showExternalPM,
-      showExternalQA,
-      darkMode,
-      colors
-    });
   };
 
   /**
@@ -1081,8 +1085,7 @@ function GanttChart() {
           renderTabButton('kanban', 'Kanban', LayoutDashboard),
           renderTabButton('actions', 'Actions', ClipboardList),
           renderTabButton('tasks', 'Tasks', CheckSquare),
-          renderTabButton('resources', 'Resources', Users),
-          renderTabButton('overview', 'Divisions', PieChart),
+          renderTabButton('resources', 'Charts', BarChart),
           renderTabButton('actuals', 'Actuals', TrendingUp),
           renderTabButton('reporting', 'Reporting', FileText),
 
@@ -1107,7 +1110,6 @@ function GanttChart() {
           activeTab === 'kanban' && renderKanbanView(),
           activeTab === 'actions' && renderActionsView(),
           activeTab === 'tasks' && renderTasksView(),
-          activeTab === 'overview' && renderOverviewView(),
           activeTab === 'resources' && renderResourcesView(),
           activeTab === 'actuals' && renderActualsView(),
           activeTab === 'reporting' && renderReportingView()

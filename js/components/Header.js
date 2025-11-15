@@ -47,10 +47,10 @@ export function Header({
       },
         React.createElement('h1', {
           className: `text-2xl font-bold bg-gradient-to-r ${darkMode ? 'from-blue-400 to-indigo-400' : 'from-blue-600 to-indigo-600'} bg-clip-text text-transparent`
-        }, 'Digital Development Project Management'),
+        }, 'Digital Development Portfolio'),
         React.createElement('p', {
           className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
-        }, 'Project planning and resource management • Version 1.1')
+        }, 'Portfolio Management, Project Planning and Resource Management • Version 1.0')
       )
     )
   );
