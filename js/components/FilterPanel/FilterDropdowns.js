@@ -169,7 +169,7 @@ export function FilterDropdowns({
 
       // Division Dropdown
       showDivisionDropdown && React.createElement('div', {
-        className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'} border rounded-lg shadow-xl max-h-60 overflow-y-auto dropdown-enter`,
+        className: `absolute z-[60] mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'} border rounded-lg shadow-xl max-h-60 overflow-y-auto dropdown-enter`,
         onMouseLeave: () => setShowDivisionDropdown(false)
       },
         // Dropdown header with buttons
@@ -228,7 +228,7 @@ export function FilterDropdowns({
 
       // BP Dropdown
       showBPDropdown && React.createElement('div', {
-        className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`,
+        className: `absolute z-[60] mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`,
         onMouseLeave: () => setShowBPDropdown(false)
       },
         React.createElement('div', {
@@ -281,7 +281,7 @@ export function FilterDropdowns({
 
       // PM Dropdown
       showPMDropdown && React.createElement('div', {
-        className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`,
+        className: `absolute z-[60] mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`,
         onMouseLeave: () => setShowPMDropdown(false)
       },
         React.createElement('div', {
@@ -386,7 +386,7 @@ export function FilterDropdowns({
 
       // Project Dropdown
       showProjectDropdown && React.createElement('div', {
-        className: `absolute z-10 mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`,
+        className: `absolute z-[60] mt-1 w-full ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'} border rounded shadow-lg max-h-60 overflow-y-auto dropdown-enter`,
         onMouseLeave: () => setShowProjectDropdown(false)
       },
         React.createElement('div', {
