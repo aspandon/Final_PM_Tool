@@ -736,8 +736,6 @@ export function ActionPlan({
           }),
           // Status dropdown
           renderStatusDropdown(subtask, 'subtask', ids),
-          // Priority dropdown
-          renderPriorityDropdown(subtask, 'subtask', ids),
           // Dependencies Button
           React.createElement('button', {
             onClick: () => setShowDependencies({ ...showDependencies, [subtask.id]: !showDeps }),
@@ -909,10 +907,46 @@ export function ActionPlan({
             }`,
             title: `${completedSubtasks}/${totalSubtasks} Subtasks Complete`
           }, `${totalSubtasks} ${totalSubtasks === 1 ? 'Sub' : 'Subs'}`),
+          // Circular Progress Indicator (for subtasks)
+          totalSubtasks > 0 && React.createElement('div', {
+            className: 'relative flex items-center justify-center flex-shrink-0',
+            style: { width: '32px', height: '32px' },
+            title: `${completedSubtasks}/${totalSubtasks} Subtasks Complete`
+          },
+            React.createElement('svg', {
+              className: 'transform -rotate-90',
+              style: { width: '32px', height: '32px' }
+            },
+              // Background circle
+              React.createElement('circle', {
+                cx: '16',
+                cy: '16',
+                r: '12',
+                stroke: darkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(203, 213, 225, 0.5)',
+                strokeWidth: '2.5',
+                fill: 'none'
+              }),
+              // Progress circle
+              React.createElement('circle', {
+                cx: '16',
+                cy: '16',
+                r: '12',
+                stroke: Math.round((completedSubtasks / totalSubtasks) * 100) === 100 ? '#10b981' : '#3b82f6',
+                strokeWidth: '2.5',
+                fill: 'none',
+                strokeLinecap: 'round',
+                strokeDasharray: `${2 * Math.PI * 12}`,
+                strokeDashoffset: `${2 * Math.PI * 12 * (1 - (completedSubtasks / totalSubtasks))}`,
+                style: { transition: 'stroke-dashoffset 0.3s ease' }
+              })
+            ),
+            // Progress percentage text
+            React.createElement('div', {
+              className: `absolute inset-0 flex items-center justify-center text-[9px] font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+            }, `${Math.round((completedSubtasks / totalSubtasks) * 100)}%`)
+          ),
           // Status dropdown
           renderStatusDropdown(task, 'task', ids),
-          // Priority dropdown
-          renderPriorityDropdown(task, 'task', ids),
           // Dependencies Button
           React.createElement('button', {
             onClick: () => setShowDependencies({ ...showDependencies, [task.id]: !showDeps }),
@@ -1014,53 +1048,54 @@ export function ActionPlan({
       React.createElement('div', {
         className: `p-3 ${darkMode ? 'bg-slate-800/30' : 'bg-blue-50/20'}`
       },
-        // Main Row: Description (left) and Dates + Assignee (right)
+        // Description
+        React.createElement('textarea', {
+          value: task.description || '',
+          onChange: (e) => updateItem('task', ids, 'description', e.target.value),
+          placeholder: 'Add detailed description...',
+          className: `w-full px-3 py-2 text-sm border-2 rounded-lg transition-all focus:ring-2 mb-2 ${
+            darkMode
+              ? 'border-slate-600 bg-slate-800/50 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20'
+              : 'border-blue-200 bg-white text-gray-800 focus:border-indigo-400 focus:ring-indigo-400/20'
+          }`,
+          rows: 2,
+          disabled: isEditLocked
+        }),
+        // Dates and Assignee in single row
         React.createElement('div', {
-          className: 'flex gap-3 mb-3'
+          className: 'flex gap-2 items-center text-xs mb-3'
         },
-          // Description (left side, flex-1)
-          React.createElement('div', { className: 'flex-1' },
-            React.createElement('textarea', {
-              value: task.description || '',
-              onChange: (e) => updateItem('task', ids, 'description', e.target.value),
-              placeholder: 'Add detailed description...',
-              className: `w-full px-3 py-2 text-sm border-2 rounded-lg transition-all focus:ring-2 ${
-                darkMode
-                  ? 'border-slate-600 bg-slate-800/50 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20'
-                  : 'border-blue-200 bg-white text-gray-800 focus:border-indigo-400 focus:ring-indigo-400/20'
-              }`,
-              rows: 2,
-              disabled: isEditLocked
-            })
-          ),
-          // Dates and Assignee (right side)
-          React.createElement('div', { className: 'flex flex-col gap-2' },
+          React.createElement('label', {
+            className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+          }, 'Dates:'),
+          // Start Date
+          React.createElement('input', {
+            type: 'date',
+            value: task.startDate || '',
+            onChange: (e) => updateItem('task', ids, 'startDate', e.target.value),
+            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded`,
+            disabled: isEditLocked
+          }),
+          React.createElement('span', { className: `${darkMode ? 'text-gray-500' : 'text-gray-400'}` }, '→'),
+          // Finish Date
+          React.createElement('input', {
+            type: 'date',
+            value: task.finishDate || '',
+            onChange: (e) => updateItem('task', ids, 'finishDate', e.target.value),
+            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded`,
+            disabled: isEditLocked
+          }),
+          React.createElement('div', { className: 'ml-auto flex items-center gap-2' },
             React.createElement('label', {
-              className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold mb-1`
-            }, 'Start / Finish Date'),
-            // Start Date
-            React.createElement('input', {
-              type: 'date',
-              value: task.startDate || '',
-              onChange: (e) => updateItem('task', ids, 'startDate', e.target.value),
-              className: `w-36 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded-lg`,
-              disabled: isEditLocked
-            }),
-            // Finish Date
-            React.createElement('input', {
-              type: 'date',
-              value: task.finishDate || '',
-              onChange: (e) => updateItem('task', ids, 'finishDate', e.target.value),
-              className: `w-36 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded-lg`,
-              disabled: isEditLocked
-            }),
+              className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+            }, 'Assignee:'),
             // Assignee
             React.createElement('input', {
               type: 'text',
               value: task.assignee || '',
               onChange: (e) => updateItem('task', ids, 'assignee', e.target.value),
               placeholder: 'Assignee',
-              className: `w-36 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded-lg`,
+              className: `w-28 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-blue-300 bg-white'} rounded`,
               disabled: isEditLocked
             })
           )
@@ -1307,47 +1342,43 @@ export function ActionPlan({
       React.createElement('div', {
         className: `p-3 ${darkMode ? 'bg-slate-800/30' : 'bg-blue-50/20'}`
       },
-        // Main Row: Description (left) and Dates (right)
+        // Description
+        React.createElement('textarea', {
+          value: action.description || '',
+          onChange: (e) => updateItem('action', ids, 'description', e.target.value),
+          placeholder: 'Add detailed description...',
+          className: `w-full px-3 py-2 text-sm border-2 rounded-lg transition-all focus:ring-2 mb-2 ${
+            darkMode
+              ? 'border-slate-600 bg-slate-800/50 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20'
+              : 'border-gray-200 bg-white text-gray-800 focus:border-indigo-400 focus:ring-indigo-400/20'
+          }`,
+          rows: 3,
+          disabled: isEditLocked
+        }),
+        // Dates in single row
         React.createElement('div', {
-          className: 'flex gap-3 mb-3'
+          className: 'flex gap-2 items-center text-xs mb-3'
         },
-          // Description (left side, flex-1)
-          React.createElement('div', { className: 'flex-1' },
-            React.createElement('textarea', {
-              value: action.description || '',
-              onChange: (e) => updateItem('action', ids, 'description', e.target.value),
-              placeholder: 'Add detailed description...',
-              className: `w-full px-3 py-2 text-sm border-2 rounded-lg transition-all focus:ring-2 ${
-                darkMode
-                  ? 'border-slate-600 bg-slate-800/50 text-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20'
-                  : 'border-gray-200 bg-white text-gray-800 focus:border-indigo-400 focus:ring-indigo-400/20'
-              }`,
-              rows: 3,
-              disabled: isEditLocked
-            })
-          ),
-          // Dates (right side)
-          React.createElement('div', { className: 'flex flex-col gap-2' },
-            React.createElement('label', {
-              className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold mb-1`
-            }, 'Start / Finish Date'),
-            // Start Date
-            React.createElement('input', {
-              type: 'date',
-              value: action.startDate || '',
-              onChange: (e) => updateItem('action', ids, 'startDate', e.target.value),
-              className: `w-40 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg`,
-              disabled: isEditLocked
-            }),
-            // Finish Date
-            React.createElement('input', {
-              type: 'date',
-              value: action.finishDate || '',
-              onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
-              className: `w-40 px-2 py-1.5 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded-lg`,
-              disabled: isEditLocked
-            })
-          )
+          React.createElement('label', {
+            className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+          }, 'Dates:'),
+          React.createElement('input', {
+            type: 'date',
+            value: action.startDate || '',
+            onChange: (e) => updateItem('action', ids, 'startDate', e.target.value),
+            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+            disabled: isEditLocked
+          }),
+          React.createElement('span', {
+            className: darkMode ? 'text-gray-500' : 'text-gray-400'
+          }, '→'),
+          React.createElement('input', {
+            type: 'date',
+            value: action.finishDate || '',
+            onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
+            className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+            disabled: isEditLocked
+          })
         ),
         // Activity Log Content (if expanded)
         (() => {
