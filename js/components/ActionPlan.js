@@ -677,8 +677,26 @@ export function ActionPlan({
       className: `mt-2 p-2 rounded ${darkMode ? 'bg-slate-700' : 'bg-gray-50'} border ${darkMode ? 'border-slate-600' : 'border-gray-200'}`
     },
       React.createElement('div', {
-        className: `text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
-      }, '🔗 Add Dependency'),
+        className: `text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1 flex items-center gap-1`
+      },
+        React.createElement('svg', {
+          className: 'w-3.5 h-3.5',
+          xmlns: 'http://www.w3.org/2000/svg',
+          width: '24',
+          height: '24',
+          viewBox: '0 0 24 24',
+          fill: 'none',
+          stroke: 'currentColor',
+          strokeWidth: '2',
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round'
+        },
+          React.createElement('path', { d: 'M9 17H7A5 5 0 0 1 7 7h2' }),
+          React.createElement('path', { d: 'M15 7h2a5 5 0 1 1 0 10h-2' }),
+          React.createElement('line', { x1: '8', x2: '16', y1: '12', y2: '12' })
+        ),
+        'Add Dependency'
+      ),
       React.createElement('select', {
         onChange: (e) => {
           if (e.target.value) {
@@ -1355,7 +1373,7 @@ export function ActionPlan({
           rows: 3,
           disabled: isEditLocked
         }),
-        // Dates in single row
+        // Dates and Assignee in single row
         React.createElement('div', {
           className: 'flex gap-2 items-center text-xs mb-3'
         },
@@ -1378,7 +1396,21 @@ export function ActionPlan({
             onChange: (e) => updateItem('action', ids, 'finishDate', e.target.value),
             className: `w-32 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
             disabled: isEditLocked
-          })
+          }),
+          React.createElement('div', { className: 'ml-auto flex items-center gap-2' },
+            React.createElement('label', {
+              className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} font-semibold`
+            }, 'Assignee:'),
+            // Assignee
+            React.createElement('input', {
+              type: 'text',
+              value: action.assignee || '',
+              onChange: (e) => updateItem('action', ids, 'assignee', e.target.value),
+              placeholder: 'Assignee',
+              className: `w-28 px-2 py-1 text-xs border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200' : 'border-gray-300 bg-white'} rounded`,
+              disabled: isEditLocked
+            })
+          )
         ),
         // Activity Log Content (if expanded)
         (() => {
