@@ -16,6 +16,20 @@ export function ProjectForm({
   darkMode,
   isEditLocked = false
 }) {
+  // State for delete confirmation
+  const [deleteConfirm, setDeleteConfirm] = React.useState(null);
+
+  // Check if delete confirmation is showing for this project
+  const isDeletePending = () => {
+    return deleteConfirm === pIndex;
+  };
+
+  // Handle delete with confirmation reset
+  const handleDelete = () => {
+    deleteProject(pIndex);
+    setDeleteConfirm(null);
+  };
+
   // Modern Icon Components
   const Briefcase = ({ className }) => React.createElement('svg', {
     className,
@@ -237,11 +251,33 @@ export function ProjectForm({
         React.createElement('div', {
           className: `px-3 py-1.5 text-xs font-bold rounded-lg border-2 ${darkMode ? getStatusColorDark(currentStatus) : getStatusColorLight(currentStatus)} whitespace-nowrap ${isEditLocked ? 'opacity-60' : ''}`
         }, getStatusDisplay(currentStatus)),
-        React.createElement('button', {
-          onClick: () => deleteProject(pIndex),
-          className: `px-3 py-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake flex items-center ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
-          title: isEditLocked ? 'Locked - Cannot delete' : 'Delete',
-          disabled: isEditLocked
+        // Delete Button (inline confirmation)
+        !isEditLocked && (isDeletePending()
+          ? React.createElement('div', {
+              className: `flex items-center gap-1 ${darkMode ? 'bg-red-900/30' : 'bg-red-100'} px-2 py-1 rounded-lg`
+            },
+              React.createElement('span', {
+                className: `text-xs font-semibold ${darkMode ? 'text-red-300' : 'text-red-700'}`
+              }, 'Delete?'),
+              React.createElement('button', {
+                onClick: handleDelete,
+                className: 'px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded font-semibold'
+              }, 'Yes'),
+              React.createElement('button', {
+                onClick: () => setDeleteConfirm(null),
+                className: 'px-2 py-1 text-xs bg-gray-500 hover:bg-gray-600 text-white rounded font-semibold'
+              }, 'No')
+            )
+          : React.createElement('button', {
+              onClick: () => setDeleteConfirm(pIndex),
+              className: `px-3 py-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake flex items-center`,
+              title: 'Delete'
+            }, React.createElement(Trash, { className: 'w-4 h-4' }))
+        ),
+        isEditLocked && React.createElement('button', {
+          className: `px-3 py-1.5 bg-red-500/90 text-white rounded-lg btn-modern flex items-center opacity-50 cursor-not-allowed`,
+          title: 'Locked - Cannot delete',
+          disabled: true
         }, React.createElement(Trash, { className: 'w-4 h-4' }))
       )
     ),
