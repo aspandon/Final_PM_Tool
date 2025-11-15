@@ -913,16 +913,6 @@ export function ActionPlan({
           renderStatusDropdown(task, 'task', ids),
           // Priority dropdown
           renderPriorityDropdown(task, 'task', ids),
-          // Add Subtask Button
-          !isEditLocked && React.createElement('button', {
-            onClick: () => addSubtask(actionId, task.id),
-            className: `flex items-center gap-2 px-3 py-2.5 rounded-lg font-semibold text-xs transition-all transform hover:scale-105 ${
-              darkMode
-                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md'
-                : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-md'
-            }`,
-            disabled: isEditLocked
-          }, '+ Sub'),
           // Dependencies Button
           React.createElement('button', {
             onClick: () => setShowDependencies({ ...showDependencies, [task.id]: !showDeps }),
@@ -1216,16 +1206,6 @@ export function ActionPlan({
           }, `${totalTasks} ${totalTasks === 1 ? 'Task' : 'Tasks'}`),
           // Priority dropdown
           renderPriorityDropdown(action, 'action', ids),
-          // Add Task Button (Templates style)
-          !isEditLocked && React.createElement('button', {
-            onClick: () => addTask(action.id),
-            className: `flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
-              darkMode
-                ? 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md'
-                : 'bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white shadow-md'
-            }`,
-            disabled: isEditLocked
-          }, '+ Task'),
           // Dependencies Button with Link2 icon
           React.createElement('button', {
             onClick: () => setShowDependencies({ ...showDependencies, [action.id]: !showDeps }),
@@ -1396,11 +1376,16 @@ export function ActionPlan({
       isExpanded && React.createElement('div', {
         className: `p-4 ${darkMode ? 'bg-slate-900/30' : 'bg-gray-50/50'}`
       },
-        action.tasks.length > 0
-          ? action.tasks.map(task => renderTask(task, action.id))
-          : React.createElement('div', {
-              className: `text-center py-4 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
-            }, 'No tasks yet. Click "+ Task" to add one.')
+        action.tasks.map(task => renderTask(task, action.id)),
+        // Add Task button
+        !isEditLocked && React.createElement('button', {
+          onClick: () => addTask(action.id),
+          className: `w-full py-3 rounded-lg border-2 border-dashed font-bold transition-all shadow-sm hover:shadow-md text-sm ${
+            darkMode
+              ? 'border-blue-400/50 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:border-blue-400'
+              : 'border-blue-400 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:border-blue-500'
+          }`
+        }, '+ Task')
       )
     );
   };
