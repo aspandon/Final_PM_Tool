@@ -1071,7 +1071,7 @@ function GanttChart() {
           renderTabButton('kanban', 'Kanban', LayoutDashboard),
           renderTabButton('actions', 'Actions', ClipboardList),
           renderTabButton('tasks', 'Tasks', CheckSquare),
-          renderTabButton('resources', 'Resources', Users),
+          renderTabButton('resources', 'Charts', Users),
           renderTabButton('actuals', 'Actuals', TrendingUp),
           renderTabButton('reporting', 'Reporting', FileText),
 
