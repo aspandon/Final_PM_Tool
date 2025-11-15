@@ -917,6 +917,8 @@ function GanttChart() {
       filterEndDate,
       pmBAU,
       bpBAU,
+      setPmBAU,
+      setBpBAU,
       showExternalPM,
       showExternalQA,
       darkMode,
