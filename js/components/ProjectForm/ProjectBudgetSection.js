@@ -142,6 +142,28 @@ export function ProjectBudgetSection({
             key: `total-year-${yearNum}`,
             className: `px-2 py-1 text-sm font-bold text-center rounded ${darkMode ? 'bg-slate-800 text-purple-300' : 'bg-sky-100/30 text-sky-800'}`
           }, budgetTotals[`totalYear${yearNum}`].toFixed(2))
+        ),
+
+        // Invoiced Row (Budget consumption tracking)
+        React.createElement('div', {
+          className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} flex items-center gap-1`
+        },
+          React.createElement(DollarSign, {
+            className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
+          }),
+          'Invoiced'
+        ),
+        ...[1, 2, 3, 4, 5].map(yearNum =>
+          React.createElement('input', {
+            key: `invoiced-year-${yearNum}`,
+            type: 'number',
+            step: '0.01',
+            value: project[`invoicedYear${yearNum}`] || '',
+            onChange: (e) => updateProject(pIndex, `invoicedYear${yearNum}`, e.target.value),
+            className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-sky-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+            placeholder: '0',
+            disabled: isEditLocked
+          })
         )
       ),
 
