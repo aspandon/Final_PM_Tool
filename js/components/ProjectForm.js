@@ -89,6 +89,31 @@ export function ProjectForm({
     React.createElement('line', { x1: '14', x2: '14', y1: '11', y2: '17' })
   );
 
+  const User = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2' }),
+    React.createElement('circle', { cx: '12', cy: '7', r: '4' })
+  );
+
+  const Zap = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('polygon', { points: '13 2 3 14 12 14 11 22 21 10 12 10 13 2' })
+  );
+
   // Get Kanban status display name
   const getStatusDisplay = (kanbanStatus) => {
     const statusMap = {
@@ -214,7 +239,7 @@ export function ProjectForm({
         }, getStatusDisplay(currentStatus)),
         React.createElement('button', {
           onClick: () => deleteProject(pIndex),
-          className: `p-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
+          className: `px-3 py-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg btn-modern delete-shake flex items-center ${isEditLocked ? 'opacity-50 cursor-not-allowed' : ''}`,
           title: isEditLocked ? 'Locked - Cannot delete' : 'Delete',
           disabled: isEditLocked
         }, React.createElement(Trash, { className: 'w-4 h-4' }))
@@ -249,8 +274,13 @@ export function ProjectForm({
             // Project Manager Name
             React.createElement('div', null,
               React.createElement('label', {
-                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
-              }, '👤 Project Manager'),
+                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+              },
+                React.createElement(User, {
+                  className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+                }),
+                'Project Manager'
+              ),
               React.createElement('input', {
                 type: 'text',
                 value: project.projectManager,
@@ -263,8 +293,13 @@ export function ProjectForm({
             // PM Allocation
             React.createElement('div', null,
               React.createElement('label', {
-                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
-              }, '⚡ FTE Effort (Implementation Phase)'),
+                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+              },
+                React.createElement(Zap, {
+                  className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+                }),
+                'FTE Effort (Implementation Phase)'
+              ),
               React.createElement('input', {
                 type: 'number',
                 step: '0.1',
@@ -278,8 +313,13 @@ export function ProjectForm({
             // Business Partner Name
             React.createElement('div', null,
               React.createElement('label', {
-                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
-              }, '👤 Business Partner'),
+                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+              },
+                React.createElement(User, {
+                  className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+                }),
+                'Business Partner'
+              ),
               React.createElement('input', {
                 type: 'text',
                 value: project.businessPartner,
@@ -292,8 +332,13 @@ export function ProjectForm({
             // BP Allocation
             React.createElement('div', null,
               React.createElement('label', {
-                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
-              }, '⚡ FTE Effort (PSD & Inv. Prop. Preparation)'),
+                className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+              },
+                React.createElement(Zap, {
+                  className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+                }),
+                'FTE Effort (PSD & Inv. Prop. Preparation)'
+              ),
               React.createElement('input', {
                 type: 'number',
                 step: '0.1',
@@ -311,8 +356,13 @@ export function ProjectForm({
             className: `pt-2 border-t ${darkMode ? 'border-slate-600' : 'border-blue-300'}`
           },
             React.createElement('div', {
-              className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} mb-1.5`
-            }, 'BP Implementation'),
+              className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} mb-1.5 flex items-center gap-1`
+            },
+              React.createElement(Calendar, {
+                className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+              }),
+              'BP Implementation'
+            ),
             React.createElement('div', {
               className: 'grid grid-cols-2 gap-1.5'
             },
@@ -336,8 +386,13 @@ export function ProjectForm({
               ),
               React.createElement('div', null,
                 React.createElement('label', {
-                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
-                }, '⚡ FTE Effort (Implementation Phase)'),
+                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+                },
+                  React.createElement(Zap, {
+                    className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+                  }),
+                  'FTE Effort (Implementation Phase)'
+                ),
                 React.createElement('input', {
                   type: 'number',
                   step: '0.1',
@@ -363,8 +418,13 @@ export function ProjectForm({
             },
               React.createElement('div', null,
                 React.createElement('label', {
-                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
-                }, '⚡ FTE Effort (PM External)'),
+                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+                },
+                  React.createElement(Zap, {
+                    className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+                  }),
+                  'FTE Effort (PM External)'
+                ),
                 React.createElement('input', {
                   type: 'number',
                   step: '0.1',
@@ -377,8 +437,13 @@ export function ProjectForm({
               ),
               React.createElement('div', null,
                 React.createElement('label', {
-                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} block mb-0.5`
-                }, '⚡ FTE Effort (QA External)'),
+                  className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+                },
+                  React.createElement(Zap, {
+                    className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+                  }),
+                  'FTE Effort (QA External)'
+                ),
                 React.createElement('input', {
                   type: 'number',
                   step: '0.1',
@@ -459,7 +524,9 @@ export function ProjectForm({
             React.createElement('div', {
               className: `text-xs font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-1 mb-1`
             },
-              '📅 ',
+              React.createElement(Calendar, {
+                className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
+              }),
               React.createElement('span', null, 'PM Plan (In. Proposal)')
             ),
             React.createElement('input', {
@@ -484,7 +551,9 @@ export function ProjectForm({
             React.createElement('div', {
               className: `text-xs font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-1 mb-1`
             },
-              '📅 ',
+              React.createElement(Calendar, {
+                className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
+              }),
               React.createElement('span', null, 'Initial Official Plan')
             ),
             React.createElement('input', {
@@ -511,14 +580,14 @@ export function ProjectForm({
       className: `p-3 border-t-2 ${darkMode ? 'border-slate-600' : 'border-gray-200'}`
     },
       React.createElement('div', {
-        className: `rounded-lg border ${darkMode ? 'border-slate-600 bg-slate-700/50' : 'border-purple-200 bg-purple-50/50'} p-3`
+        className: `rounded-lg border ${darkMode ? 'border-slate-600 bg-slate-700/50' : 'border-purple-700 bg-purple-900/30'} p-3`
       },
         // Budget Header
         React.createElement('div', {
-          className: `text-sm font-bold ${darkMode ? 'text-purple-300' : 'text-purple-900'} mb-2 flex items-center gap-2`
+          className: `text-sm font-bold ${darkMode ? 'text-purple-300' : 'text-purple-100'} mb-2 flex items-center gap-2`
         },
           React.createElement(DollarSign, {
-            className: `w-4 h-4 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
+            className: `w-4 h-4 ${darkMode ? 'text-purple-400' : 'text-purple-300'}`
           }),
           'Project Budget'
         ),
@@ -534,14 +603,19 @@ export function ProjectForm({
           ...[1, 2, 3, 4, 5].map(yearNum =>
             React.createElement('div', {
               key: `year-label-${yearNum}`,
-              className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-purple-800'} text-center`
+              className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-purple-200'} text-center`
             }, firstYear + yearNum - 1)
           ),
 
           // CAPEX Row
           React.createElement('div', {
-            className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center`
-          }, 'CAPEX'),
+            className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1`
+          },
+            React.createElement(DollarSign, {
+              className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
+            }),
+            'CAPEX'
+          ),
           ...[1, 2, 3, 4, 5].map(yearNum =>
             React.createElement('input', {
               key: `capex-year-${yearNum}`,
@@ -549,7 +623,7 @@ export function ProjectForm({
               step: '0.01',
               value: project[`capexYear${yearNum}`] || '',
               onChange: (e) => updateProject(pIndex, `capexYear${yearNum}`, e.target.value),
-              className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-purple-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+              className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-purple-600 bg-purple-50 input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
               placeholder: '0',
               disabled: isEditLocked
             })
@@ -557,8 +631,13 @@ export function ProjectForm({
 
           // OPEX Row
           React.createElement('div', {
-            className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center`
-          }, 'OPEX'),
+            className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1`
+          },
+            React.createElement(DollarSign, {
+              className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
+            }),
+            'OPEX'
+          ),
           ...[1, 2, 3, 4, 5].map(yearNum =>
             React.createElement('input', {
               key: `opex-year-${yearNum}`,
@@ -566,7 +645,7 @@ export function ProjectForm({
               step: '0.01',
               value: project[`opexYear${yearNum}`] || '',
               onChange: (e) => updateProject(pIndex, `opexYear${yearNum}`, e.target.value),
-              className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-purple-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+              className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-purple-600 bg-purple-50 input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
               placeholder: '0',
               disabled: isEditLocked
             })
@@ -574,31 +653,41 @@ export function ProjectForm({
 
           // Total per Year Row (read-only calculated)
           React.createElement('div', {
-            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-purple-800'} flex items-center`
-          }, '💎 Total/Year'),
+            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-purple-200'} flex items-center gap-1`
+          },
+            React.createElement(DollarSign, {
+              className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-purple-300'}`
+            }),
+            'Total/Year'
+          ),
           ...[1, 2, 3, 4, 5].map(yearNum =>
             React.createElement('div', {
               key: `total-year-${yearNum}`,
-              className: `px-2 py-1 text-sm font-bold text-center rounded ${darkMode ? 'bg-slate-800 text-purple-300' : 'bg-purple-100 text-purple-800'}`
+              className: `px-2 py-1 text-sm font-bold text-center rounded ${darkMode ? 'bg-slate-800 text-purple-300' : 'bg-purple-700 text-purple-100'}`
             }, budgetTotals[`totalYear${yearNum}`].toFixed(2))
           )
         ),
 
         // Summary Totals
         React.createElement('div', {
-          className: `mt-3 pt-3 border-t ${darkMode ? 'border-slate-600' : 'border-purple-300'} grid grid-cols-4 gap-3`
+          className: `mt-3 pt-3 border-t ${darkMode ? 'border-slate-600' : 'border-purple-600'} grid grid-cols-4 gap-3`
         },
           // First Year Selector
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-purple-200'} flex flex-col`
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-purple-800'} border ${darkMode ? 'border-slate-600' : 'border-purple-700'} flex flex-col`
           },
             React.createElement('div', {
-              className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
-            }, '📅 First Budget Year'),
+              className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-purple-100'} mb-1 flex items-center gap-1`
+            },
+              React.createElement(Calendar, {
+                className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-purple-300'}`
+              }),
+              'First Budget Year'
+            ),
             React.createElement('select', {
               value: project.budgetFirstYear || new Date().getFullYear(),
               onChange: (e) => updateProject(pIndex, 'budgetFirstYear', e.target.value),
-              className: `flex-1 px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-purple-300 bg-white'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+              className: `flex-1 px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-purple-600 bg-purple-700 text-purple-100'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
               disabled: isEditLocked
             },
               // Generate year options from current year - 5 to current year + 10
@@ -611,37 +700,42 @@ export function ProjectForm({
 
           // Total CAPEX
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-purple-200'}`
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-purple-800'} border ${darkMode ? 'border-slate-600' : 'border-purple-700'}`
           },
             React.createElement('div', {
-              className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+              className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-purple-100'} mb-1`
             }, 'Total CAPEX'),
             React.createElement('div', {
-              className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-purple-700'}`
+              className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-purple-100'}`
             }, budgetTotals.totalCapex.toFixed(2))
           ),
 
           // Total OPEX
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-purple-200'}`
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-purple-800'} border ${darkMode ? 'border-slate-600' : 'border-purple-700'}`
           },
             React.createElement('div', {
-              className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+              className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-purple-100'} mb-1`
             }, 'Total OPEX'),
             React.createElement('div', {
-              className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-purple-700'}`
+              className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-purple-100'}`
             }, budgetTotals.totalOpex.toFixed(2))
           ),
 
           // Total Budget
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700' : 'bg-gradient-to-br from-purple-100 to-indigo-100'} border-2 ${darkMode ? 'border-purple-500' : 'border-purple-400'}`
+            className: `p-2 rounded ${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700' : 'bg-gradient-to-br from-purple-900 to-indigo-900'} border-2 ${darkMode ? 'border-purple-500' : 'border-purple-600'}`
           },
             React.createElement('div', {
-              className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`
-            }, '💰 TOTAL BUDGET'),
+              className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-purple-100'} mb-1 flex items-center gap-1`
+            },
+              React.createElement(DollarSign, {
+                className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-purple-200'}`
+              }),
+              'TOTAL BUDGET'
+            ),
             React.createElement('div', {
-              className: `text-xl font-bold ${darkMode ? 'text-purple-400' : 'text-purple-800'}`
+              className: `text-xl font-bold ${darkMode ? 'text-purple-400' : 'text-purple-100'}`
             }, budgetTotals.totalBudget.toFixed(2))
           )
         )
