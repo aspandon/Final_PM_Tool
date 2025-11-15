@@ -16,7 +16,7 @@ export function ProjectForm({
   darkMode,
   isEditLocked = false
 }) {
-  // Modern Icon Component for Project
+  // Modern Icon Components
   const Briefcase = ({ className }) => React.createElement('svg', {
     className,
     fill: 'none',
@@ -28,6 +28,49 @@ export function ProjectForm({
   },
     React.createElement('rect', { width: '20', height: '14', x: '2', y: '7', rx: '2', ry: '2' }),
     React.createElement('path', { d: 'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16' })
+  );
+
+  const Users = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' }),
+    React.createElement('circle', { cx: '9', cy: '7', r: '4' }),
+    React.createElement('path', { d: 'M22 21v-2a4 4 0 0 0-3-3.87' }),
+    React.createElement('path', { d: 'M16 3.13a4 4 0 0 1 0 7.75' })
+  );
+
+  const Calendar = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('rect', { width: '18', height: '18', x: '3', y: '4', rx: '2', ry: '2' }),
+    React.createElement('line', { x1: '16', x2: '16', y1: '2', y2: '6' }),
+    React.createElement('line', { x1: '8', x2: '8', y1: '2', y2: '6' }),
+    React.createElement('line', { x1: '3', x2: '21', y1: '10', y2: '10' })
+  );
+
+  const DollarSign = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('line', { x1: '12', x2: '12', y1: '2', y2: '22' }),
+    React.createElement('path', { d: 'M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' })
   );
 
   // Get Kanban status display name
@@ -175,12 +218,12 @@ export function ProjectForm({
         },
           // Team Header
           React.createElement('div', {
-            className: `text-sm font-bold ${darkMode ? 'text-blue-300' : 'text-blue-900'} mb-1.5 flex items-center gap-1`
+            className: `text-sm font-bold ${darkMode ? 'text-blue-300' : 'text-blue-900'} mb-1.5 flex items-center gap-1.5`
           },
-            React.createElement('div', {
-              className: 'w-0.5 h-3 bg-blue-600 rounded'
+            React.createElement(Users, {
+              className: `w-4 h-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
             }),
-            '👥 Team'
+            'Team'
           ),
 
           // Team 2x2 Grid
@@ -341,12 +384,12 @@ export function ProjectForm({
       },
         // Phases Header
         React.createElement('div', {
-          className: `text-sm font-bold ${darkMode ? 'text-purple-300' : 'text-purple-900'} mb-1.5 flex items-center gap-1`
+          className: `text-sm font-bold ${darkMode ? 'text-purple-300' : 'text-purple-900'} mb-1.5 flex items-center gap-1.5`
         },
-          React.createElement('div', {
-            className: 'w-0.5 h-3 bg-purple-600 rounded'
+          React.createElement(Calendar, {
+            className: `w-4 h-4 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
           }),
-          '🎯 Project Phases'
+          'Project Phases'
         ),
 
         // Main 4 Phases in 2x2 Grid
@@ -452,16 +495,16 @@ export function ProjectForm({
       className: `p-3 border-t-2 ${darkMode ? 'border-slate-600' : 'border-gray-200'}`
     },
       React.createElement('div', {
-        className: `rounded-lg border ${darkMode ? 'border-slate-600 bg-slate-700/50' : 'border-green-200 bg-green-50/50'} p-3`
+        className: `rounded-lg border ${darkMode ? 'border-slate-600 bg-slate-700/50' : 'border-purple-200 bg-purple-50/50'} p-3`
       },
         // Budget Header
         React.createElement('div', {
-          className: `text-sm font-bold ${darkMode ? 'text-green-300' : 'text-green-900'} mb-2 flex items-center gap-2`
+          className: `text-sm font-bold ${darkMode ? 'text-purple-300' : 'text-purple-900'} mb-2 flex items-center gap-2`
         },
-          React.createElement('div', {
-            className: 'w-0.5 h-3 bg-green-600 rounded'
+          React.createElement(DollarSign, {
+            className: `w-4 h-4 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
           }),
-          '💰 Project Budget'
+          'Project Budget'
         ),
 
         // Budget Grid
@@ -475,14 +518,14 @@ export function ProjectForm({
           ...[1, 2, 3, 4, 5].map(yearNum =>
             React.createElement('div', {
               key: `year-label-${yearNum}`,
-              className: `text-xs font-bold ${darkMode ? 'text-green-300' : 'text-green-800'} text-center`
+              className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-purple-800'} text-center`
             }, firstYear + yearNum - 1)
           ),
 
           // CAPEX Row
           React.createElement('div', {
-            className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center`
-          }, '💵 CAPEX'),
+            className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center`
+          }, 'CAPEX'),
           ...[1, 2, 3, 4, 5].map(yearNum =>
             React.createElement('input', {
               key: `capex-year-${yearNum}`,
@@ -490,7 +533,7 @@ export function ProjectForm({
               step: '0.01',
               value: project[`capexYear${yearNum}`] || '',
               onChange: (e) => updateProject(pIndex, `capexYear${yearNum}`, e.target.value),
-              className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-green-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+              className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-purple-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
               placeholder: '0',
               disabled: isEditLocked
             })
@@ -498,8 +541,8 @@ export function ProjectForm({
 
           // OPEX Row
           React.createElement('div', {
-            className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center`
-          }, '📊 OPEX'),
+            className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center`
+          }, 'OPEX'),
           ...[1, 2, 3, 4, 5].map(yearNum =>
             React.createElement('input', {
               key: `opex-year-${yearNum}`,
@@ -507,7 +550,7 @@ export function ProjectForm({
               step: '0.01',
               value: project[`opexYear${yearNum}`] || '',
               onChange: (e) => updateProject(pIndex, `opexYear${yearNum}`, e.target.value),
-              className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-green-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+              className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-purple-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
               placeholder: '0',
               disabled: isEditLocked
             })
@@ -515,31 +558,31 @@ export function ProjectForm({
 
           // Total per Year Row (read-only calculated)
           React.createElement('div', {
-            className: `text-xs font-bold ${darkMode ? 'text-green-300' : 'text-green-800'} flex items-center`
+            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-purple-800'} flex items-center`
           }, '💎 Total/Year'),
           ...[1, 2, 3, 4, 5].map(yearNum =>
             React.createElement('div', {
               key: `total-year-${yearNum}`,
-              className: `px-2 py-1 text-sm font-bold text-center rounded ${darkMode ? 'bg-slate-800 text-green-300' : 'bg-green-100 text-green-800'}`
+              className: `px-2 py-1 text-sm font-bold text-center rounded ${darkMode ? 'bg-slate-800 text-purple-300' : 'bg-purple-100 text-purple-800'}`
             }, budgetTotals[`totalYear${yearNum}`].toFixed(2))
           )
         ),
 
         // Summary Totals
         React.createElement('div', {
-          className: `mt-3 pt-3 border-t ${darkMode ? 'border-slate-600' : 'border-green-300'} grid grid-cols-4 gap-3`
+          className: `mt-3 pt-3 border-t ${darkMode ? 'border-slate-600' : 'border-purple-300'} grid grid-cols-4 gap-3`
         },
           // First Year Selector
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-green-200'} flex flex-col`
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-purple-200'} flex flex-col`
           },
             React.createElement('div', {
-              className: `text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+              className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
             }, '📅 First Budget Year'),
             React.createElement('select', {
               value: project.budgetFirstYear || new Date().getFullYear(),
               onChange: (e) => updateProject(pIndex, 'budgetFirstYear', e.target.value),
-              className: `flex-1 px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-green-300 bg-white'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+              className: `flex-1 px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-purple-300 bg-white'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
               disabled: isEditLocked
             },
               // Generate year options from current year - 5 to current year + 10
@@ -552,37 +595,37 @@ export function ProjectForm({
 
           // Total CAPEX
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-green-200'}`
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-purple-200'}`
           },
             React.createElement('div', {
-              className: `text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+              className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
             }, 'Total CAPEX'),
             React.createElement('div', {
-              className: `text-lg font-bold ${darkMode ? 'text-green-300' : 'text-green-700'}`
+              className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-purple-700'}`
             }, budgetTotals.totalCapex.toFixed(2))
           ),
 
           // Total OPEX
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-green-200'}`
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-purple-200'}`
           },
             React.createElement('div', {
-              className: `text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+              className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
             }, 'Total OPEX'),
             React.createElement('div', {
-              className: `text-lg font-bold ${darkMode ? 'text-blue-300' : 'text-blue-700'}`
+              className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-purple-700'}`
             }, budgetTotals.totalOpex.toFixed(2))
           ),
 
           // Total Budget
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700' : 'bg-gradient-to-br from-green-100 to-blue-100'} border-2 ${darkMode ? 'border-green-500' : 'border-green-400'}`
+            className: `p-2 rounded ${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700' : 'bg-gradient-to-br from-purple-100 to-indigo-100'} border-2 ${darkMode ? 'border-purple-500' : 'border-purple-400'}`
           },
             React.createElement('div', {
-              className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`
+              className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`
             }, '💰 TOTAL BUDGET'),
             React.createElement('div', {
-              className: `text-xl font-bold ${darkMode ? 'text-green-400' : 'text-green-800'}`
+              className: `text-xl font-bold ${darkMode ? 'text-purple-400' : 'text-purple-800'}`
             }, budgetTotals.totalBudget.toFixed(2))
           )
         )
