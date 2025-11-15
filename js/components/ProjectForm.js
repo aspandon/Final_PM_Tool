@@ -580,7 +580,7 @@ export function ProjectForm({
       className: `p-3 border-t-2 ${darkMode ? 'border-slate-600' : 'border-gray-200'}`
     },
       React.createElement('div', {
-        className: `rounded-lg border ${darkMode ? 'border-slate-600 bg-slate-700/50' : 'border-sky-200 bg-sky-50/50'} p-3`
+        className: `rounded-lg border ${darkMode ? 'border-slate-600 bg-slate-700/50' : 'border-sky-200 bg-sky-50/30'} p-3`
       },
         // Budget Header
         React.createElement('div', {
@@ -663,7 +663,7 @@ export function ProjectForm({
           ...[1, 2, 3, 4, 5].map(yearNum =>
             React.createElement('div', {
               key: `total-year-${yearNum}`,
-              className: `px-2 py-1 text-sm font-bold text-center rounded ${darkMode ? 'bg-slate-800 text-purple-300' : 'bg-sky-100 text-sky-800'}`
+              className: `px-2 py-1 text-sm font-bold text-center rounded ${darkMode ? 'bg-slate-800 text-purple-300' : 'bg-sky-100/30 text-sky-800'}`
             }, budgetTotals[`totalYear${yearNum}`].toFixed(2))
           )
         ),
@@ -674,7 +674,7 @@ export function ProjectForm({
         },
           // First Year Selector
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-sky-200'} flex flex-col`
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white/30'} border ${darkMode ? 'border-slate-600' : 'border-sky-200'} flex flex-col`
           },
             React.createElement('div', {
               className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1 flex items-center gap-1`
@@ -700,7 +700,7 @@ export function ProjectForm({
 
           // Total CAPEX
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-sky-200'}`
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white/30'} border ${darkMode ? 'border-slate-600' : 'border-sky-200'}`
           },
             React.createElement('div', {
               className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
@@ -712,7 +712,7 @@ export function ProjectForm({
 
           // Total OPEX
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-sky-200'}`
+            className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white/30'} border ${darkMode ? 'border-slate-600' : 'border-sky-200'}`
           },
             React.createElement('div', {
               className: `text-xs font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
@@ -724,7 +724,7 @@ export function ProjectForm({
 
           // Total Budget
           React.createElement('div', {
-            className: `p-2 rounded ${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700' : 'bg-gradient-to-br from-sky-50 to-blue-50'} border-2 ${darkMode ? 'border-purple-500' : 'border-sky-300'}`
+            className: `p-2 rounded ${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700' : 'bg-sky-50/20'} border-2 ${darkMode ? 'border-purple-500' : 'border-sky-300'}`
           },
             React.createElement('div', {
               className: `text-xs font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1 flex items-center gap-1`
