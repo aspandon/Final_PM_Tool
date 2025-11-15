@@ -66,7 +66,7 @@ export function ProjectTeamSection({
         // Project Manager Name
         React.createElement('div', null,
           React.createElement('label', {
-            className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+            className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} flex items-center gap-1 mb-0.5`
           },
             React.createElement(User, {
               className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
@@ -85,7 +85,7 @@ export function ProjectTeamSection({
         // PM Allocation
         React.createElement('div', null,
           React.createElement('label', {
-            className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+            className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} flex items-center gap-1 mb-0.5`
           },
             React.createElement(Zap, {
               className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
@@ -105,7 +105,7 @@ export function ProjectTeamSection({
         // Business Partner Name
         React.createElement('div', null,
           React.createElement('label', {
-            className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+            className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} flex items-center gap-1 mb-0.5`
           },
             React.createElement(User, {
               className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
@@ -124,7 +124,7 @@ export function ProjectTeamSection({
         // BP Allocation
         React.createElement('div', null,
           React.createElement('label', {
-            className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+            className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} flex items-center gap-1 mb-0.5`
           },
             React.createElement(Zap, {
               className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
@@ -178,7 +178,7 @@ export function ProjectTeamSection({
           ),
           React.createElement('div', null,
             React.createElement('label', {
-              className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+              className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} flex items-center gap-1 mb-0.5`
             },
               React.createElement(Zap, {
                 className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
@@ -210,7 +210,7 @@ export function ProjectTeamSection({
         },
           React.createElement('div', null,
             React.createElement('label', {
-              className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+              className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} flex items-center gap-1 mb-0.5`
             },
               React.createElement(Zap, {
                 className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
@@ -229,7 +229,7 @@ export function ProjectTeamSection({
           ),
           React.createElement('div', null,
             React.createElement('label', {
-              className: `text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} flex items-center gap-1 mb-0.5`
+              className: `text-xs font-semibold ${darkMode ? 'text-blue-300' : 'text-blue-900'} flex items-center gap-1 mb-0.5`
             },
               React.createElement(Zap, {
                 className: `w-3 h-3 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`

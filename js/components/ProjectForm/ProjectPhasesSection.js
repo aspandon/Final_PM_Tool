@@ -38,7 +38,7 @@ export function ProjectPhasesSection({
           className: `${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-100'} rounded p-1.5 border`
         },
           React.createElement('div', {
-            className: `text-xs font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-1 mb-1`
+            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-purple-900'} flex items-center gap-1 mb-1`
           },
             React.createElement('div', {
               className: `w-2 h-2 ${phase.color} rounded-full`
@@ -77,7 +77,7 @@ export function ProjectPhasesSection({
         className: `${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-100'} rounded p-1.5 border`
       },
         React.createElement('div', {
-          className: `text-xs font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-1 mb-1`
+          className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-purple-900'} flex items-center gap-1 mb-1`
         },
           React.createElement(Calendar, {
             className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
@@ -104,7 +104,7 @@ export function ProjectPhasesSection({
         className: `${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-100'} rounded p-1.5 border`
       },
         React.createElement('div', {
-          className: `text-xs font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-1 mb-1`
+          className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-purple-900'} flex items-center gap-1 mb-1`
         },
           React.createElement(Calendar, {
             className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
