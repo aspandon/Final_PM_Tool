@@ -147,25 +147,25 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
       // Right side - Additional Details (below RAG boxes)
       let rightYPos = ragY + ragH + 0.1;
-      const rightColX = 7.5;
+      const detailsX = 7.5;
       const rightCol1W = 1.2;
       const rightCol2W = 1.2;
 
       // Row 1: Project Status, Work Completed
-      slide.addText('Project Status', { x: rightColX, y: rightYPos, w: rightCol1W, h: 0.2, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(slideData.projectStatus || '-', { x: rightColX, y: rightYPos + 0.13, w: rightCol1W, h: 0.2, fontSize: 7, bold: true });
+      slide.addText('Project Status', { x: detailsX, y: rightYPos, w: rightCol1W, h: 0.2, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.projectStatus || '-', { x: detailsX, y: rightYPos + 0.13, w: rightCol1W, h: 0.2, fontSize: 7, bold: true });
 
-      slide.addText('Work Completed (%)', { x: rightColX + rightCol1W + 0.15, y: rightYPos, w: rightCol2W, h: 0.2, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(String(slideData.workCompleted || '0') + '%', { x: rightColX + rightCol1W + 0.15, y: rightYPos + 0.13, w: rightCol2W, h: 0.2, fontSize: 7, bold: true });
+      slide.addText('Work Completed (%)', { x: detailsX + rightCol1W + 0.15, y: rightYPos, w: rightCol2W, h: 0.2, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(String(slideData.workCompleted || '0') + '%', { x: detailsX + rightCol1W + 0.15, y: rightYPos + 0.13, w: rightCol2W, h: 0.2, fontSize: 7, bold: true });
 
       rightYPos += 0.4;
 
       // Row 2: Planned Finish Date, Planned Start Date
-      slide.addText('Planned Finish Date', { x: rightColX, y: rightYPos, w: rightCol1W, h: 0.2, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(formatDate(slideData.plannedCompletionDate), { x: rightColX, y: rightYPos + 0.13, w: rightCol1W, h: 0.2, fontSize: 7, bold: true });
+      slide.addText('Planned Finish Date', { x: detailsX, y: rightYPos, w: rightCol1W, h: 0.2, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(formatDate(slideData.plannedCompletionDate), { x: detailsX, y: rightYPos + 0.13, w: rightCol1W, h: 0.2, fontSize: 7, bold: true });
 
-      slide.addText('Planned Start Date', { x: rightColX + rightCol1W + 0.15, y: rightYPos, w: rightCol2W, h: 0.2, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(formatDate(slideData.plannedStartDate), { x: rightColX + rightCol1W + 0.15, y: rightYPos + 0.13, w: rightCol2W, h: 0.2, fontSize: 7, bold: true });
+      slide.addText('Planned Start Date', { x: detailsX + rightCol1W + 0.15, y: rightYPos, w: rightCol2W, h: 0.2, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(formatDate(slideData.plannedStartDate), { x: detailsX + rightCol1W + 0.15, y: rightYPos + 0.13, w: rightCol2W, h: 0.2, fontSize: 7, bold: true });
 
       // Main content area - 2 columns
       yPos = 2.1;
