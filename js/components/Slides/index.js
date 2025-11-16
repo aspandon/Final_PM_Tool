@@ -46,8 +46,9 @@ export function Slides({ projects, darkMode }) {
   // Auto-select first project if none selected
   useEffect(() => {
     if (!selectedProjectId && implementationProjects.length > 0) {
-      // Convert to string for consistency with select dropdown
-      setSelectedProjectId(String(implementationProjects[0].id));
+      // Use project name as the ID (projects use name as identifier)
+      const firstProjectId = implementationProjects[0].id || implementationProjects[0].name;
+      setSelectedProjectId(firstProjectId);
     }
   }, [selectedProjectId, implementationProjects]);
 
@@ -58,20 +59,14 @@ export function Slides({ projects, darkMode }) {
     }));
   };
 
-  // Find selected project - convert both to strings for comparison
+  // Find selected project - compare using either id or name
   const selectedProject = selectedProjectId
-    ? implementationProjects.find(p => String(p.id) === String(selectedProjectId))
+    ? implementationProjects.find(p => {
+        const projectId = p.id || p.name;
+        return String(projectId) === String(selectedProjectId);
+      })
     : null;
   const selectedSlideData = selectedProjectId ? slidesData[selectedProjectId] : null;
-
-  // Debug logging
-  console.log('Slides Debug:', {
-    selectedProjectId,
-    selectedProjectIdType: typeof selectedProjectId,
-    selectedProject: selectedProject ? selectedProject.name : 'NOT FOUND',
-    implementationProjectsCount: implementationProjects.length,
-    viewMode
-  });
 
   return React.createElement('div', {
     className: 'space-y-6'
@@ -135,8 +130,8 @@ export function Slides({ projects, darkMode }) {
                 },
                   implementationProjects.map((project, idx) =>
                     React.createElement('option', {
-                      key: `project-${project.id || idx}`,
-                      value: project.id
+                      key: `project-${project.id || project.name || idx}`,
+                      value: project.id || project.name
                     }, project.name)
                   )
                 )
