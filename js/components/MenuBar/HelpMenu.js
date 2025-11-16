@@ -37,7 +37,7 @@ export function HelpMenu({
 
     // Help Modal
     showHelpModal && React.createElement('div', {
-      className: 'fixed inset-0 bg-black/50 flex items-start justify-center z-[100] p-4 pt-8 overflow-y-auto',
+      className: 'fixed inset-0 bg-black/50 flex items-start justify-center z-[200] p-4 pt-8 overflow-y-auto',
       onClick: () => setShowHelpModal(false)
     },
       React.createElement('div', {
@@ -196,6 +196,76 @@ export function HelpMenu({
               )
             ),
 
+            // Reporting Dashboard Tab
+            React.createElement('div', { className: 'mb-4' },
+              React.createElement('h4', { className: 'font-bold text-lg mb-2' }, '📊 Reporting Dashboard'),
+              React.createElement('p', { className: 'mb-2' },
+                'Comprehensive analytics dashboard providing insights into your project portfolio:'
+              ),
+              React.createElement('ul', { className: 'list-disc list-inside ml-4 space-y-1' },
+                React.createElement('li', null, 'Portfolio Overview - Total projects, active projects, and completion metrics'),
+                React.createElement('li', null, 'Active Projects by Team - Visual breakdown of ongoing projects by division'),
+                React.createElement('li', null, 'Project Status Distribution - Pie charts showing project health (Red/Amber/Green)'),
+                React.createElement('li', null, 'Timeline Analysis - Project distribution across different phases'),
+                React.createElement('li', null, 'Resource Utilization - Charts showing PM and BP workload distribution'),
+                React.createElement('li', null, 'Monthly trends and forecasting capabilities')
+              )
+            ),
+
+            // Tasks Tab
+            React.createElement('div', { className: 'mb-4' },
+              React.createElement('h4', { className: 'font-bold text-lg mb-2' }, '✅ Tasks'),
+              React.createElement('p', { className: 'mb-2' },
+                'Manage individual tasks and to-dos across your projects. Features include:'
+              ),
+              React.createElement('ul', { className: 'list-disc list-inside ml-4 space-y-1' },
+                React.createElement('li', null, 'Create and organize tasks by project'),
+                React.createElement('li', null, 'Set priorities (High/Medium/Low)'),
+                React.createElement('li', null, 'Track task status (Not Started/In Progress/Completed)'),
+                React.createElement('li', null, 'Assign tasks to team members'),
+                React.createElement('li', null, 'Set due dates and track completion'),
+                React.createElement('li', null, 'Add detailed descriptions and notes'),
+                React.createElement('li', null, 'Filter and sort tasks by various criteria')
+              )
+            ),
+
+            // Action Plan Tab
+            React.createElement('div', { className: 'mb-4' },
+              React.createElement('h4', { className: 'font-bold text-lg mb-2' }, '📋 Action Plan'),
+              React.createElement('p', { className: 'mb-2' },
+                'Detailed action planning with hierarchical task management (Actions > Tasks > Subtasks):'
+              ),
+              React.createElement('ul', { className: 'list-disc list-inside ml-4 space-y-1' },
+                React.createElement('li', null, 'Multiple Views - Switch between List, Board (Kanban), Table, and Gantt views'),
+                React.createElement('li', null, 'Status Workflow - Track items through Not Started, In Progress, Blocked, and Completed'),
+                React.createElement('li', null, 'Priority Levels - Assign Low, Medium, High, or Critical priorities'),
+                React.createElement('li', null, 'Dependencies - Define task dependencies to manage workflow'),
+                React.createElement('li', null, 'Templates - Save and reuse action plan templates'),
+                React.createElement('li', null, 'Activity Log - Track all changes and updates'),
+                React.createElement('li', null, 'Comments - Add notes and discussions to any item'),
+                React.createElement('li', null, 'Drag & Drop - Reorganize tasks easily in Board and Table views')
+              )
+            ),
+
+            // Slides Tab
+            React.createElement('div', { className: 'mb-4' },
+              React.createElement('h4', { className: 'font-bold text-lg mb-2' }, '📊 Slides'),
+              React.createElement('p', { className: 'mb-2' },
+                'Create professional project status slides for projects in Implementation phase:'
+              ),
+              React.createElement('ul', { className: 'list-disc list-inside ml-4 space-y-1' },
+                React.createElement('li', null, 'Rich Text Editing - Format content with bold, italic, underline, bullets, and numbering'),
+                React.createElement('li', null, 'RAG Status Indicators - Overall, Schedule, Cost, and Scope health indicators'),
+                React.createElement('li', null, 'Project Metadata - SAP ID, JIRA ID, PM/BP, Business Owner, Divisions'),
+                React.createElement('li', null, 'Progress Tracking - Work completed percentage with visual progress bar'),
+                React.createElement('li', null, 'Phases & Milestones - Dynamic table with delivery dates and RAG status'),
+                React.createElement('li', null, 'Risk Management - Track risks with assessment levels and controls'),
+                React.createElement('li', null, 'Export to PowerPoint - Generate .pptx files for presentations'),
+                React.createElement('li', null, 'Export to Image - Create high-quality JPEG images of slides'),
+                React.createElement('li', null, 'Auto-Save - All slide data automatically saved to database')
+              )
+            ),
+
             // Menu Options
             React.createElement('h4', {
               className: `font-bold text-lg mb-3 mt-6 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
@@ -333,11 +403,15 @@ export function HelpMenu({
               React.createElement('div', null,
                 React.createElement('h4', { className: 'font-bold mb-2' }, '2️⃣ Viewing & Analyzing Data'),
                 React.createElement('ul', { className: 'list-disc list-inside ml-4 space-y-1' },
-                  React.createElement('li', null, 'Switch between tabs (Projects, Planner, Resources, Divisions, Actuals) to see different views'),
+                  React.createElement('li', null, 'Switch between tabs to see different views and insights'),
                   React.createElement('li', null, 'Use Planner tab for Gantt timeline visualization'),
                   React.createElement('li', null, 'Check Resources tab to monitor individual PM/BP workload'),
                   React.createElement('li', null, 'Review Divisions tab for departmental FTE distribution'),
-                  React.createElement('li', null, 'Compare timelines in Actuals Comparison tab')
+                  React.createElement('li', null, 'Compare timelines in Actuals Comparison tab'),
+                  React.createElement('li', null, 'View analytics and metrics in Reporting Dashboard'),
+                  React.createElement('li', null, 'Manage daily tasks in the Tasks tab'),
+                  React.createElement('li', null, 'Create detailed action plans with the Action Plan tab'),
+                  React.createElement('li', null, 'Generate presentation slides in the Slides tab for Implementation projects')
                 )
               ),
               React.createElement('div', null,
@@ -386,7 +460,11 @@ export function HelpMenu({
               React.createElement('li', null, 'Set date ranges in Global Filters to zoom into specific time periods'),
               React.createElement('li', null, 'Use the Hide Fields option when presenting to focus on visualizations'),
               React.createElement('li', null, 'Export regularly to maintain backups of your project data'),
-              React.createElement('li', null, 'BAU allocation adds a constant FTE value per month to all PMs or BPs')
+              React.createElement('li', null, 'BAU allocation adds a constant FTE value per month to all PMs or BPs'),
+              React.createElement('li', null, 'Use Reporting Dashboard to get quick insights into portfolio health and status'),
+              React.createElement('li', null, 'Action Plan templates save time when starting new projects with similar structures'),
+              React.createElement('li', null, 'Slides feature is available only for projects in "Implementation" status'),
+              React.createElement('li', null, 'Export slides to both PowerPoint and Image formats for different presentation needs')
             )
           )
         )
