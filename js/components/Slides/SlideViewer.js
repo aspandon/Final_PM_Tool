@@ -88,8 +88,7 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
       // Top section - Project Info (left) and RAG Status (right)
       let yPos = 1.0;
-      const labelFontSize = 8;
-      const valueFontSize = 9;
+      const labelFontSize = 8, valueFontSize = 9;
 
       // Row 1: SAP ID, JIRA ID, PM/BP (left side - 3 columns)
       const col1X = 0.5, col2X = 2.8, col3X = 5.1;
@@ -117,11 +116,7 @@ export function SlideViewer({ project, slideData, darkMode }) {
       slide.addText(slideData.baselineBudget || '-', { x: col3X, y: yPos + 0.15, w: colW, h: 0.2, fontSize: valueFontSize, bold: true });
 
       // Right side - RAG Status (horizontal layout)
-      const ragStartX = 7.5;
-      const ragY = 1.0;
-      const ragW = 0.6;
-      const ragH = 0.25;
-      const ragGap = 0.05;
+      const ragStartX = 7.5, ragY = 1.0, ragW = 0.6, ragH = 0.25, ragGap = 0.05;
 
       ['Overall', 'Schedule', 'Cost', 'Scope'].forEach((category, idx) => {
         const fieldName = `rag${category}`;
@@ -147,9 +142,7 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
       // Right side - Additional Details (below RAG boxes)
       let rightYPos = ragY + ragH + 0.1;
-      const detailsX = 7.5;
-      const rightCol1W = 1.2;
-      const rightCol2W = 1.2;
+      const detailsX = 7.5, rightCol1W = 1.2, rightCol2W = 1.2;
 
       // Row 1: Project Status, Work Completed
       slide.addText('Project Status', { x: detailsX, y: rightYPos, w: rightCol1W, h: 0.2, fontSize: labelFontSize, bold: true, color: '666666' });
@@ -169,10 +162,7 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
       // Main content area - 2 columns
       yPos = 2.1;
-      const leftColX = 0.5;
-      const leftColW = 3.6;
-      const rightColX = 4.2;
-      const rightColW = 3.2;
+      const leftColX = 0.5, leftColW = 3.6, rightColX = 4.2, rightColW = 3.2;
 
       // Project Scope
       slide.addShape('rect', {
