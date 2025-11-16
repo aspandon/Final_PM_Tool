@@ -62,7 +62,7 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
   const exportToPowerPoint = async () => {
     try {
-      const pptx = new pptxgen();
+      const pptx = new PptxGenJS();
       const slide = pptx.addSlide();
 
       // Header - Project Name
@@ -96,15 +96,15 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
       yPos += 0.6;
 
-      // Row 2: Business Owner, Involved Divisions, Project Status
+      // Row 2: Business Owner, Involved Divisions, Baseline Budget
       slide.addText('Business Owner', { x: 0.5, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
       slide.addText(slideData.businessOwner || '-', { x: 0.5, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
 
       slide.addText('Involved Divisions', { x: 3.2, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
       slide.addText(slideData.involvedDivisions || '-', { x: 3.2, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
 
-      slide.addText('Project Status', { x: 5.9, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(slideData.projectStatus || '-', { x: 5.9, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+      slide.addText('Baseline Budget', { x: 5.9, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.baselineBudget || '-', { x: 5.9, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
 
       // Right column - RAG Status
       const ragX = 8.6;
@@ -134,8 +134,8 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
       // Right column - Additional Details
       let rightYPos = 2.5;
-      slide.addText('Baseline Budget', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(slideData.baselineBudget || '-', { x: 8.6, y: rightYPos + 0.15, w: 1.3, h: 0.3, fontSize: valueFontSize, bold: true });
+      slide.addText('Project Status', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.projectStatus || '-', { x: 8.6, y: rightYPos + 0.15, w: 1.3, h: 0.3, fontSize: valueFontSize, bold: true });
 
       rightYPos += 0.5;
       slide.addText('Work Completed (%)', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
@@ -380,8 +380,8 @@ export function SlideViewer({ project, slideData, darkMode }) {
                 React.createElement('div', { className: 'text-sm font-bold' }, slideData.involvedDivisions || '-')
               ),
               React.createElement('div', null,
-                React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Project Status'),
-                React.createElement('div', { className: 'text-sm font-bold' }, slideData.projectStatus || '-')
+                React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Baseline Budget'),
+                React.createElement('div', { className: 'text-sm font-bold' }, slideData.baselineBudget || '-')
               )
             )
           ),
@@ -406,8 +406,8 @@ export function SlideViewer({ project, slideData, darkMode }) {
             React.createElement('div', { className: 'space-y-1' },
               React.createElement('div', { className: 'grid grid-cols-2 gap-2' },
                 React.createElement('div', null,
-                  React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Baseline Budget'),
-                  React.createElement('div', { className: 'text-sm font-bold' }, slideData.baselineBudget || '-')
+                  React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Project Status'),
+                  React.createElement('div', { className: 'text-sm font-bold' }, slideData.projectStatus || '-')
                 ),
                 React.createElement('div', null,
                   React.createElement('div', { className: 'text-xs font-semibold text-gray-600 mb-1' }, 'Work Completed (%)'),
