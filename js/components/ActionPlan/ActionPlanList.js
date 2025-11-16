@@ -35,12 +35,52 @@ export function ActionPlanList({
   handleActionDragOver,
   handleActionDrop,
   deleteConfirm,
-  setDeleteConfirm
+  setDeleteConfirm,
+  itemOrder,
+  setItemOrder
 }) {
   const [expandedActions, setExpandedActions] = React.useState({});
   const [expandedTasks, setExpandedTasks] = React.useState({});
   const [showDependencies, setShowDependencies] = React.useState({});
   const [showActivityLog, setShowActivityLog] = React.useState({});
+
+  // Get sorted action plan based on itemOrder
+  const getSortedActionPlan = () => {
+    if (!itemOrder || itemOrder.length === 0) return actionPlan;
+
+    // Sort actions
+    const sortedActions = [...actionPlan].sort((a, b) => {
+      const aIndex = itemOrder.indexOf(a.id);
+      const bIndex = itemOrder.indexOf(b.id);
+      if (aIndex === -1 && bIndex === -1) return 0;
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
+    });
+
+    // Sort tasks and subtasks within each action
+    return sortedActions.map(action => ({
+      ...action,
+      tasks: [...(action.tasks || [])].sort((a, b) => {
+        const aIndex = itemOrder.indexOf(a.id);
+        const bIndex = itemOrder.indexOf(b.id);
+        if (aIndex === -1 && bIndex === -1) return 0;
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        return aIndex - bIndex;
+      }).map(task => ({
+        ...task,
+        subtasks: [...(task.subtasks || [])].sort((a, b) => {
+          const aIndex = itemOrder.indexOf(a.id);
+          const bIndex = itemOrder.indexOf(b.id);
+          if (aIndex === -1 && bIndex === -1) return 0;
+          if (aIndex === -1) return 1;
+          if (bIndex === -1) return -1;
+          return aIndex - bIndex;
+        })
+      }))
+    }));
+  };
 
   // Check if delete confirmation is showing for this item
   const isDeletePending = (type, ids) => {
@@ -507,7 +547,9 @@ export function ActionPlanList({
     );
   };
 
+  const sortedActionPlan = getSortedActionPlan();
+
   return React.createElement('div', { className: 'space-y-4' },
-    actionPlan.map((action, index) => renderAction(action, index))
+    sortedActionPlan.map((action, index) => renderAction(action, index))
   );
 }

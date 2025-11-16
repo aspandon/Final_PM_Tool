@@ -9,7 +9,7 @@
  * - Autopilot feature for automatic task arrangement
  */
 
-export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, priorities, isEditLocked }) {
+export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, priorities, isEditLocked, itemOrder, setItemOrder }) {
   console.log('📈 [ActionPlanGantt] Component loaded - NEW GANTT VIEW VERSION 2.0');
 
   const [draggedItem, setDraggedItem] = React.useState(null);
@@ -24,12 +24,23 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
   const [autopilotResult, setAutopilotResult] = React.useState(null);
   const [undoHistory, setUndoHistory] = React.useState([]); // Stack of previous states (max 20)
   const [svgReady, setSvgReady] = React.useState(false);
-  const [itemOrder, setItemOrder] = React.useState([]); // Custom order of items [itemId1, itemId2, ...]
   const [draggedRowIndex, setDraggedRowIndex] = React.useState(null);
 
   // Force re-render when component mounts to get proper dimensions
   React.useEffect(() => {
     setSvgReady(true);
+  }, []);
+
+  // Handle window resize to adjust dependency lines
+  React.useEffect(() => {
+    const handleResize = () => {
+      // Force re-render of dependency lines
+      setSvgReady(false);
+      setTimeout(() => setSvgReady(true), 10);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Toggle filter
@@ -119,13 +130,15 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     console.log('[ActionPlanGantt] All items:', items);
 
     // Initialize itemOrder if empty or items changed
-    if (itemOrder.length === 0 || itemOrder.length !== items.length) {
+    if (!itemOrder || itemOrder.length === 0 || itemOrder.length !== items.length) {
       const newOrder = items.map(item => item.itemId);
-      setItemOrder(newOrder);
+      if (setItemOrder) {
+        setItemOrder(newOrder);
+      }
     }
 
     // Sort items based on custom order
-    if (itemOrder.length > 0) {
+    if (itemOrder && itemOrder.length > 0) {
       items.sort((a, b) => {
         const aIndex = itemOrder.indexOf(a.itemId);
         const bIndex = itemOrder.indexOf(b.itemId);
@@ -427,7 +440,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
       let sortedTasks = action.tasks ? [...action.tasks] : [];
 
       // Apply custom order if available
-      if (itemOrder.length > 0) {
+      if (itemOrder && itemOrder.length > 0) {
         sortedTasks.sort((a, b) => {
           const aIndex = itemOrder.indexOf(a.id);
           const bIndex = itemOrder.indexOf(b.id);
@@ -476,7 +489,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
           let sortedSubtasks = [...task.subtasks];
 
           // Apply custom order if available
-          if (itemOrder.length > 0) {
+          if (itemOrder && itemOrder.length > 0) {
             sortedSubtasks.sort((a, b) => {
               const aIndex = itemOrder.indexOf(a.id);
               const bIndex = itemOrder.indexOf(b.id);

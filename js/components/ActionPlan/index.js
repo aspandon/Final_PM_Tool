@@ -31,6 +31,7 @@ export function ActionPlan({
   const [filters, setFilters] = React.useState({ status: [], priority: [], search: '' });
   const [draggedAction, setDraggedAction] = React.useState(null);
   const [deleteConfirm, setDeleteConfirm] = React.useState(null); // { type, ids }
+  const [itemOrder, setItemOrder] = React.useState([]); // Custom order for Gantt/List/Table views
 
   // Get constants based on dark mode
   const STATUSES = getStatuses(darkMode);
@@ -578,7 +579,9 @@ export function ActionPlan({
             actionPlan,
             darkMode,
             statuses: STATUSES,
-            priorities: PRIORITIES
+            priorities: PRIORITIES,
+            itemOrder,
+            setItemOrder
           })
         : currentView === 'gantt'
           ? React.createElement(ActionPlanGantt, {
@@ -587,7 +590,9 @@ export function ActionPlan({
               onUpdate: updateActionPlan,
               statuses: STATUSES,
               priorities: PRIORITIES,
-              isEditLocked
+              isEditLocked,
+              itemOrder,
+              setItemOrder
             })
           : // List view (default)
             React.createElement('div', { className: 'space-y-4' },
@@ -609,7 +614,9 @@ export function ActionPlan({
                 handleActionDragOver,
                 handleActionDrop,
                 deleteConfirm,
-                setDeleteConfirm
+                setDeleteConfirm,
+                itemOrder,
+                setItemOrder
               }),
               // Add Action button
               !isEditLocked && React.createElement('button', {
