@@ -1718,49 +1718,6 @@ export function ActionPlan({
       totalDays = Math.ceil((latestDate - earliestDate) / (1000 * 60 * 60 * 24)) || 1;
     }
 
-    // Generate month labels for the timeline
-    const generateMonthLabels = () => {
-      if (!hasDates) return [];
-
-      const months = [];
-      const current = new Date(earliestDate.getFullYear(), earliestDate.getMonth(), 1);
-
-      while (current <= latestDate) {
-        months.push({
-          label: current.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-          date: new Date(current)
-        });
-        current.setMonth(current.getMonth() + 1);
-      }
-
-      return months;
-    };
-
-    const monthLabels = generateMonthLabels();
-
-    // Calculate days between dates
-    const getDaysDiff = (start, end) => {
-      const s = new Date(start);
-      const e = new Date(end);
-      return Math.ceil((e - s) / (1000 * 60 * 60 * 24)) + 1;
-    };
-
-    // Render month grid lines
-    const renderMonthLines = () => {
-      if (!hasDates) return null;
-
-      return monthLabels.map((month, i) => {
-        const offset = getDaysDiff(earliestDate, month.date) - 1;
-        const leftPosition = (offset / totalDays) * 100;
-
-        return React.createElement('div', {
-          key: i,
-          className: `absolute top-0 bottom-0 w-px ${darkMode ? 'bg-slate-600' : 'bg-gray-300'}`,
-          style: { left: `${leftPosition}%` }
-        });
-      });
-    };
-
     // Calculate bar position based on dates
     const getBarPosition = (startDate, finishDate) => {
       if (!startDate || !finishDate || !hasDates) return null;
@@ -1796,35 +1753,17 @@ export function ActionPlan({
           React.createElement('div', { className: 'w-48 flex-shrink-0' }),
           // Timeline scale
           React.createElement('div', {
-            className: `flex-1 relative border-b ${darkMode ? 'border-slate-600' : 'border-gray-300'} pb-1 min-h-[20px]`
+            className: `flex-1 flex border-b ${darkMode ? 'border-slate-600' : 'border-gray-300'} pb-1`
           },
             hasDates
-              ? // Show month labels when dates are available
-                monthLabels.map((month, i) => {
-                  // Calculate the width of this month based on actual days
-                  const monthStartOffset = getDaysDiff(earliestDate, month.date) - 1;
-                  let monthEndOffset;
-
-                  if (i < monthLabels.length - 1) {
-                    // Use the start of the next month
-                    monthEndOffset = getDaysDiff(earliestDate, monthLabels[i + 1].date) - 1;
-                  } else {
-                    // For the last month, extend to the end of the timeline
-                    monthEndOffset = totalDays;
-                  }
-
-                  const monthWidth = ((monthEndOffset - monthStartOffset) / totalDays) * 100;
-                  const monthLeft = (monthStartOffset / totalDays) * 100;
-
-                  return React.createElement('div', {
-                    key: i,
-                    className: `absolute text-xs ${darkMode ? 'text-gray-200' : 'text-gray-700'} text-center font-semibold`,
-                    style: {
-                      left: `${monthLeft}%`,
-                      width: `${monthWidth}%`
-                    }
-                  }, month.label);
-                })
+              ? // Show date range when dates are available
+                React.createElement('div', {
+                  className: `flex justify-between w-full text-xs ${darkMode ? 'text-gray-200' : 'text-gray-700'} font-semibold px-2`
+                },
+                  React.createElement('span', null, earliestDate.toLocaleDateString()),
+                  React.createElement('span', null, `${totalDays} days`),
+                  React.createElement('span', null, latestDate.toLocaleDateString())
+                )
               : // Show progress scale when no dates
                 [0, 25, 50, 75, 100].map(percent =>
                   React.createElement('div', {
@@ -1885,16 +1824,14 @@ export function ActionPlan({
             React.createElement('div', {
               className: `flex-1 relative h-5 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-200'} rounded border`
             },
-              // Grid lines - month lines when dates available, percentage lines otherwise
-              hasDates
-                ? renderMonthLines()
-                : [25, 50, 75].map(percent =>
-                    React.createElement('div', {
-                      key: percent,
-                      className: `absolute top-0 bottom-0 w-px ${darkMode ? 'bg-slate-600' : 'bg-gray-300'}`,
-                      style: { left: `${percent}%` }
-                    })
-                  ),
+              // Grid lines at 25%, 50%, 75% (only when no dates)
+              !hasDates && [25, 50, 75].map(percent =>
+                React.createElement('div', {
+                  key: percent,
+                  className: `absolute top-0 bottom-0 w-px ${darkMode ? 'bg-slate-600' : 'bg-gray-300'}`,
+                  style: { left: `${percent}%` }
+                })
+              ),
 
               // Timeline bar based on dates OR progress bar
               (() => {
