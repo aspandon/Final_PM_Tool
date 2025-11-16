@@ -1,6 +1,6 @@
 // js/components/Actions.js
 
-import { ActionPlan } from './ActionPlan.js';
+import { ActionPlan } from './ActionPlan/index.js';
 
 /**
  * Actions Component
