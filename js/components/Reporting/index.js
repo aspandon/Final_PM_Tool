@@ -11,6 +11,7 @@ import {
   RiskAlertCardsGrid,
   PipelineStatusCardsGrid
 } from './ReportingSummary.js';
+import { Target, TrendingUp, Users } from '../../shared/icons/index.js';
 
 /**
  * Calculate RAG status based on finish date
@@ -177,6 +178,7 @@ export function Reporting({
   const [selectedKPIFilter, setSelectedKPIFilter] = useState(null); // 'total', 'red', 'amber', 'green', 'onhold', 'completed'
   const [selectedRiskAlert, setSelectedRiskAlert] = useState(null); // 'critical', 'high', 'medium', 'onhold'
   const [selectedPipelineStatus, setSelectedPipelineStatus] = useState(null); // kanban status key
+  const [selectedBPorPM, setSelectedBPorPM] = useState(null); // { type: 'bp'|'pm', name: string }
 
   // Calculate all analytics data
   const analyticsData = useMemo(() => {
@@ -383,6 +385,47 @@ export function Reporting({
 
     const monthlyTrends = trendsArray;
 
+    // Report: Projects by Business Partner and Project Manager (Active projects only)
+    const activeStatuses = ['psdpre', 'psdready', 'invapproved', 'procurement', 'implementation', 'uat'];
+    const activeProjects = projectsWithRAG.filter(p => activeStatuses.includes(p.column));
+
+    // Group by Business Partner
+    const projectsByBP = {};
+    activeProjects.forEach(project => {
+      const bp = project.businessPartner || 'Unassigned';
+      if (!projectsByBP[bp]) {
+        projectsByBP[bp] = [];
+      }
+      projectsByBP[bp].push(project);
+    });
+
+    // Group by Project Manager
+    const projectsByPM = {};
+    activeProjects.forEach(project => {
+      const pm = project.projectManager || 'Unassigned';
+      if (!projectsByPM[pm]) {
+        projectsByPM[pm] = [];
+      }
+      projectsByPM[pm].push(project);
+    });
+
+    // Convert to arrays and sort by project count
+    const bpSummary = Object.entries(projectsByBP)
+      .map(([bp, projects]) => ({
+        name: bp,
+        projects: projects,
+        count: projects.length
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    const pmSummary = Object.entries(projectsByPM)
+      .map(([pm, projects]) => ({
+        name: pm,
+        projects: projects,
+        count: projects.length
+      }))
+      .sort((a, b) => b.count - a.count);
+
     return {
       totalProjects,
       redCount,
@@ -405,7 +448,10 @@ export function Reporting({
       monthlyTrends,
       projectsWithRAG,
       divisions,
-      allKanbanColumns
+      allKanbanColumns,
+      bpSummary,
+      pmSummary,
+      activeProjects
     };
   }, [filteredProjects]);
 
@@ -509,16 +555,21 @@ export function Reporting({
   return React.createElement('div', {
     className: 'space-y-6'
   },
-    // Header
+    // Header - Matching Actions Tab Style
     React.createElement('div', {
       className: `rounded-lg p-6 ${darkMode ? 'bg-slate-800' : 'bg-white'} shadow-md`
     },
       React.createElement('h2', {
-        className: `text-3xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
-      }, 'Reporting Dashboard'),
+        className: `text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'} flex items-center gap-2`
+      },
+        React.createElement('div', {
+          className: 'w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full'
+        }),
+        'Reporting Dashboard'
+      ),
       React.createElement('p', {
-        className: `mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-      }, `Showing data for ${filteredProjects.length} of ${projects.length} projects${isFilterActive ? ' (Filtered)' : ''}`),
+        className: `mt-2 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+      }, `Showing data for ${filteredProjects.length} of ${projects.length} projects`),
 
       // Active filters display
       React.createElement(ActiveFiltersDisplay, {
@@ -601,8 +652,11 @@ export function Reporting({
       className: `rounded-lg p-6 ${darkMode ? 'bg-slate-800' : 'bg-white'} shadow-md`
     },
       React.createElement('h3', {
-        className: `text-2xl font-bold mb-6 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
-      }, '🚨 Risk Analysis'),
+        className: `text-2xl font-bold mb-6 ${darkMode ? 'text-gray-100' : 'text-gray-900'} flex items-center gap-2`
+      },
+        React.createElement(Target, { className: 'w-7 h-7' }),
+        'Risk Analysis'
+      ),
 
       // Risk Alert Cards
       React.createElement(RiskAlertCardsGrid, {
@@ -654,7 +708,16 @@ export function Reporting({
               { header: 'Division', key: 'division' },
               {
                 header: 'Kanban Status',
-                render: (row) => getColumnDisplayName(row.column)
+                render: (row) => {
+                  const statusText = getColumnDisplayName(row.column);
+                  // Make "On Hold" bold and yellow when showing onhold risk alert
+                  if (selectedRiskAlert === 'onhold' && row.column === 'onhold') {
+                    return React.createElement('span', {
+                      className: `font-bold ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`
+                    }, statusText);
+                  }
+                  return statusText;
+                }
               },
               {
                 header: 'RAG Status',
@@ -695,8 +758,11 @@ export function Reporting({
       className: `rounded-lg p-6 ${darkMode ? 'bg-slate-800' : 'bg-white'} shadow-md`
     },
       React.createElement('h3', {
-        className: `text-2xl font-bold mb-6 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
-      }, '📈 Distribution & Pipeline'),
+        className: `text-2xl font-bold mb-6 ${darkMode ? 'text-gray-100' : 'text-gray-900'} flex items-center gap-2`
+      },
+        React.createElement(TrendingUp, { className: 'w-7 h-7' }),
+        'Distribution & Pipeline'
+      ),
 
       // Pipeline Status Cards Grid
       React.createElement(PipelineStatusCardsGrid, {
@@ -723,12 +789,39 @@ export function Reporting({
           }, 'Close ✕')
         ),
 
-        // Division breakdown table
+        // All projects in this status (moved to top)
         React.createElement('div', {
           className: 'p-4'
         },
+          React.createElement('div', null,
+            React.createElement('h4', {
+              className: `text-md font-semibold mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+            }, 'All Projects in this Status'),
+            React.createElement(DataTable, {
+              data: pipelineStatusData.projects,
+              columns: [
+                { header: 'Project', key: 'name' },
+                { header: 'Division', key: 'division' },
+                {
+                  header: 'RAG Status',
+                  render: (row) => React.createElement('span', {
+                    className: `px-2 py-1 rounded text-white text-xs font-semibold ${row.ragStatus.color}`
+                  }, row.ragStatus.label)
+                },
+                {
+                  header: 'Due Date',
+                  render: (row) => formatDate(row.finishDate)
+                },
+                { header: 'PM', key: 'projectManager' },
+                { header: 'BP', key: 'businessPartner' }
+              ],
+              darkMode
+            })
+          ),
+
+          // Division breakdown and summary stats
           React.createElement('div', {
-            className: 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'
+            className: 'grid grid-cols-1 md:grid-cols-2 gap-4 mt-6'
           },
             // Division breakdown chart
             React.createElement('div', null,
@@ -805,41 +898,191 @@ export function Reporting({
                 )
               )
             )
-          ),
-
-          // All projects in this status
-          React.createElement('div', {
-            className: 'mt-6'
-          },
-            React.createElement('h4', {
-              className: `text-md font-semibold mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-            }, 'All Projects in this Status'),
-            React.createElement(DataTable, {
-              data: pipelineStatusData.projects,
-              columns: [
-                { header: 'Project', key: 'name' },
-                { header: 'Division', key: 'division' },
-                {
-                  header: 'RAG Status',
-                  render: (row) => React.createElement('span', {
-                    className: `px-2 py-1 rounded text-white text-xs font-semibold ${row.ragStatus.color}`
-                  }, row.ragStatus.label)
-                },
-                {
-                  header: 'Due Date',
-                  render: (row) => formatDate(row.finishDate)
-                },
-                { header: 'PM', key: 'projectManager' },
-                { header: 'BP', key: 'businessPartner' }
-              ],
-              darkMode
-            })
           )
         )
       )
     ),
 
-    // SECTION 3: Timeline Performance (Report 6)
+    // SECTION 3: Active Projects by Business Partner & Project Manager
+    React.createElement('div', {
+      className: `rounded-lg p-6 ${darkMode ? 'bg-slate-800' : 'bg-white'} shadow-md`
+    },
+      React.createElement('h3', {
+        className: `text-2xl font-bold mb-6 ${darkMode ? 'text-gray-100' : 'text-gray-900'} flex items-center gap-2`
+      },
+        React.createElement(Users, { className: 'w-7 h-7' }),
+        'Active Projects by Team'
+      ),
+      React.createElement('p', {
+        className: `mb-6 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+      }, `Showing ${analyticsData.activeProjects.length} active projects currently being worked on (excluding On Hold, Backlog, and Done)`),
+
+      // Grid with BP and PM columns
+      React.createElement('div', {
+        className: 'grid grid-cols-1 lg:grid-cols-2 gap-6'
+      },
+        // Business Partners Column
+        React.createElement('div', null,
+          React.createElement('h4', {
+            className: `text-lg font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+          }, 'By Business Partner'),
+          React.createElement('div', {
+            className: 'space-y-3'
+          },
+            analyticsData.bpSummary.length > 0
+              ? analyticsData.bpSummary.map((bp, idx) =>
+                  React.createElement('div', {
+                    key: idx,
+                    className: `p-4 rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors ${selectedBPorPM?.type === 'bp' && selectedBPorPM?.name === bp.name ? 'ring-2 ring-blue-500' : ''}`,
+                    onClick: () => setSelectedBPorPM(selectedBPorPM?.type === 'bp' && selectedBPorPM?.name === bp.name ? null : { type: 'bp', name: bp.name })
+                  },
+                    React.createElement('div', {
+                      className: 'flex items-center justify-between'
+                    },
+                      React.createElement('div', {
+                        className: 'flex-1'
+                      },
+                        React.createElement('div', {
+                          className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+                        }, bp.name),
+                        React.createElement('div', {
+                          className: `text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                        }, `${bp.count} active ${bp.count === 1 ? 'project' : 'projects'}`)
+                      ),
+                      React.createElement('div', {
+                        className: `text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+                      }, bp.count)
+                    ),
+                    // Status breakdown
+                    React.createElement('div', {
+                      className: 'mt-3 flex flex-wrap gap-2'
+                    },
+                      bp.projects.slice(0, 3).map((project, pIdx) =>
+                        React.createElement('span', {
+                          key: pIdx,
+                          className: `text-xs px-2 py-1 rounded ${darkMode ? 'bg-slate-600 text-gray-300' : 'bg-white text-gray-700'} truncate max-w-[150px]`,
+                          title: project.name
+                        }, project.name)
+                      ),
+                      bp.projects.length > 3 && React.createElement('span', {
+                        className: `text-xs px-2 py-1 rounded ${darkMode ? 'bg-slate-600 text-gray-400' : 'bg-white text-gray-500'}`
+                      }, `+${bp.projects.length - 3} more`)
+                    )
+                  )
+                )
+              : React.createElement('div', {
+                  className: `text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+                }, 'No active projects assigned to Business Partners')
+          )
+        ),
+
+        // Project Managers Column
+        React.createElement('div', null,
+          React.createElement('h4', {
+            className: `text-lg font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+          }, 'By Project Manager'),
+          React.createElement('div', {
+            className: 'space-y-3'
+          },
+            analyticsData.pmSummary.length > 0
+              ? analyticsData.pmSummary.map((pm, idx) =>
+                  React.createElement('div', {
+                    key: idx,
+                    className: `p-4 rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors ${selectedBPorPM?.type === 'pm' && selectedBPorPM?.name === pm.name ? 'ring-2 ring-blue-500' : ''}`,
+                    onClick: () => setSelectedBPorPM(selectedBPorPM?.type === 'pm' && selectedBPorPM?.name === pm.name ? null : { type: 'pm', name: pm.name })
+                  },
+                    React.createElement('div', {
+                      className: 'flex items-center justify-between'
+                    },
+                      React.createElement('div', {
+                        className: 'flex-1'
+                      },
+                        React.createElement('div', {
+                          className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+                        }, pm.name),
+                        React.createElement('div', {
+                          className: `text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                        }, `${pm.count} active ${pm.count === 1 ? 'project' : 'projects'}`)
+                      ),
+                      React.createElement('div', {
+                        className: `text-2xl font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
+                      }, pm.count)
+                    ),
+                    // Status breakdown
+                    React.createElement('div', {
+                      className: 'mt-3 flex flex-wrap gap-2'
+                    },
+                      pm.projects.slice(0, 3).map((project, pIdx) =>
+                        React.createElement('span', {
+                          key: pIdx,
+                          className: `text-xs px-2 py-1 rounded ${darkMode ? 'bg-slate-600 text-gray-300' : 'bg-white text-gray-700'} truncate max-w-[150px]`,
+                          title: project.name
+                        }, project.name)
+                      ),
+                      pm.projects.length > 3 && React.createElement('span', {
+                        className: `text-xs px-2 py-1 rounded ${darkMode ? 'bg-slate-600 text-gray-400' : 'bg-white text-gray-500'}`
+                      }, `+${pm.projects.length - 3} more`)
+                    )
+                  )
+                )
+              : React.createElement('div', {
+                  className: `text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+                }, 'No active projects assigned to Project Managers')
+          )
+        )
+      ),
+
+      // Expandable section for selected BP/PM details
+      selectedBPorPM && React.createElement('div', {
+        className: `mt-6 rounded-lg overflow-hidden transition-all duration-300 ease-in-out ${darkMode ? 'bg-slate-700' : 'bg-gray-50'} shadow-lg border-2 border-blue-500`
+      },
+        // Header with title and close button
+        React.createElement('div', {
+          className: `flex items-center justify-between p-4 ${darkMode ? 'bg-slate-600 border-b border-slate-500' : 'bg-blue-50 border-b border-blue-200'}`
+        },
+          React.createElement('h3', {
+            className: `text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
+          }, `${selectedBPorPM.type === 'bp' ? 'Business Partner' : 'Project Manager'}: ${selectedBPorPM.name}`),
+          React.createElement('button', {
+            onClick: () => setSelectedBPorPM(null),
+            className: `px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${darkMode ? 'bg-slate-700 text-gray-200 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
+          }, 'Close ✕')
+        ),
+        // Projects table
+        React.createElement('div', {
+          className: 'p-4'
+        },
+          React.createElement(DataTable, {
+            data: selectedBPorPM.type === 'bp'
+              ? analyticsData.bpSummary.find(bp => bp.name === selectedBPorPM.name)?.projects || []
+              : analyticsData.pmSummary.find(pm => pm.name === selectedBPorPM.name)?.projects || [],
+            columns: [
+              { header: 'Project', key: 'name' },
+              { header: 'Division', key: 'division' },
+              {
+                header: 'Kanban Status',
+                render: (row) => getColumnDisplayName(row.column)
+              },
+              {
+                header: 'RAG Status',
+                render: (row) => React.createElement('span', {
+                  className: `px-2 py-1 rounded text-white text-xs font-semibold ${row.ragStatus.color}`
+                }, row.ragStatus.label)
+              },
+              {
+                header: 'Due Date',
+                render: (row) => formatDate(row.finishDate)
+              },
+              { header: 'PM', key: 'projectManager' },
+              { header: 'BP', key: 'businessPartner' }
+            ],
+            darkMode
+          })
+        )
+      )
+    ),
+
+    // SECTION 4: Timeline Performance (Report 6)
     analyticsData.projectsWithDelays.length > 0 && React.createElement(TimelinePerformanceChart, {
       projectsWithDelays: analyticsData.projectsWithDelays,
       darkMode

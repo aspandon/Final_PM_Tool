@@ -9,7 +9,10 @@ import {
   ShoppingCart,
   Settings,
   Flask,
-  PartyPopper
+  PartyPopper,
+  FolderKanban,
+  TrendingUp,
+  Target
 } from '../../shared/icons/index.js';
 
 /**
@@ -32,7 +35,7 @@ import {
 /**
  * KPI Card Component
  */
-export function KPICard({ title, value, percentage, color, icon, filterType, onClick, selectedKPIFilter, darkMode }) {
+export function KPICard({ title, value, percentage, color, Icon, filterType, onClick, selectedKPIFilter, darkMode }) {
   const isSelected = selectedKPIFilter === filterType;
 
   return React.createElement('div', {
@@ -53,9 +56,9 @@ export function KPICard({ title, value, percentage, color, icon, filterType, onC
           className: `text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
         }, `${percentage}% of total`)
       ),
-      React.createElement('div', {
-        className: `text-3xl opacity-20`
-      }, icon)
+      Icon && React.createElement(Icon, {
+        className: `w-12 h-12 opacity-20 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+      })
     )
   );
 }
@@ -63,7 +66,7 @@ export function KPICard({ title, value, percentage, color, icon, filterType, onC
 /**
  * Risk Alert Card Component
  */
-export function RiskAlertCard({ title, value, severity, icon, alertType, onClick, selectedRiskAlert, darkMode }) {
+export function RiskAlertCard({ title, value, severity, Icon, alertType, onClick, selectedRiskAlert, darkMode }) {
   const isSelected = selectedRiskAlert === alertType;
   const isCritical = alertType === 'critical';
 
@@ -73,28 +76,24 @@ export function RiskAlertCard({ title, value, severity, icon, alertType, onClick
       border: 'border-red-600',
       bg: darkMode ? 'bg-red-900/30' : 'bg-red-50',
       text: darkMode ? 'text-red-300' : 'text-red-700',
-      icon: '🚨',
       pulse: 'animate-pulse'
     },
     high: {
       border: 'border-red-500',
       bg: darkMode ? 'bg-red-900/20' : 'bg-red-50/70',
       text: darkMode ? 'text-red-400' : 'text-red-600',
-      icon: '🔴',
       pulse: ''
     },
     medium: {
       border: 'border-orange-500',
       bg: darkMode ? 'bg-orange-900/20' : 'bg-orange-50',
       text: darkMode ? 'text-orange-400' : 'text-orange-600',
-      icon: '⚠️',
       pulse: ''
     },
     low: {
       border: 'border-yellow-500',
       bg: darkMode ? 'bg-yellow-900/20' : 'bg-yellow-50',
       text: darkMode ? 'text-yellow-400' : 'text-yellow-600',
-      icon: '⏸️',
       pulse: ''
     }
   };
@@ -119,9 +118,9 @@ export function RiskAlertCard({ title, value, severity, icon, alertType, onClick
           className: `text-3xl font-bold ${style.text}`
         }, value)
       ),
-      React.createElement('div', {
-        className: `text-4xl ${isCritical ? style.pulse : ''}`
-      }, style.icon)
+      Icon && React.createElement(Icon, {
+        className: `w-12 h-12 ${style.text} ${isCritical ? style.pulse : ''}`
+      })
     )
   );
 }
@@ -240,7 +239,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       title: 'Total Projects',
       value: analyticsData.totalProjects,
       color: 'border-blue-500',
-      icon: '📊',
+      Icon: FolderKanban,
       filterType: 'total',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -251,7 +250,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       value: analyticsData.redCount,
       percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.redCount / analyticsData.totalProjects) * 100) : 0,
       color: 'border-red-500',
-      icon: '🔴',
+      Icon: Target,
       filterType: 'red',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -262,7 +261,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       value: analyticsData.amberCount,
       percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.amberCount / analyticsData.totalProjects) * 100) : 0,
       color: 'border-yellow-500',
-      icon: '🟡',
+      Icon: Target,
       filterType: 'amber',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -273,7 +272,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       value: analyticsData.greenCount,
       percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.greenCount / analyticsData.totalProjects) * 100) : 0,
       color: 'border-green-500',
-      icon: '🟢',
+      Icon: CheckSquare,
       filterType: 'green',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -284,7 +283,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       value: analyticsData.onHoldCount,
       percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.onHoldCount / analyticsData.totalProjects) * 100) : 0,
       color: 'border-orange-500',
-      icon: '⏸️',
+      Icon: PauseCircle,
       filterType: 'onhold',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -295,7 +294,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       value: analyticsData.completedCount,
       percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.completedCount / analyticsData.totalProjects) * 100) : 0,
       color: 'border-emerald-500',
-      icon: '✅',
+      Icon: CheckSquare,
       filterType: 'completed',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -315,6 +314,7 @@ export function RiskAlertCardsGrid({ analyticsData, selectedRiskAlert, handleRis
       title: 'Expiring ≤ 7 Days',
       value: analyticsData.criticalRiskCount,
       severity: 'critical',
+      Icon: Target,
       alertType: 'critical',
       onClick: handleRiskAlertClick,
       selectedRiskAlert,
@@ -324,6 +324,7 @@ export function RiskAlertCardsGrid({ analyticsData, selectedRiskAlert, handleRis
       title: 'All Red Projects',
       value: analyticsData.highRiskCount,
       severity: 'high',
+      Icon: Target,
       alertType: 'high',
       onClick: handleRiskAlertClick,
       selectedRiskAlert,
@@ -333,6 +334,7 @@ export function RiskAlertCardsGrid({ analyticsData, selectedRiskAlert, handleRis
       title: 'All Amber Projects',
       value: analyticsData.mediumRiskCount,
       severity: 'medium',
+      Icon: Target,
       alertType: 'medium',
       onClick: handleRiskAlertClick,
       selectedRiskAlert,
@@ -342,6 +344,7 @@ export function RiskAlertCardsGrid({ analyticsData, selectedRiskAlert, handleRis
       title: 'On Hold Projects',
       value: analyticsData.onHoldRiskCount,
       severity: 'low',
+      Icon: PauseCircle,
       alertType: 'onhold',
       onClick: handleRiskAlertClick,
       selectedRiskAlert,
