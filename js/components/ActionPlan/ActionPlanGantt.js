@@ -22,6 +22,12 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
   });
   const [autopilotResult, setAutopilotResult] = React.useState(null);
   const [undoHistory, setUndoHistory] = React.useState([]); // Stack of previous states (max 20)
+  const [svgReady, setSvgReady] = React.useState(false);
+
+  // Force re-render when component mounts to get proper dimensions
+  React.useEffect(() => {
+    setSvgReady(true);
+  }, []);
 
   // Toggle filter
   const toggleFilter = (filterKey) => {
@@ -534,9 +540,23 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     return months;
   };
 
-  // Render dependency lines with professional curved connectors
+  // Render dependency lines with professional curved connectors - REDESIGNED
   const renderDependencyLines = (allItems, earliest, totalDays, timelineRef) => {
-    if (!timelineRef.current) return null;
+    if (!timelineRef.current || !svgReady) return null;
+
+    // Get the timeline container element and find its width
+    const timelineContainer = timelineRef.current;
+    const timelineRect = timelineContainer.getBoundingClientRect();
+
+    // Calculate actual timeline width (subtract the 256px label column)
+    const timelineWidth = timelineRect.width - 256;
+
+    if (!timelineWidth || timelineWidth <= 0) {
+      console.log('[Gantt] Timeline width not ready:', timelineWidth);
+      return null;
+    }
+
+    console.log('[Gantt] Rendering dependency lines, timeline width:', timelineWidth);
 
     const paths = [];
 
@@ -552,34 +572,40 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
 
         const isViolated = isDependencyViolated(item, allItems);
 
-        // Calculate positions
+        // Calculate positions in PIXELS
         const depFinish = new Date(depItem.finishDate || depItem.dueDate);
         const itemStart = new Date(item.startDate);
 
         const depOffset = getDaysDiff(earliest, depFinish) - 1;
         const itemOffset = getDaysDiff(earliest, itemStart) - 1;
 
-        const x1 = (depOffset / totalDays) * 100;
-        const x2 = (itemOffset / totalDays) * 100;
-        const y1 = depIndex * 40 + 20;
+        // Convert to pixel positions
+        const x1 = (depOffset / totalDays) * timelineWidth;
+        const x2 = (itemOffset / totalDays) * timelineWidth;
+        const y1 = depIndex * 40 + 20; // Center of row
         const y2 = itemIndex * 40 + 20;
 
-        // Calculate control points for smooth bezier curve
+        // Calculate smooth curved path
         const horizontalDistance = Math.abs(x2 - x1);
         const verticalDistance = Math.abs(y2 - y1);
 
-        // Adaptive control point distance based on line length
-        const controlPointDistance = Math.min(horizontalDistance * 0.5, 20);
+        // Adaptive control point distance
+        const controlDist = Math.min(horizontalDistance * 0.4, 100);
 
-        // Create a smooth S-curve path
         let pathData;
-        if (y1 === y2) {
-          // Horizontal line - slight arc
-          pathData = `M ${x1},${y1} C ${x1 + controlPointDistance},${y1} ${x2 - controlPointDistance},${y2} ${x2},${y2}`;
+
+        if (Math.abs(y2 - y1) < 5) {
+          // Same row - simple horizontal curve
+          pathData = `M ${x1} ${y1} C ${x1 + controlDist} ${y1}, ${x2 - controlDist} ${y2}, ${x2} ${y2}`;
+        } else if (x2 > x1) {
+          // Forward dependency - smooth S curve
+          const midX = (x1 + x2) / 2;
+          pathData = `M ${x1} ${y1} C ${x1 + controlDist} ${y1}, ${midX - controlDist * 0.5} ${y1}, ${midX} ${(y1 + y2) / 2} S ${x2 - controlDist} ${y2}, ${x2} ${y2}`;
         } else {
-          // Curved connector for different vertical positions
+          // Backward dependency - loop back
+          const loopOut = 30;
           const midY = (y1 + y2) / 2;
-          pathData = `M ${x1},${y1} C ${x1 + controlPointDistance},${y1} ${x1 + controlPointDistance},${midY} ${(x1 + x2) / 2},${midY} S ${x2 - controlPointDistance},${y2} ${x2},${y2}`;
+          pathData = `M ${x1} ${y1} C ${x1 + loopOut} ${y1}, ${x1 + loopOut} ${midY}, ${(x1 + x2) / 2} ${midY} S ${x2 - loopOut} ${y2}, ${x2} ${y2}`;
         }
 
         paths.push({
@@ -591,9 +617,14 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
           x2,
           y2
         });
+
+        console.log(`[Gantt] Path for ${depItem.itemName} -> ${item.itemName}:`, {
+          x1, y1, x2, y2, pathData: pathData.substring(0, 50) + '...'
+        });
       });
     });
 
+    console.log(`[Gantt] Total paths generated: ${paths.length}`);
     return paths;
   };
 
@@ -777,8 +808,10 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
             className: 'absolute top-0 left-64 pointer-events-none',
             style: {
               width: 'calc(100% - 16rem)',
-              height: items.length * 40
-            }
+              height: items.length * 40,
+              overflow: 'visible'
+            },
+            preserveAspectRatio: 'none'
           },
             // Define filters and markers
             React.createElement('defs', null,
