@@ -474,6 +474,5 @@ export function HelpModal({
           )
         )
       )
-    )
-  );
+    );
 }
