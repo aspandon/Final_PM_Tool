@@ -62,7 +62,7 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
   const exportToPowerPoint = async () => {
     try {
-      const pptx = new PptxGenJS();
+      const pptx = new pptxgen();
       const slide = pptx.addSlide();
 
       // Header - Project Name
