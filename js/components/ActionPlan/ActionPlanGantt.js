@@ -585,9 +585,10 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
         const itemStartOffset = getDaysDiff(earliest, itemStart) - 1;
         const x2 = (itemStartOffset / totalDays) * timelineWidth;
 
-        // Y positions: bars are h-6 (24px) with top-1 (4px), center is at index * 40 + 16
-        const y1 = depIndex * 40 + 16; // Center of dependency bar
-        const y2 = itemIndex * 40 + 16; // Center of dependent item bar
+        // Y positions: bars are h-6 (24px) with top-1 (4px), rows are h-10 (40px) with mb-1 (4px)
+        // Each row takes 44px total (40px + 4px margin), center is at index * 44 + 16
+        const y1 = depIndex * 44 + 16; // Center of dependency bar
+        const y2 = itemIndex * 44 + 16; // Center of dependent item bar
 
         // Create BPMN-style orthogonal connector (right angles only)
         // Exit horizontally from source, turn vertically, enter horizontally to target
@@ -920,7 +921,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
             className: 'absolute top-0 left-64 pointer-events-none',
             style: {
               width: 'calc(100% - 16rem)',
-              height: items.length * 40,
+              height: items.length * 44, // 40px row height + 4px margin-bottom
               overflow: 'visible',
               zIndex: 10
             },
