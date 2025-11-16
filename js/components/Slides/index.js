@@ -46,7 +46,8 @@ export function Slides({ projects, darkMode }) {
   // Auto-select first project if none selected
   useEffect(() => {
     if (!selectedProjectId && implementationProjects.length > 0) {
-      setSelectedProjectId(implementationProjects[0].id);
+      // Convert to string for consistency with select dropdown
+      setSelectedProjectId(String(implementationProjects[0].id));
     }
   }, [selectedProjectId, implementationProjects]);
 
@@ -57,9 +58,20 @@ export function Slides({ projects, darkMode }) {
     }));
   };
 
-  // Use loose equality to handle string/number mismatch from select dropdown
-  const selectedProject = implementationProjects.find(p => p.id == selectedProjectId);
+  // Find selected project - convert both to strings for comparison
+  const selectedProject = selectedProjectId
+    ? implementationProjects.find(p => String(p.id) === String(selectedProjectId))
+    : null;
   const selectedSlideData = selectedProjectId ? slidesData[selectedProjectId] : null;
+
+  // Debug logging
+  console.log('Slides Debug:', {
+    selectedProjectId,
+    selectedProjectIdType: typeof selectedProjectId,
+    selectedProject: selectedProject ? selectedProject.name : 'NOT FOUND',
+    implementationProjectsCount: implementationProjects.length,
+    viewMode
+  });
 
   return React.createElement('div', {
     className: 'space-y-6'
@@ -168,7 +180,19 @@ export function Slides({ projects, darkMode }) {
             )
           ),
 
-          // Content Area
+          // Content Area - Debug info when project not found
+          !selectedProject && selectedProjectId && React.createElement('div', {
+            className: `rounded-lg p-6 ${darkMode ? 'bg-slate-800' : 'bg-white'} shadow-md text-center`
+          },
+            React.createElement('p', {
+              className: `text-lg ${darkMode ? 'text-red-400' : 'text-red-600'}`
+            }, `Error: Project with ID "${selectedProjectId}" not found`),
+            React.createElement('p', {
+              className: `mt-2 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+            }, 'Check the console for debug information.')
+          ),
+
+          // Content Area - Show editor/viewer when project is found
           selectedProject && React.createElement('div', null,
             // Edit Mode - Show Editor
             viewMode === 'edit' && React.createElement(SlideEditor, {
