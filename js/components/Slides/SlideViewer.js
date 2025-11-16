@@ -77,8 +77,8 @@ export function SlideViewer({ project, slideData, darkMode }) {
               )
             ),
 
-            // Middle row - 2 columns
-            React.createElement('div', { className: 'grid grid-cols-2 gap-2' },
+            // Second row - 3 columns (aligned with top)
+            React.createElement('div', { className: 'grid grid-cols-3 gap-2' },
               React.createElement('div', null,
                 React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Business Owner'),
                 React.createElement('div', { className: 'text-sm font-bold' }, slideData.businessOwner || '-')
@@ -86,6 +86,10 @@ export function SlideViewer({ project, slideData, darkMode }) {
               React.createElement('div', null,
                 React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Involved Divisions'),
                 React.createElement('div', { className: 'text-sm font-bold' }, slideData.involvedDivisions || '-')
+              ),
+              React.createElement('div', null,
+                React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Project Status'),
+                React.createElement('div', { className: 'text-sm font-bold' }, slideData.projectStatus || '-')
               )
             )
           ),
@@ -110,8 +114,8 @@ export function SlideViewer({ project, slideData, darkMode }) {
             React.createElement('div', { className: 'space-y-1' },
               React.createElement('div', { className: 'grid grid-cols-2 gap-2' },
                 React.createElement('div', null,
-                  React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Project Status'),
-                  React.createElement('div', { className: 'text-sm font-bold' }, slideData.projectStatus || '-')
+                  React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Baseline Budget'),
+                  React.createElement('div', { className: 'text-sm font-bold' }, slideData.baselineBudget || '-')
                 ),
                 React.createElement('div', null,
                   React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Work Completed (%)'),
@@ -120,17 +124,13 @@ export function SlideViewer({ project, slideData, darkMode }) {
               ),
               React.createElement('div', { className: 'grid grid-cols-2 gap-2' },
                 React.createElement('div', null,
-                  React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Baseline Budget'),
-                  React.createElement('div', { className: 'text-sm font-bold' }, slideData.baselineBudget || '-')
+                  React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Planned Finish Date'),
+                  React.createElement('div', { className: 'text-sm font-bold' }, formatDate(slideData.plannedCompletionDate))
                 ),
                 React.createElement('div', null,
                   React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Planned Start Date'),
                   React.createElement('div', { className: 'text-sm font-bold' }, formatDate(slideData.plannedStartDate))
                 )
-              ),
-              React.createElement('div', null,
-                React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Planned/Estimated Completion Date'),
-                React.createElement('div', { className: 'text-sm font-bold' }, formatDate(slideData.plannedCompletionDate))
               )
             )
           )

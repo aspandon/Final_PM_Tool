@@ -776,7 +776,7 @@ function GanttChart() {
     return React.createElement('button', {
       key: tabName,
       onClick: () => setActiveTab(tabName),
-      className: `px-4 py-2 text-base font-semibold rounded-t-lg tab-button flex items-center gap-2 ${
+      className: `px-4 py-2 text-base font-semibold rounded-t-lg tab-button flex items-center gap-2 flex-shrink-0 whitespace-nowrap ${
         isActive ? 'active' : ''
       } ${
         isActive
@@ -1105,7 +1105,11 @@ function GanttChart() {
 
         // Tabs
         React.createElement('div', {
-          className: 'flex gap-2 mb-6 border-b-2 ' + (darkMode ? 'border-slate-700' : 'border-gray-200')
+          className: 'flex gap-2 mb-6 border-b-2 overflow-x-auto scrollbar-thin ' + (darkMode ? 'border-slate-700' : 'border-gray-200'),
+          style: {
+            scrollbarWidth: 'thin',
+            WebkitOverflowScrolling: 'touch'
+          }
         },
           renderTabButton('projects', 'Projects', FolderKanban),
           renderTabButton('planner', 'Planner', Calendar),
@@ -1120,7 +1124,7 @@ function GanttChart() {
           // Lock/Unlock button - only visible on Projects tab
           activeTab === 'projects' && React.createElement('button', {
             onClick: () => setIsEditLocked(!isEditLocked),
-            className: `ml-auto px-4 py-2 text-base rounded-t-lg lock-button btn-modern flex items-center gap-2 ${
+            className: `ml-auto px-4 py-2 text-base rounded-t-lg lock-button btn-modern flex items-center gap-2 flex-shrink-0 ${
               darkMode
                 ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-4 ' + (isEditLocked ? 'border-red-400 glow-red' : 'border-green-400 glow-green')
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-4 ' + (isEditLocked ? 'border-red-500 glow-red' : 'border-green-500 glow-green')

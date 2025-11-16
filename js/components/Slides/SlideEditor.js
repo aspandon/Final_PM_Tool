@@ -215,9 +215,9 @@ export function SlideEditor({ project, slideData, onSave, darkMode }) {
           })
         ),
 
-        // Planned/Estimated Completion Date
+        // Planned Finish Date
         React.createElement('div', null,
-          React.createElement('label', { className: labelClass }, 'Planned/Estimated Completion Date'),
+          React.createElement('label', { className: labelClass }, 'Planned Finish Date'),
           React.createElement('input', {
             type: 'date',
             className: inputClass,

@@ -25,9 +25,21 @@ export function RichTextEditor({ value, onChange, darkMode, placeholder = 'Enter
   };
 
   const execCommand = (command, value = null) => {
-    document.execCommand(command, false, value);
+    // Ensure editor has focus before executing command
     editorRef.current?.focus();
-    handleInput();
+
+    // Execute the command
+    document.execCommand(command, false, value);
+
+    // For list commands, ensure focus is maintained
+    if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
+      setTimeout(() => {
+        editorRef.current?.focus();
+        handleInput();
+      }, 0);
+    } else {
+      handleInput();
+    }
   };
 
   const toolbarButtonClass = `p-2 rounded transition-colors ${
