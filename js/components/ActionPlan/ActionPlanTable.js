@@ -5,7 +5,7 @@
  * Table view with sortable columns showing Actions, Tasks, and Subtasks
  */
 
-export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities }) {
+export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities, itemOrder, setItemOrder }) {
   console.log('📋 [ActionPlanTable] Component loaded - VERSION 2.0');
 
   const [viewFilters, setViewFilters] = React.useState({
@@ -82,18 +82,38 @@ export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities }) 
 
   console.log('[ActionPlanTable] All items:', allItems);
 
-  // Sort by type, then priority, then due date
-  allItems.sort((a, b) => {
-    // First by type (Actions, Tasks, Subtasks)
-    if (a.sortPriority !== b.sortPriority) {
-      return a.sortPriority - b.sortPriority;
+  // Initialize itemOrder if empty or items changed
+  if (!itemOrder || itemOrder.length === 0 || itemOrder.length !== allItems.length) {
+    const newOrder = allItems.map(item => item.id);
+    if (setItemOrder) {
+      setItemOrder(newOrder);
     }
-    // Then by priority
-    const priorityDiff = (priorities[b.priority || 'medium'].order) - (priorities[a.priority || 'medium'].order);
-    if (priorityDiff !== 0) return priorityDiff;
-    // Then by due date
-    return (a.dueDate || '').localeCompare(b.dueDate || '');
-  });
+  }
+
+  // Sort by itemOrder if available, otherwise use default sorting
+  if (itemOrder && itemOrder.length > 0) {
+    allItems.sort((a, b) => {
+      const aIndex = itemOrder.indexOf(a.id);
+      const bIndex = itemOrder.indexOf(b.id);
+      if (aIndex === -1 && bIndex === -1) return 0;
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
+    });
+  } else {
+    // Default sort: by type, then priority, then due date
+    allItems.sort((a, b) => {
+      // First by type (Actions, Tasks, Subtasks)
+      if (a.sortPriority !== b.sortPriority) {
+        return a.sortPriority - b.sortPriority;
+      }
+      // Then by priority
+      const priorityDiff = (priorities[b.priority || 'medium'].order) - (priorities[a.priority || 'medium'].order);
+      if (priorityDiff !== 0) return priorityDiff;
+      // Then by due date
+      return (a.dueDate || '').localeCompare(b.dueDate || '');
+    });
+  }
 
   return React.createElement('div', { className: 'space-y-4' },
     // Filter Toggles
@@ -153,8 +173,9 @@ export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities }) 
     },
       // Table header
       React.createElement('div', {
-        className: `grid grid-cols-8 gap-3 p-4 font-bold text-xs ${darkMode ? 'bg-slate-800 text-gray-300 border-b border-slate-700' : 'bg-gray-50 text-gray-700 border-b border-gray-200'}`
+        className: `grid grid-cols-9 gap-3 p-4 font-bold text-xs ${darkMode ? 'bg-slate-800 text-gray-300 border-b border-slate-700' : 'bg-gray-50 text-gray-700 border-b border-gray-200'}`
       },
+        React.createElement('div', null, 'ORDER'),
         React.createElement('div', null, 'TYPE'),
         React.createElement('div', null, 'NAME'),
         React.createElement('div', null, 'HIERARCHY'),
@@ -170,7 +191,7 @@ export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities }) 
           ? React.createElement('div', {
             className: `p-8 text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
           }, 'No items to display. Please select at least one filter.')
-          : allItems.map(item => {
+          : allItems.map((item, index) => {
             const statusInfo = statuses[item.status || 'not-started'];
             const priorityInfo = priorities[item.priority || 'medium'];
             const progress = item.type === 'task' && item.subtasks && item.subtasks.length > 0
@@ -200,8 +221,12 @@ export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities }) 
 
             return React.createElement('div', {
               key: `${item.type}-${item.id}`,
-              className: `grid grid-cols-8 gap-3 p-4 text-xs ${darkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'} transition-colors`
+              className: `grid grid-cols-9 gap-3 p-4 text-xs ${darkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'} transition-colors`
             },
+              // Order Number
+              React.createElement('div', {
+                className: `font-bold ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+              }, index + 1),
               // Type Badge
               React.createElement('div', null,
                 React.createElement('span', {

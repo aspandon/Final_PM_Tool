@@ -9,7 +9,7 @@
  * - Autopilot feature for automatic task arrangement
  */
 
-export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, priorities, isEditLocked }) {
+export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, priorities, isEditLocked, itemOrder, setItemOrder }) {
   console.log('📈 [ActionPlanGantt] Component loaded - NEW GANTT VIEW VERSION 2.0');
 
   const [draggedItem, setDraggedItem] = React.useState(null);
@@ -24,10 +24,23 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
   const [autopilotResult, setAutopilotResult] = React.useState(null);
   const [undoHistory, setUndoHistory] = React.useState([]); // Stack of previous states (max 20)
   const [svgReady, setSvgReady] = React.useState(false);
+  const [draggedRowIndex, setDraggedRowIndex] = React.useState(null);
 
   // Force re-render when component mounts to get proper dimensions
   React.useEffect(() => {
     setSvgReady(true);
+  }, []);
+
+  // Handle window resize to adjust dependency lines
+  React.useEffect(() => {
+    const handleResize = () => {
+      // Force re-render of dependency lines
+      setSvgReady(false);
+      setTimeout(() => setSvgReady(true), 10);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Toggle filter
@@ -115,6 +128,27 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     });
 
     console.log('[ActionPlanGantt] All items:', items);
+
+    // Initialize itemOrder if empty or items changed
+    if (!itemOrder || itemOrder.length === 0 || itemOrder.length !== items.length) {
+      const newOrder = items.map(item => item.itemId);
+      if (setItemOrder) {
+        setItemOrder(newOrder);
+      }
+    }
+
+    // Sort items based on custom order
+    if (itemOrder && itemOrder.length > 0) {
+      items.sort((a, b) => {
+        const aIndex = itemOrder.indexOf(a.itemId);
+        const bIndex = itemOrder.indexOf(b.itemId);
+        // If item not in order, put it at the end
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        return aIndex - bIndex;
+      });
+    }
+
     return items;
   };
 
@@ -402,13 +436,27 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
       const actionStart = new Date(action.startDate);
       const actionFinish = new Date(action.finishDate);
 
-      // Sort tasks by dependencies (topological sort)
-      const sortedTasks = topologicalSort(action.tasks);
+      // Sort tasks by custom order first, then check dependencies
+      let sortedTasks = action.tasks ? [...action.tasks] : [];
 
-      if (!sortedTasks) {
-        issues.push(`Action "${action.name}" has circular task dependencies`);
-        allFit = false;
-        return;
+      // Apply custom order if available
+      if (itemOrder && itemOrder.length > 0) {
+        sortedTasks.sort((a, b) => {
+          const aIndex = itemOrder.indexOf(a.id);
+          const bIndex = itemOrder.indexOf(b.id);
+          if (aIndex === -1 && bIndex === -1) return 0;
+          if (aIndex === -1) return 1;
+          if (bIndex === -1) return -1;
+          return aIndex - bIndex;
+        });
+      } else {
+        // Fallback to topological sort if no custom order
+        sortedTasks = topologicalSort(action.tasks);
+        if (!sortedTasks) {
+          issues.push(`Action "${action.name}" has circular task dependencies`);
+          allFit = false;
+          return;
+        }
       }
 
       let currentDate = new Date(actionStart);
@@ -438,12 +486,26 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
 
         // Arrange subtasks if any
         if (task.subtasks && task.subtasks.length > 0) {
-          const sortedSubtasks = topologicalSort(task.subtasks);
+          let sortedSubtasks = [...task.subtasks];
 
-          if (!sortedSubtasks) {
-            issues.push(`Task "${task.name}" has circular subtask dependencies`);
-            allFit = false;
-            return;
+          // Apply custom order if available
+          if (itemOrder && itemOrder.length > 0) {
+            sortedSubtasks.sort((a, b) => {
+              const aIndex = itemOrder.indexOf(a.id);
+              const bIndex = itemOrder.indexOf(b.id);
+              if (aIndex === -1 && bIndex === -1) return 0;
+              if (aIndex === -1) return 1;
+              if (bIndex === -1) return -1;
+              return aIndex - bIndex;
+            });
+          } else {
+            // Fallback to topological sort if no custom order
+            sortedSubtasks = topologicalSort(task.subtasks);
+            if (!sortedSubtasks) {
+              issues.push(`Task "${task.name}" has circular subtask dependencies`);
+              allFit = false;
+              return;
+            }
           }
 
           let subtaskDate = new Date(taskStart);
@@ -539,6 +601,31 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     }
 
     return months;
+  };
+
+  // Get week labels for detailed timeline
+  const getWeekLabels = (earliest, latest) => {
+    const weeks = [];
+    const current = new Date(earliest);
+
+    // Start from the beginning of the week (Monday)
+    const day = current.getDay();
+    const diff = current.getDate() - day + (day === 0 ? -6 : 1);
+    current.setDate(diff);
+
+    while (current <= latest) {
+      const weekEnd = new Date(current);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      weeks.push({
+        label: `${current.getDate()} ${current.toLocaleDateString('en-US', { month: 'short' })}`,
+        date: new Date(current),
+        endDate: new Date(weekEnd)
+      });
+      current.setDate(current.getDate() + 7);
+    }
+
+    return weeks;
   };
 
   // Render dependency lines with professional curved connectors - REDESIGNED
@@ -650,19 +737,26 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
   const { earliest, latest } = getDateRange();
   const totalDays = getDaysDiff(earliest, latest);
   const monthLabels = getMonthLabels(earliest, latest);
+  const weekLabels = getWeekLabels(earliest, latest);
 
   // Type-specific styling
   const typeStyles = {
     action: {
       color: darkMode ? 'bg-blue-600' : 'bg-blue-500',
+      bgTransparent: darkMode ? 'bg-blue-600/20' : 'bg-blue-500/20',
+      border: darkMode ? 'border-blue-600' : 'border-blue-500',
       label: 'Action'
     },
     task: {
       color: darkMode ? 'bg-green-600' : 'bg-green-500',
+      bgTransparent: darkMode ? 'bg-green-600/20' : 'bg-green-500/20',
+      border: darkMode ? 'border-green-600' : 'border-green-500',
       label: 'Task'
     },
     subtask: {
       color: darkMode ? 'bg-purple-600' : 'bg-purple-500',
+      bgTransparent: darkMode ? 'bg-purple-600/20' : 'bg-purple-500/20',
+      border: darkMode ? 'border-purple-600' : 'border-purple-500',
       label: 'Subtask'
     }
   };
@@ -801,7 +895,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
         className: 'min-w-[1200px]'
       },
         // Month header
-        React.createElement('div', { className: 'flex mb-2' },
+        React.createElement('div', { className: 'flex mb-1' },
           React.createElement('div', { className: 'w-64 flex-shrink-0' }),
           React.createElement('div', {
             className: `flex-1 flex border-b ${darkMode ? 'border-slate-600' : 'border-gray-300'} pb-1`
@@ -812,6 +906,27 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                 className: `flex-1 text-xs ${darkMode ? 'text-gray-200' : 'text-gray-700'} text-center font-semibold`
               }, month.label)
             )
+          )
+        ),
+
+        // Week header with detailed dates
+        React.createElement('div', { className: 'flex mb-2' },
+          React.createElement('div', { className: 'w-64 flex-shrink-0' }),
+          React.createElement('div', {
+            className: `flex-1 relative h-5 ${darkMode ? 'bg-slate-700/30' : 'bg-gray-50'} rounded`
+          },
+            weekLabels.map((week, i) => {
+              const offset = getDaysDiff(earliest, week.date) - 1;
+              const duration = getDaysDiff(week.date, week.endDate);
+              const left = `${(offset / totalDays) * 100}%`;
+              const width = `${(duration / totalDays) * 100}%`;
+
+              return React.createElement('div', {
+                key: i,
+                className: `absolute top-0 bottom-0 flex items-center justify-center text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-medium border-r ${darkMode ? 'border-slate-600' : 'border-gray-300'}`,
+                style: { left, width }
+              }, week.label);
+            })
           )
         ),
 
@@ -831,14 +946,62 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
             const statusInfo = statuses[item.status || 'not-started'];
             const priorityInfo = priorities[item.priority || 'medium'];
 
+            // Row drag handlers for reordering
+            const handleRowDragStart = (e) => {
+              if (isEditLocked) return;
+              setDraggedRowIndex(index);
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('text/html', e.currentTarget);
+            };
+
+            const handleRowDragOver = (e) => {
+              if (isEditLocked) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+            };
+
+            const handleRowDrop = (e) => {
+              if (isEditLocked) return;
+              e.preventDefault();
+
+              if (draggedRowIndex === null || draggedRowIndex === index) {
+                setDraggedRowIndex(null);
+                return;
+              }
+
+              // Reorder items
+              const newOrder = [...itemOrder];
+              const draggedId = newOrder[draggedRowIndex];
+              newOrder.splice(draggedRowIndex, 1);
+              newOrder.splice(index, 0, draggedId);
+
+              setItemOrder(newOrder);
+              setDraggedRowIndex(null);
+              saveToHistory();
+            };
+
+            const handleRowDragEnd = () => {
+              setDraggedRowIndex(null);
+            };
+
             return React.createElement('div', {
               key: `${item.type}-${item.itemId}`,
-              className: 'flex items-center mb-1 h-10'
+              className: `flex items-center mb-1 h-10 ${draggedRowIndex === index ? 'opacity-50' : ''}`,
+              onDragOver: handleRowDragOver,
+              onDrop: handleRowDrop
             },
               // Item info column
               React.createElement('div', {
-                className: 'w-64 flex-shrink-0 pr-2 flex items-center gap-2'
+                className: 'w-64 flex-shrink-0 pr-2 flex items-center gap-1'
               },
+                // Order number (drag handle)
+                React.createElement('span', {
+                  draggable: !isEditLocked,
+                  onDragStart: handleRowDragStart,
+                  onDragEnd: handleRowDragEnd,
+                  className: `px-1.5 py-0.5 rounded text-[9px] font-bold ${darkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-200 text-gray-700'} text-center inline-block w-6 ${!isEditLocked ? 'cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-blue-400' : 'cursor-default'}`,
+                  title: !isEditLocked ? 'Drag to reorder' : ''
+                }, index + 1),
                 React.createElement('span', {
                   className: `px-2 py-0.5 rounded text-[9px] font-bold text-white text-center inline-block w-14 ${typeStyle.color}`
                 }, typeStyle.label),
@@ -883,8 +1046,9 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                     const rect = e.currentTarget.parentElement.getBoundingClientRect();
                     handleBarDragEnd(e, rect.width, earliest, totalDays);
                   },
-                  className: `group absolute h-6 top-1 ${typeStyle.color} rounded-lg flex items-center justify-center text-white text-[10px] font-semibold transition shadow-sm ${
-                    isViolated ? 'ring-2 ring-red-500' : ''
+                  className: `group absolute h-6 top-1 ${typeStyle.bgTransparent} ${typeStyle.border} border-2 rounded-lg flex items-center justify-center text-[10px] font-semibold transition shadow-sm ${
+                    darkMode ? 'text-gray-200' : 'text-gray-800'
+                  } ${isViolated ? 'ring-2 ring-red-500' : ''
                   } ${!isEditLocked ? 'cursor-move hover:opacity-90 hover:shadow-md' : 'cursor-default'}`,
                   style: {
                     left: position.left,
