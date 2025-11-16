@@ -138,14 +138,14 @@ export function Slides({ projects, darkMode }) {
               // View Mode Toggle
               React.createElement('button', {
                 onClick: () => setViewMode('edit'),
-                className: `px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                className: `flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
                   viewMode === 'edit'
                     ? darkMode
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-purple-500 text-white'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                      : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
                     : darkMode
-                    ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      ? 'bg-slate-700/50 text-gray-300 hover:bg-slate-600/50 border border-slate-600'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                 }`
               },
                 React.createElement(Edit, { className: 'w-4 h-4' }),
@@ -153,14 +153,14 @@ export function Slides({ projects, darkMode }) {
               ),
               React.createElement('button', {
                 onClick: () => setViewMode('view'),
-                className: `px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                className: `flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
                   viewMode === 'view'
                     ? darkMode
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-purple-500 text-white'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                      : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
                     : darkMode
-                    ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      ? 'bg-slate-700/50 text-gray-300 hover:bg-slate-600/50 border border-slate-600'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                 }`
               },
                 React.createElement(Eye, { className: 'w-4 h-4' }),
@@ -204,7 +204,7 @@ export function Slides({ projects, darkMode }) {
                 }, 'Slide Preview'),
                 // Export Buttons
                 React.createElement('div', {
-                  className: 'flex gap-2'
+                  className: 'flex gap-3'
                 },
                   // Export to Image Button
                   React.createElement('button', {
@@ -214,10 +214,10 @@ export function Slides({ projects, darkMode }) {
                       });
                       window.dispatchEvent(event);
                     },
-                    className: `px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
+                    className: `flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
                       darkMode
-                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                        : 'bg-green-500 hover:bg-green-600 text-white'
+                        ? 'bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-md'
+                        : 'bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white shadow-md'
                     }`
                   },
                     React.createElement('svg', {
@@ -243,10 +243,10 @@ export function Slides({ projects, darkMode }) {
                       });
                       window.dispatchEvent(event);
                     },
-                    className: `px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
+                    className: `flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
                       darkMode
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                        : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        ? 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md'
+                        : 'bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white shadow-md'
                     }`
                   },
                     React.createElement('svg', {
