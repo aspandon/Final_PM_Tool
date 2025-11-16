@@ -3,6 +3,7 @@
 import { SlideEditor } from './SlideEditor.js';
 import { SlideViewer } from './SlideViewer.js';
 import { Presentation, Eye, Edit } from '../../shared/icons/index.js';
+import { loadSlides, saveSlides } from '../../utils/storage.js';
 
 const { useState, useEffect, useMemo } = React;
 
@@ -23,21 +24,23 @@ export function Slides({ projects, darkMode }) {
     });
   }, [projects]);
 
-  // Load slides data from localStorage on mount
+  // Load slides data from Supabase on mount
   useEffect(() => {
-    const savedSlides = localStorage.getItem('projectSlides');
-    if (savedSlides) {
-      try {
-        setSlidesData(JSON.parse(savedSlides));
-      } catch (error) {
-        console.error('Error loading slides data:', error);
+    const loadData = async () => {
+      const savedSlides = await loadSlides();
+      if (savedSlides && Object.keys(savedSlides).length > 0) {
+        setSlidesData(savedSlides);
+        console.log('Loaded', Object.keys(savedSlides).length, 'project slides');
       }
-    }
+    };
+    loadData();
   }, []);
 
-  // Save slides data to localStorage whenever it changes
+  // Save slides data to Supabase whenever it changes
   useEffect(() => {
-    localStorage.setItem('projectSlides', JSON.stringify(slidesData));
+    if (Object.keys(slidesData).length > 0) {
+      saveSlides(slidesData);
+    }
   }, [slidesData]);
 
   // Auto-select first project if none selected
