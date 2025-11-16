@@ -588,8 +588,23 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
         const y1 = depIndex * 40 + 16; // Center of dependency bar
         const y2 = itemIndex * 40 + 16; // Center of dependent item bar
 
-        // Create STRAIGHT line connecting end of one bar to start of next
-        const pathData = `M ${x1} ${y1} L ${x2} ${y2}`;
+        // Create BPMN-style orthogonal connector (right angles only)
+        // Exit horizontally from source, turn vertically, enter horizontally to target
+        const horizontalGap = Math.abs(x2 - x1);
+        const verticalGap = Math.abs(y2 - y1);
+
+        let pathData;
+
+        if (verticalGap < 5) {
+          // Same row - simple horizontal line
+          pathData = `M ${x1} ${y1} L ${x2} ${y2}`;
+        } else {
+          // Different rows - orthogonal connector with right angles
+          const turnPoint = x1 + Math.min(horizontalGap * 0.5, 40); // Turn point distance from source
+
+          // Path: horizontal → vertical → horizontal (L-shape or Z-shape)
+          pathData = `M ${x1} ${y1} L ${turnPoint} ${y1} L ${turnPoint} ${y2} L ${x2} ${y2}`;
+        }
 
         paths.push({
           key: `${depItem.itemId}-${item.itemId}`,
@@ -601,10 +616,12 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
           y2
         });
 
-        console.log(`[Gantt] Dependency: ${depItem.itemName} -> ${item.itemName}`, {
+        console.log(`[Gantt] BPMN Connector: ${depItem.itemName} → ${item.itemName}`, {
           depFinish: depFinish.toISOString().split('T')[0],
           itemStart: itemStart.toISOString().split('T')[0],
-          x1: Math.round(x1), y1, x2: Math.round(x2), y2
+          from: `(${Math.round(x1)}, ${y1})`,
+          to: `(${Math.round(x2)}, ${y2})`,
+          type: verticalGap < 5 ? 'horizontal' : 'orthogonal'
         });
       });
     });
@@ -868,7 +885,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                 })
               )
             ),
-            // Render straight line paths
+            // Render BPMN-style orthogonal paths
             (renderDependencyLines(items, earliest, totalDays, timelineRef) || []).map(path => {
               const strokeColor = path.isViolated
                 ? (darkMode ? '#ef4444' : '#dc2626')
@@ -880,9 +897,10 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                 d: path.pathData,
                 fill: 'none',
                 stroke: strokeColor,
-                strokeWidth: 2,
-                opacity: 0.9,
-                strokeLinecap: 'round',
+                strokeWidth: 2.5,
+                opacity: 1,
+                strokeLinecap: 'butt',
+                strokeLinejoin: 'miter',
                 markerEnd: markerEnd,
                 filter: 'url(#dependency-shadow)',
                 style: {
