@@ -107,14 +107,33 @@ export function GanttTimeline({
           React.createElement('div', { className: 'w-40 flex-shrink-0' }),
           // Month labels
           React.createElement('div', {
-            className: `flex-1 flex border-b ${darkMode ? 'border-slate-600' : 'border-gray-300'} pb-1`
+            className: `flex-1 relative border-b ${darkMode ? 'border-slate-600' : 'border-gray-300'} pb-1 min-h-[20px]`
           },
-            monthLabels.map((month, i) =>
-              React.createElement('div', {
+            monthLabels.map((month, i) => {
+              // Calculate the width of this month based on actual days
+              const monthStartOffset = getDaysDiff(earliest, month.date) - 1;
+              let monthEndOffset;
+
+              if (i < monthLabels.length - 1) {
+                // Use the start of the next month
+                monthEndOffset = getDaysDiff(earliest, monthLabels[i + 1].date) - 1;
+              } else {
+                // For the last month, extend to the end of the timeline
+                monthEndOffset = totalDays;
+              }
+
+              const monthWidth = ((monthEndOffset - monthStartOffset) / totalDays) * 100;
+              const monthLeft = (monthStartOffset / totalDays) * 100;
+
+              return React.createElement('div', {
                 key: i,
-                className: `flex-1 text-xs ${darkMode ? 'text-gray-200' : 'text-gray-700'} text-center font-semibold`
-              }, month.label)
-            )
+                className: `absolute text-xs ${darkMode ? 'text-gray-200' : 'text-gray-700'} text-center font-semibold`,
+                style: {
+                  left: `${monthLeft}%`,
+                  width: `${monthWidth}%`
+                }
+              }, month.label);
+            })
           )
         ),
 
