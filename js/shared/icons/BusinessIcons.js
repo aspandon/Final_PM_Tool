@@ -74,6 +74,21 @@ export const DollarSign = ({ className }) => React.createElement('svg', {
   React.createElement('path', { d: 'M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' })
 );
 
+export const Euro = ({ className }) => React.createElement('svg', {
+  className,
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+  viewBox: '0 0 24 24'
+},
+  React.createElement('path', { d: 'M19 6a10 10 0 0 0-14 0' }),
+  React.createElement('path', { d: 'M19 18a10 10 0 0 1-14 0' }),
+  React.createElement('line', { x1: '3', x2: '11', y1: '12', y2: '12' }),
+  React.createElement('line', { x1: '3', x2: '10', y1: '9', y2: '9' })
+);
+
 export const Target = ({ className }) => React.createElement('svg', {
   className,
   fill: 'none',

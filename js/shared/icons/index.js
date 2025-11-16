@@ -65,6 +65,7 @@ export {
   User,
   Calendar,
   DollarSign,
+  Euro,
   Target,
   TrendingUp,
   Activity,

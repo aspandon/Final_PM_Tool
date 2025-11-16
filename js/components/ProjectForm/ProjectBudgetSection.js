@@ -5,7 +5,7 @@
  * Handles 5-year budget fields (CAPEX/OPEX)
  */
 
-import { DollarSign, Calendar } from '../../shared/icons/index.js';
+import { Euro, Calendar } from '../../shared/icons/index.js';
 
 export function ProjectBudgetSection({
   project,
@@ -14,6 +14,13 @@ export function ProjectBudgetSection({
   darkMode,
   isEditLocked = false
 }) {
+  // Format number with thousand separators (dots) and euro symbol
+  const formatNumber = (num) => {
+    const rounded = Math.round(num);
+    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `€${formatted}`;
+  };
+
   // Calculate budget totals
   const calculateBudgetTotals = () => {
     const capexYear1 = parseFloat(project.capexYear1) || 0;
@@ -85,7 +92,7 @@ export function ProjectBudgetSection({
       React.createElement('div', {
         className: `text-sm font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-2 flex items-center gap-2`
       },
-        React.createElement(DollarSign, {
+        React.createElement(Euro, {
           className: `w-4 h-4 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
         }),
         'Project Budget'
@@ -110,7 +117,7 @@ export function ProjectBudgetSection({
         React.createElement('div', {
           className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} flex items-center gap-1`
         },
-          React.createElement(DollarSign, {
+          React.createElement(Euro, {
             className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
           }),
           'CAPEX'
@@ -122,7 +129,7 @@ export function ProjectBudgetSection({
             step: '0.01',
             value: project[`capexYear${yearNum}`] || '',
             onChange: (e) => updateProject(pIndex, `capexYear${yearNum}`, e.target.value),
-            className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-sky-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+            className: `w-full px-2 py-1 text-sm text-center border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-sky-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
             placeholder: '0',
             disabled: isEditLocked
           })
@@ -132,7 +139,7 @@ export function ProjectBudgetSection({
         React.createElement('div', {
           className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} flex items-center gap-1`
         },
-          React.createElement(DollarSign, {
+          React.createElement(Euro, {
             className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
           }),
           'OPEX'
@@ -144,7 +151,7 @@ export function ProjectBudgetSection({
             step: '0.01',
             value: project[`opexYear${yearNum}`] || '',
             onChange: (e) => updateProject(pIndex, `opexYear${yearNum}`, e.target.value),
-            className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-sky-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+            className: `w-full px-2 py-1 text-sm text-center border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-sky-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
             placeholder: '0',
             disabled: isEditLocked
           })
@@ -154,7 +161,7 @@ export function ProjectBudgetSection({
         React.createElement('div', {
           className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-700'} flex items-center gap-1`
         },
-          React.createElement(DollarSign, {
+          React.createElement(Euro, {
             className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
           }),
           'Total/Year'
@@ -163,14 +170,14 @@ export function ProjectBudgetSection({
           React.createElement('div', {
             key: `total-year-${yearNum}`,
             className: `px-2 py-1 text-sm font-bold text-center rounded ${darkMode ? 'bg-slate-800 text-purple-300' : 'bg-sky-100/30 text-sky-800'}`
-          }, budgetTotals[`totalYear${yearNum}`].toFixed(2))
+          }, formatNumber(budgetTotals[`totalYear${yearNum}`]))
         ),
 
         // Invoiced Row (Budget consumption tracking)
         React.createElement('div', {
           className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} flex items-center gap-1`
         },
-          React.createElement(DollarSign, {
+          React.createElement(Euro, {
             className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
           }),
           'Invoiced'
@@ -182,7 +189,7 @@ export function ProjectBudgetSection({
             step: '0.01',
             value: project[`invoicedYear${yearNum}`] || '',
             onChange: (e) => updateProject(pIndex, `invoicedYear${yearNum}`, e.target.value),
-            className: `w-full px-2 py-1 text-sm border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-sky-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
+            className: `w-full px-2 py-1 text-sm text-center border ${darkMode ? 'border-slate-600 bg-slate-800 text-gray-200 input-glow-dark' : 'border-sky-200 bg-white input-glow'} rounded ${isEditLocked ? 'opacity-60 cursor-not-allowed' : ''}`,
             placeholder: '0',
             disabled: isEditLocked
           })
@@ -192,7 +199,7 @@ export function ProjectBudgetSection({
         React.createElement('div', {
           className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} flex items-center gap-1`
         },
-          React.createElement(DollarSign, {
+          React.createElement(Euro, {
             className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
           }),
           'Remaining Budget'
@@ -205,7 +212,7 @@ export function ProjectBudgetSection({
                 ? darkMode ? 'bg-red-900/30 text-red-300 border border-red-500' : 'bg-red-100 text-red-700 border border-red-400'
                 : darkMode ? 'bg-slate-800 text-emerald-300' : 'bg-emerald-50/50 text-emerald-700'
             }`
-          }, budgetTotals[`remainingYear${yearNum}`].toFixed(2))
+          }, formatNumber(budgetTotals[`remainingYear${yearNum}`]))
         )
       ),
 
@@ -248,7 +255,7 @@ export function ProjectBudgetSection({
           }, 'Total CAPEX'),
           React.createElement('div', {
             className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-sky-700'}`
-          }, budgetTotals.totalCapex.toFixed(2))
+          }, formatNumber(budgetTotals.totalCapex))
         ),
 
         // Total OPEX
@@ -260,7 +267,7 @@ export function ProjectBudgetSection({
           }, 'Total OPEX'),
           React.createElement('div', {
             className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-sky-700'}`
-          }, budgetTotals.totalOpex.toFixed(2))
+          }, formatNumber(budgetTotals.totalOpex))
         ),
 
         // Total Budget
@@ -270,14 +277,14 @@ export function ProjectBudgetSection({
           React.createElement('div', {
             className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1 flex items-center gap-1`
           },
-            React.createElement(DollarSign, {
+            React.createElement(Euro, {
               className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
             }),
             'TOTAL BUDGET'
           ),
           React.createElement('div', {
             className: `text-xl font-bold ${darkMode ? 'text-purple-400' : 'text-sky-800'}`
-          }, budgetTotals.totalBudget.toFixed(2))
+          }, formatNumber(budgetTotals.totalBudget))
         ),
 
         // Total Remaining Budget
@@ -291,7 +298,7 @@ export function ProjectBudgetSection({
           React.createElement('div', {
             className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1 flex items-center gap-1`
           },
-            React.createElement(DollarSign, {
+            React.createElement(Euro, {
               className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
             }),
             'TOTAL REMAINING BUDGET'
@@ -302,7 +309,7 @@ export function ProjectBudgetSection({
                 ? darkMode ? 'text-red-400' : 'text-red-700'
                 : darkMode ? 'text-emerald-400' : 'text-emerald-700'
             }`
-          }, budgetTotals.totalRemainingBudget.toFixed(2))
+          }, formatNumber(budgetTotals.totalRemainingBudget))
         )
       )
     )
