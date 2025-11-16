@@ -9,7 +9,8 @@ import { ActiveFiltersDisplay } from './ReportingFilters.js';
 import {
   KPICardsGrid,
   RiskAlertCardsGrid,
-  PipelineStatusCardsGrid
+  PipelineStatusCardsGrid,
+  TeamMemberCard
 } from './ReportingSummary.js';
 import { Target, TrendingUp, Users } from '../../shared/icons/index.js';
 
@@ -208,23 +209,49 @@ export function Reporting({
     const onHoldCount = projectsWithRAG.filter(p => p.column === 'onhold').length;
     const completedCount = projectsWithRAG.filter(p => p.column === 'done').length;
 
-    // Risk Alert Metrics
+    // Risk Alert Metrics - New Day-Based Logic
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
-    // Critical: Red projects expiring within 7 days
-    const criticalRiskProjects = projectsWithRAG.filter(p => {
-      if (p.ragStatus.label !== 'Red' || !p.finishDate) return false;
+    // Calculate days until deadline for each project
+    const projectsWithDays = projectsWithRAG.map(p => {
+      if (!p.finishDate) return { ...p, daysUntilDeadline: null };
       const finishDate = new Date(p.finishDate);
       finishDate.setHours(0, 0, 0, 0);
       const daysUntilDeadline = Math.ceil((finishDate - currentDate) / (1000 * 60 * 60 * 24));
-      return daysUntilDeadline <= 7 && daysUntilDeadline >= 0;
+      return { ...p, daysUntilDeadline };
     });
 
+    // OVERDUE RISK: Projects past their deadline (< 0 days)
+    const overdueRiskProjects = projectsWithDays.filter(p =>
+      p.daysUntilDeadline !== null && p.daysUntilDeadline < 0 && p.column !== 'onhold' && p.column !== 'done'
+    );
+    const overdueRiskCount = overdueRiskProjects.length;
+
+    // CRITICAL RISK: 0-4 days until deadline
+    const criticalRiskProjects = projectsWithDays.filter(p =>
+      p.daysUntilDeadline !== null && p.daysUntilDeadline >= 0 && p.daysUntilDeadline <= 4 && p.column !== 'onhold' && p.column !== 'done'
+    );
     const criticalRiskCount = criticalRiskProjects.length;
-    const highRiskCount = redCount; // All red projects
-    const mediumRiskCount = projectsWithRAG.filter(p => p.ragStatus.label === 'Amber' && p.column !== 'onhold').length; // Amber projects excluding on-hold
-    const onHoldRiskCount = onHoldCount; // All on-hold projects
+
+    // HIGH RISK: 5-14 days until deadline
+    const highRiskProjects = projectsWithDays.filter(p =>
+      p.daysUntilDeadline !== null && p.daysUntilDeadline >= 5 && p.daysUntilDeadline <= 14 && p.column !== 'onhold' && p.column !== 'done'
+    );
+    const highRiskCount = highRiskProjects.length;
+
+    // MEDIUM RISK: 10-15 days until deadline (note: overlaps with high at 10-14, high takes priority in display)
+    const mediumRiskProjects = projectsWithDays.filter(p =>
+      p.daysUntilDeadline !== null && p.daysUntilDeadline >= 10 && p.daysUntilDeadline <= 15 && p.column !== 'onhold' && p.column !== 'done'
+    );
+    const mediumRiskCount = mediumRiskProjects.length;
+
+    // LOW RISK: On Hold projects + 16-21 days until deadline
+    const lowRiskProjects = projectsWithDays.filter(p =>
+      p.column === 'onhold' || (p.daysUntilDeadline !== null && p.daysUntilDeadline >= 16 && p.daysUntilDeadline <= 21 && p.column !== 'done')
+    );
+    const lowRiskCount = lowRiskProjects.length;
+    const onHoldRiskCount = onHoldCount; // Keep for backwards compatibility
 
     // Report 1: On Hold Projects by Division
     const onHoldByDivision = divisions.map(division => {
@@ -433,10 +460,16 @@ export function Reporting({
       greenCount,
       onHoldCount,
       completedCount,
+      overdueRiskCount,
+      overdueRiskProjects,
       criticalRiskCount,
       criticalRiskProjects,
       highRiskCount,
+      highRiskProjects,
       mediumRiskCount,
+      mediumRiskProjects,
+      lowRiskCount,
+      lowRiskProjects,
       onHoldRiskCount,
       onHoldByDivision,
       ragByDivision,
@@ -524,18 +557,22 @@ export function Reporting({
     if (!selectedRiskAlert) return [];
 
     switch (selectedRiskAlert) {
+      case 'overdue':
+        return analyticsData.overdueRiskProjects;
       case 'critical':
         return analyticsData.criticalRiskProjects;
       case 'high':
-        return analyticsData.projectsWithRAG.filter(p => p.ragStatus.label === 'Red');
+        return analyticsData.highRiskProjects;
       case 'medium':
-        return analyticsData.projectsWithRAG.filter(p => p.ragStatus.label === 'Amber' && p.column !== 'onhold');
+        return analyticsData.mediumRiskProjects;
+      case 'low':
+        return analyticsData.lowRiskProjects;
       case 'onhold':
         return analyticsData.projectsWithRAG.filter(p => p.column === 'onhold');
       default:
         return [];
     }
-  }, [selectedRiskAlert, analyticsData.projectsWithRAG, analyticsData.criticalRiskProjects]);
+  }, [selectedRiskAlert, analyticsData]);
 
   // Get division breakdown and projects for selected pipeline status
   const pipelineStatusData = useMemo(() => {
@@ -687,10 +724,12 @@ export function Reporting({
           React.createElement('h3', {
             className: `text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
           },
-            selectedRiskAlert === 'critical' ? `🚨 Critical Risk Projects (${riskAlertFilteredProjects.length})` :
-            selectedRiskAlert === 'high' ? `🔴 High Risk Projects (${riskAlertFilteredProjects.length})` :
-            selectedRiskAlert === 'medium' ? `⚠️ Medium Risk Projects (${riskAlertFilteredProjects.length})` :
-            `⏸️ On Hold Projects (${riskAlertFilteredProjects.length})`
+            selectedRiskAlert === 'overdue' ? `OVERDUE RISK: Past Deadline (${riskAlertFilteredProjects.length} projects)` :
+            selectedRiskAlert === 'critical' ? `CRITICAL RISK: 0-4 Days (${riskAlertFilteredProjects.length} projects)` :
+            selectedRiskAlert === 'high' ? `HIGH RISK: 5-14 Days (${riskAlertFilteredProjects.length} projects)` :
+            selectedRiskAlert === 'medium' ? `MEDIUM RISK: 10-15 Days (${riskAlertFilteredProjects.length} projects)` :
+            selectedRiskAlert === 'low' ? `LOW RISK: On Hold + 16-21 Days (${riskAlertFilteredProjects.length} projects)` :
+            `Projects (${riskAlertFilteredProjects.length})`
           ),
           React.createElement('button', {
             onClick: () => setSelectedRiskAlert(null),
@@ -917,7 +956,7 @@ export function Reporting({
         className: `mb-6 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
       }, `Showing ${analyticsData.activeProjects.length} active projects currently being worked on (excluding On Hold, Backlog, and Done)`),
 
-      // Grid with BP and PM columns
+      // Grid with BP and PM columns using pipeline-style cards
       React.createElement('div', {
         className: 'grid grid-cols-1 lg:grid-cols-2 gap-6'
       },
@@ -927,51 +966,24 @@ export function Reporting({
             className: `text-lg font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
           }, 'By Business Partner'),
           React.createElement('div', {
-            className: 'space-y-3'
+            className: 'grid grid-cols-1 md:grid-cols-2 gap-4'
           },
             analyticsData.bpSummary.length > 0
               ? analyticsData.bpSummary.map((bp, idx) =>
-                  React.createElement('div', {
+                  React.createElement(TeamMemberCard, {
                     key: idx,
-                    className: `p-4 rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors ${selectedBPorPM?.type === 'bp' && selectedBPorPM?.name === bp.name ? 'ring-2 ring-blue-500' : ''}`,
-                    onClick: () => setSelectedBPorPM(selectedBPorPM?.type === 'bp' && selectedBPorPM?.name === bp.name ? null : { type: 'bp', name: bp.name })
-                  },
-                    React.createElement('div', {
-                      className: 'flex items-center justify-between'
-                    },
-                      React.createElement('div', {
-                        className: 'flex-1'
-                      },
-                        React.createElement('div', {
-                          className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-                        }, bp.name),
-                        React.createElement('div', {
-                          className: `text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-                        }, `${bp.count} active ${bp.count === 1 ? 'project' : 'projects'}`)
-                      ),
-                      React.createElement('div', {
-                        className: `text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
-                      }, bp.count)
-                    ),
-                    // Status breakdown
-                    React.createElement('div', {
-                      className: 'mt-3 flex flex-wrap gap-2'
-                    },
-                      bp.projects.slice(0, 3).map((project, pIdx) =>
-                        React.createElement('span', {
-                          key: pIdx,
-                          className: `text-xs px-2 py-1 rounded ${darkMode ? 'bg-slate-600 text-gray-300' : 'bg-white text-gray-700'} truncate max-w-[150px]`,
-                          title: project.name
-                        }, project.name)
-                      ),
-                      bp.projects.length > 3 && React.createElement('span', {
-                        className: `text-xs px-2 py-1 rounded ${darkMode ? 'bg-slate-600 text-gray-400' : 'bg-white text-gray-500'}`
-                      }, `+${bp.projects.length - 3} more`)
-                    )
-                  )
+                    name: bp.name,
+                    count: bp.count,
+                    projects: bp.projects,
+                    totalActive: analyticsData.activeProjects.length,
+                    type: 'bp',
+                    isSelected: selectedBPorPM?.type === 'bp' && selectedBPorPM?.name === bp.name,
+                    onClick: () => setSelectedBPorPM(selectedBPorPM?.type === 'bp' && selectedBPorPM?.name === bp.name ? null : { type: 'bp', name: bp.name }),
+                    darkMode
+                  })
                 )
               : React.createElement('div', {
-                  className: `text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+                  className: `text-center py-8 col-span-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
                 }, 'No active projects assigned to Business Partners')
           )
         ),
@@ -982,51 +994,24 @@ export function Reporting({
             className: `text-lg font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
           }, 'By Project Manager'),
           React.createElement('div', {
-            className: 'space-y-3'
+            className: 'grid grid-cols-1 md:grid-cols-2 gap-4'
           },
             analyticsData.pmSummary.length > 0
               ? analyticsData.pmSummary.map((pm, idx) =>
-                  React.createElement('div', {
+                  React.createElement(TeamMemberCard, {
                     key: idx,
-                    className: `p-4 rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors ${selectedBPorPM?.type === 'pm' && selectedBPorPM?.name === pm.name ? 'ring-2 ring-blue-500' : ''}`,
-                    onClick: () => setSelectedBPorPM(selectedBPorPM?.type === 'pm' && selectedBPorPM?.name === pm.name ? null : { type: 'pm', name: pm.name })
-                  },
-                    React.createElement('div', {
-                      className: 'flex items-center justify-between'
-                    },
-                      React.createElement('div', {
-                        className: 'flex-1'
-                      },
-                        React.createElement('div', {
-                          className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-                        }, pm.name),
-                        React.createElement('div', {
-                          className: `text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-                        }, `${pm.count} active ${pm.count === 1 ? 'project' : 'projects'}`)
-                      ),
-                      React.createElement('div', {
-                        className: `text-2xl font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
-                      }, pm.count)
-                    ),
-                    // Status breakdown
-                    React.createElement('div', {
-                      className: 'mt-3 flex flex-wrap gap-2'
-                    },
-                      pm.projects.slice(0, 3).map((project, pIdx) =>
-                        React.createElement('span', {
-                          key: pIdx,
-                          className: `text-xs px-2 py-1 rounded ${darkMode ? 'bg-slate-600 text-gray-300' : 'bg-white text-gray-700'} truncate max-w-[150px]`,
-                          title: project.name
-                        }, project.name)
-                      ),
-                      pm.projects.length > 3 && React.createElement('span', {
-                        className: `text-xs px-2 py-1 rounded ${darkMode ? 'bg-slate-600 text-gray-400' : 'bg-white text-gray-500'}`
-                      }, `+${pm.projects.length - 3} more`)
-                    )
-                  )
+                    name: pm.name,
+                    count: pm.count,
+                    projects: pm.projects,
+                    totalActive: analyticsData.activeProjects.length,
+                    type: 'pm',
+                    isSelected: selectedBPorPM?.type === 'pm' && selectedBPorPM?.name === pm.name,
+                    onClick: () => setSelectedBPorPM(selectedBPorPM?.type === 'pm' && selectedBPorPM?.name === pm.name ? null : { type: 'pm', name: pm.name }),
+                    darkMode
+                  })
                 )
               : React.createElement('div', {
-                  className: `text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+                  className: `text-center py-8 col-span-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
                 }, 'No active projects assigned to Project Managers')
           )
         )
