@@ -6,10 +6,9 @@ export function HelpMenu({
   isOpen,
   onClose,
   darkMode,
-  showHelpModal,
   setShowHelpModal
 }) {
-  if (!isOpen && !showHelpModal) return null;
+  if (!isOpen) return null;
 
   const menuItemClass = `flex items-center gap-3 px-4 py-2.5 text-sm dropdown-item ${
     darkMode
@@ -17,9 +16,7 @@ export function HelpMenu({
       : 'text-gray-700 hover:bg-gray-100'
   }`;
 
-  return React.createElement(React.Fragment, null,
-    // Help Dropdown
-    isOpen && React.createElement('div', {
+  return React.createElement('div', {
       className: `absolute top-full left-0 mt-1 w-56 ${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow-lg border ${darkMode ? 'border-slate-700' : 'border-gray-200'} py-1 z-[100] dropdown-enter`
     },
       React.createElement('button', {
@@ -33,10 +30,18 @@ export function HelpMenu({
         React.createElement(HelpCircle, { className: 'w-4 h-4' }),
         'Guide'
       )
-    ),
+    );
+}
 
-    // Help Modal
-    showHelpModal && React.createElement('div', {
+// Help Modal Component (to be rendered outside MenuBar)
+export function HelpModal({
+  showHelpModal,
+  setShowHelpModal,
+  darkMode
+}) {
+  if (!showHelpModal) return null;
+
+  return React.createElement('div', {
       className: 'fixed inset-0 bg-black/50 flex items-start justify-center z-[9999] p-4 pt-8 overflow-y-auto',
       onClick: () => setShowHelpModal(false)
     },
