@@ -38,7 +38,8 @@ export {
   Folder,
   FolderKanban,
   Inbox,
-  FileEdit
+  FileEdit,
+  Presentation
 } from './FileIcons.js';
 
 // UI Icons

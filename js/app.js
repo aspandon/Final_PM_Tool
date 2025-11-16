@@ -16,6 +16,7 @@ import { Reporting } from './components/Reporting/index.js';
 import { KanbanBoard } from './components/KanbanBoard/index.js';
 import { Actions } from './components/Actions.js';
 import { Tasks } from './components/Tasks/index.js';
+import { Slides } from './components/Slides/index.js';
 
 const { useState, useRef, useMemo, useEffect } = React;
 const { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
@@ -166,6 +167,20 @@ function GanttChart() {
     React.createElement('path', { d: 'M12 16h4' }),
     React.createElement('path', { d: 'M8 11h.01' }),
     React.createElement('path', { d: 'M8 16h.01' })
+  );
+
+  const Presentation = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M2 3h20' }),
+    React.createElement('path', { d: 'M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3' }),
+    React.createElement('path', { d: 'm7 21 5-5 5 5' })
   );
 
   const Lock = ({ className }) => React.createElement('svg', {
@@ -954,6 +969,17 @@ function GanttChart() {
   };
 
   /**
+   * Render slides view
+   */
+  const renderSlidesView = () => {
+    return React.createElement(Slides, {
+      projects,
+      onUpdateProject: handleUpdateProject,
+      darkMode
+    });
+  };
+
+  /**
    * Render tasks view
    */
   const renderTasksView = () => {
@@ -1086,6 +1112,7 @@ function GanttChart() {
           renderTabButton('resources', 'Charts', BarChart),
           renderTabButton('actuals', 'Actuals', TrendingUp),
           renderTabButton('reporting', 'Reporting', FileText),
+          renderTabButton('slides', 'Slides', Presentation),
 
           // Lock/Unlock button - only visible on Projects tab
           activeTab === 'projects' && React.createElement('button', {
@@ -1110,7 +1137,8 @@ function GanttChart() {
           activeTab === 'tasks' && renderTasksView(),
           activeTab === 'resources' && renderResourcesView(),
           activeTab === 'actuals' && renderActualsView(),
-          activeTab === 'reporting' && renderReportingView()
+          activeTab === 'reporting' && renderReportingView(),
+          activeTab === 'slides' && renderSlidesView()
         )
       )
     )
