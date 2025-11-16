@@ -320,29 +320,27 @@ export function SlideViewer({ project, slideData, darkMode }) {
         return;
       }
 
-      // Generate canvas from slide element with high quality settings
+      // Generate canvas from slide element
       const canvas = await html2canvas(slideElement, {
-        scale: 4, // Very high quality (4x resolution for sharp output)
+        scale: 2, // Higher quality (2x resolution)
         backgroundColor: '#ffffff',
         logging: false,
         useCORS: true,
-        allowTaint: true,
-        windowWidth: slideElement.scrollWidth,
-        windowHeight: slideElement.scrollHeight
+        allowTaint: true
       });
 
-      // Convert canvas to blob (PNG for lossless quality)
+      // Convert canvas to blob
       canvas.toBlob((blob) => {
         // Create download link
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        const fileName = `${slideData.projectName || project.name || 'Project'}_Slide.png`;
+        const fileName = `${slideData.projectName || project.name || 'Project'}_Slide.jpg`;
         link.download = fileName;
         link.href = url;
         link.click();
         URL.revokeObjectURL(url);
         console.log('Image exported successfully!');
-      }, 'image/png'); // PNG format for lossless quality
+      }, 'image/jpeg', 0.95); // High quality JPEG (95%)
     } catch (error) {
       console.error('Error exporting to image:', error);
       alert('Failed to export to image. Please try again.');
