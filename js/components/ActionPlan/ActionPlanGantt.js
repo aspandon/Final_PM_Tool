@@ -31,6 +31,9 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
   const getAllItems = () => {
     const items = [];
 
+    console.log('[ActionPlanGantt] View filters:', viewFilters);
+    console.log('[ActionPlanGantt] Action plan data:', actionPlan);
+
     actionPlan.forEach(action => {
       if (viewFilters.showActions) {
         items.push({
@@ -41,41 +44,47 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
           actionId: action.id,
           dependencies: action.dependencies || []
         });
+        console.log('[ActionPlanGantt] Added Action:', action.name);
       }
 
-      action.tasks.forEach(task => {
-        if (viewFilters.showTasks) {
-          items.push({
-            ...task,
-            type: 'task',
-            itemId: task.id,
-            itemName: task.name,
-            actionName: action.name,
-            actionId: action.id,
-            taskId: task.id,
-            dependencies: task.dependencies || []
-          });
-        }
-
-        if (task.subtasks && viewFilters.showSubtasks) {
-          task.subtasks.forEach(subtask => {
+      if (action.tasks) {
+        action.tasks.forEach(task => {
+          if (viewFilters.showTasks) {
             items.push({
-              ...subtask,
-              type: 'subtask',
-              itemId: subtask.id,
-              itemName: subtask.name,
+              ...task,
+              type: 'task',
+              itemId: task.id,
+              itemName: task.name,
               actionName: action.name,
-              taskName: task.name,
               actionId: action.id,
               taskId: task.id,
-              subtaskId: subtask.id,
-              dependencies: subtask.dependencies || []
+              dependencies: task.dependencies || []
             });
-          });
-        }
-      });
+            console.log('[ActionPlanGantt] Added Task:', task.name);
+          }
+
+          if (task.subtasks && viewFilters.showSubtasks) {
+            task.subtasks.forEach(subtask => {
+              items.push({
+                ...subtask,
+                type: 'subtask',
+                itemId: subtask.id,
+                itemName: subtask.name,
+                actionName: action.name,
+                taskName: task.name,
+                actionId: action.id,
+                taskId: task.id,
+                subtaskId: subtask.id,
+                dependencies: subtask.dependencies || []
+              });
+              console.log('[ActionPlanGantt] Added Subtask:', subtask.name);
+            });
+          }
+        });
+      }
     });
 
+    console.log('[ActionPlanGantt] All items:', items);
     return items;
   };
 

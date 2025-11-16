@@ -23,6 +23,9 @@ export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities }) 
   // Collect all items
   const allItems = [];
 
+  console.log('[ActionPlanTable] View filters:', viewFilters);
+  console.log('[ActionPlanTable] Action plan data:', actionPlan);
+
   actionPlan.forEach(action => {
     // Add Actions
     if (viewFilters.showActions) {
@@ -33,10 +36,11 @@ export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities }) 
         displayName: action.name,
         sortPriority: 1 // Actions first
       });
+      console.log('[ActionPlanTable] Added Action:', action.name);
     }
 
     // Add Tasks
-    if (viewFilters.showTasks) {
+    if (viewFilters.showTasks && action.tasks) {
       action.tasks.forEach(task => {
         allItems.push({
           ...task,
@@ -47,11 +51,12 @@ export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities }) 
           actionId: action.id,
           sortPriority: 2 // Tasks second
         });
+        console.log('[ActionPlanTable] Added Task:', task.name);
       });
     }
 
     // Add Subtasks
-    if (viewFilters.showSubtasks) {
+    if (viewFilters.showSubtasks && action.tasks) {
       action.tasks.forEach(task => {
         if (task.subtasks && task.subtasks.length > 0) {
           task.subtasks.forEach(subtask => {
@@ -66,11 +71,14 @@ export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities }) 
               actionId: action.id,
               sortPriority: 3 // Subtasks third
             });
+            console.log('[ActionPlanTable] Added Subtask:', subtask.name);
           });
         }
       });
     }
   });
+
+  console.log('[ActionPlanTable] All items:', allItems);
 
   // Sort by type, then priority, then due date
   allItems.sort((a, b) => {

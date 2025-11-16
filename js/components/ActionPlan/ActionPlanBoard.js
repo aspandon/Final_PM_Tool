@@ -86,6 +86,9 @@ export function ActionPlanBoard({ actionPlan, darkMode, onUpdate, statuses, prio
     itemsByStatus[status] = [];
   });
 
+  console.log('[ActionPlanBoard] View filters:', viewFilters);
+  console.log('[ActionPlanBoard] Action plan data:', actionPlan);
+
   actionPlan.forEach(action => {
     // Add Actions
     if (viewFilters.showActions) {
@@ -96,10 +99,11 @@ export function ActionPlanBoard({ actionPlan, darkMode, onUpdate, statuses, prio
         itemName: action.name,
         displayName: action.name
       });
+      console.log('[ActionPlanBoard] Added Action:', action.name, 'Status:', status);
     }
 
     // Add Tasks
-    if (viewFilters.showTasks) {
+    if (viewFilters.showTasks && action.tasks) {
       action.tasks.forEach(task => {
         const status = task.status || 'not-started';
         itemsByStatus[status].push({
@@ -110,11 +114,12 @@ export function ActionPlanBoard({ actionPlan, darkMode, onUpdate, statuses, prio
           actionName: action.name,
           actionId: action.id
         });
+        console.log('[ActionPlanBoard] Added Task:', task.name, 'Status:', status);
       });
     }
 
     // Add Subtasks
-    if (viewFilters.showSubtasks) {
+    if (viewFilters.showSubtasks && action.tasks) {
       action.tasks.forEach(task => {
         if (task.subtasks && task.subtasks.length > 0) {
           task.subtasks.forEach(subtask => {
@@ -129,11 +134,14 @@ export function ActionPlanBoard({ actionPlan, darkMode, onUpdate, statuses, prio
               actionName: action.name,
               actionId: action.id
             });
+            console.log('[ActionPlanBoard] Added Subtask:', subtask.name, 'Status:', status);
           });
         }
       });
     }
   });
+
+  console.log('[ActionPlanBoard] Items by status:', itemsByStatus);
 
   return React.createElement('div', { className: 'space-y-4' },
     // Filter Toggles
