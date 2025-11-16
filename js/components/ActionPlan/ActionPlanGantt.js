@@ -14,12 +14,14 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
 
   const [draggedItem, setDraggedItem] = React.useState(null);
   const [dragStartX, setDragStartX] = React.useState(null);
+  const [dragType, setDragType] = React.useState(null); // 'move', 'resize-start', 'resize-end'
   const [viewFilters, setViewFilters] = React.useState({
     showActions: true,
     showTasks: true,
     showSubtasks: true
   });
   const [autopilotResult, setAutopilotResult] = React.useState(null);
+  const [undoHistory, setUndoHistory] = React.useState([]); // Stack of previous states (max 20)
 
   // Toggle filter
   const toggleFilter = (filterKey) => {
@@ -27,6 +29,25 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
       ...prev,
       [filterKey]: !prev[filterKey]
     }));
+  };
+
+  // Undo functionality
+  const saveToHistory = () => {
+    setUndoHistory(prev => {
+      const newHistory = [...prev, JSON.parse(JSON.stringify(actionPlan))];
+      // Keep only last 20 states
+      return newHistory.slice(-20);
+    });
+  };
+
+  const undo = () => {
+    if (undoHistory.length === 0) return;
+
+    const previousState = undoHistory[undoHistory.length - 1];
+    const newHistory = undoHistory.slice(0, -1);
+
+    setUndoHistory(newHistory);
+    onUpdate(previousState);
   };
 
   // Get all items with their dates
@@ -179,12 +200,59 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     return false;
   };
 
-  // Handle drag start
+  // Mouse event handlers for resize
+  React.useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!draggedItem || !dragStartX || !dragType || dragType === 'move') return;
+      // Visual feedback during resize - handled by CSS
+    };
+
+    const handleMouseUp = (e) => {
+      if (!draggedItem || !dragStartX || !dragType || dragType === 'move') return;
+
+      // Find the timeline element to calculate width
+      const timelineElement = document.querySelector('.gantt-timeline-area');
+      if (!timelineElement) return;
+
+      const rect = timelineElement.getBoundingClientRect();
+      const items = getAllItems();
+      const { earliest } = getDateRange();
+      const totalDays = getDaysDiff(earliest, getDateRange().latest);
+
+      handleBarDragEnd(e, rect.width, earliest, totalDays);
+    };
+
+    if (draggedItem && dragType && dragType !== 'move') {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [draggedItem, dragStartX, dragType]);
+
+  // Handle resize handle mouse down
+  const handleResizeStart = (e, item, type) => {
+    if (isEditLocked) return;
+    e.stopPropagation();
+    e.preventDefault();
+
+    saveToHistory(); // Save state before change
+    setDraggedItem(item);
+    setDragStartX(e.clientX);
+    setDragType(type); // 'resize-start' or 'resize-end'
+  };
+
+  // Handle bar drag start
   const handleBarDragStart = (e, item, barElement) => {
     if (isEditLocked) return;
 
+    saveToHistory(); // Save state before change
     setDraggedItem(item);
     setDragStartX(e.clientX);
+    setDragType('move');
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -194,11 +262,12 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     // Visual feedback could be added here
   };
 
-  // Handle drag end
+  // Handle drag end (for both move and resize)
   const handleBarDragEnd = (e, timelineWidth, earliest, totalDays) => {
     if (!draggedItem || !dragStartX || isEditLocked) {
       setDraggedItem(null);
       setDragStartX(null);
+      setDragType(null);
       return;
     }
 
@@ -207,15 +276,33 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     const deltaDays = Math.round((deltaPercent / 100) * totalDays);
 
     if (deltaDays !== 0) {
-      // Calculate new dates
       const oldStart = new Date(draggedItem.startDate);
       const oldFinish = new Date(draggedItem.finishDate || draggedItem.dueDate);
 
-      const newStart = new Date(oldStart);
-      newStart.setDate(newStart.getDate() + deltaDays);
+      let newStart = new Date(oldStart);
+      let newFinish = new Date(oldFinish);
 
-      const newFinish = new Date(oldFinish);
-      newFinish.setDate(newFinish.getDate() + deltaDays);
+      if (dragType === 'move') {
+        // Move both dates
+        newStart.setDate(newStart.getDate() + deltaDays);
+        newFinish.setDate(newFinish.getDate() + deltaDays);
+      } else if (dragType === 'resize-start') {
+        // Resize start date
+        newStart.setDate(newStart.getDate() + deltaDays);
+        // Ensure start is before finish
+        if (newStart >= newFinish) {
+          newStart = new Date(newFinish);
+          newStart.setDate(newStart.getDate() - 1);
+        }
+      } else if (dragType === 'resize-end') {
+        // Resize end date
+        newFinish.setDate(newFinish.getDate() + deltaDays);
+        // Ensure finish is after start
+        if (newFinish <= newStart) {
+          newFinish = new Date(newStart);
+          newFinish.setDate(newFinish.getDate() + 1);
+        }
+      }
 
       // Update the item dates
       updateItemDates(draggedItem, newStart, newFinish);
@@ -223,6 +310,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
 
     setDraggedItem(null);
     setDragStartX(null);
+    setDragType(null);
   };
 
   // Update item dates in action plan
@@ -290,6 +378,8 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
   // Autopilot: Rearrange tasks to fit in action timeframe
   const runAutopilot = () => {
     if (isEditLocked) return;
+
+    saveToHistory(); // Save state before autopilot changes
 
     const newActionPlan = [...actionPlan];
     let allFit = true;
@@ -566,25 +656,53 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
         }, 'Subtasks')
       ),
 
-      // Autopilot Button
-      !isEditLocked && React.createElement('button', {
-        onClick: runAutopilot,
-        className: `flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
-          darkMode
-            ? 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white shadow-md'
-            : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-md'
-        }`
-      },
-        React.createElement('svg', {
-          className: 'w-4 h-4',
-          fill: 'none',
-          stroke: 'currentColor',
-          strokeWidth: 2,
-          viewBox: '0 0 24 24'
+      // Right side buttons
+      React.createElement('div', { className: 'flex items-center gap-3' },
+        // Undo Button
+        !isEditLocked && React.createElement('button', {
+          onClick: undo,
+          disabled: undoHistory.length === 0,
+          className: `flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+            undoHistory.length === 0
+              ? darkMode ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              : darkMode
+                ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-md transform hover:scale-105'
+                : 'bg-blue-500 hover:bg-blue-600 text-white shadow-md transform hover:scale-105'
+          }`
         },
-          React.createElement('path', { d: 'M13 10V3L4 14h7v7l9-11h-7z' })
+          React.createElement('svg', {
+            className: 'w-4 h-4',
+            fill: 'none',
+            stroke: 'currentColor',
+            strokeWidth: 2,
+            viewBox: '0 0 24 24'
+          },
+            React.createElement('path', { d: 'M3 7v6h6' }),
+            React.createElement('path', { d: 'M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13' })
+          ),
+          `Undo (${undoHistory.length})`
         ),
-        'Autopilot'
+
+        // Autopilot Button
+        !isEditLocked && React.createElement('button', {
+          onClick: runAutopilot,
+          className: `flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${
+            darkMode
+              ? 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white shadow-md'
+              : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-md'
+          }`
+        },
+          React.createElement('svg', {
+            className: 'w-4 h-4',
+            fill: 'none',
+            stroke: 'currentColor',
+            strokeWidth: 2,
+            viewBox: '0 0 24 24'
+          },
+            React.createElement('path', { d: 'M13 10V3L4 14h7v7l9-11h-7z' })
+          ),
+          'Autopilot'
+        )
       )
     ),
 
@@ -718,7 +836,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
 
               // Timeline area
               React.createElement('div', {
-                className: `flex-1 relative h-8 ${darkMode ? 'bg-slate-700/30 border-slate-600' : 'bg-gray-50 border-gray-200'} rounded border`
+                className: `gantt-timeline-area flex-1 relative h-8 ${darkMode ? 'bg-slate-700/30 border-slate-600' : 'bg-gray-50 border-gray-200'} rounded border`
               },
                 // Month grid lines
                 monthLabels.map((month, i) => {
@@ -740,7 +858,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                     const rect = e.currentTarget.parentElement.getBoundingClientRect();
                     handleBarDragEnd(e, rect.width, earliest, totalDays);
                   },
-                  className: `absolute h-6 top-1 ${typeStyle.color} rounded-lg flex items-center justify-center text-white text-[10px] font-semibold transition shadow-sm ${
+                  className: `group absolute h-6 top-1 ${typeStyle.color} rounded-lg flex items-center justify-center text-white text-[10px] font-semibold transition shadow-sm ${
                     isViolated ? 'ring-2 ring-red-500' : ''
                   } ${!isEditLocked ? 'cursor-move hover:opacity-90 hover:shadow-md' : 'cursor-default'}`,
                   style: {
@@ -749,10 +867,25 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                   },
                   title: `${item.itemName}\n${item.startDate} to ${item.finishDate || item.dueDate}\nDuration: ${position.duration} days${isViolated ? '\n⚠️ Dependency violation!' : ''}`
                 },
+                  // Left resize handle
+                  !isEditLocked && React.createElement('div', {
+                    onMouseDown: (e) => handleResizeStart(e, item, 'resize-start'),
+                    className: `absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'bg-white/30 hover:bg-white/50' : 'bg-black/20 hover:bg-black/40'}`,
+                    title: 'Drag to resize start date'
+                  }),
+
+                  // Bar content
                   React.createElement('span', null, `${position.duration}d`),
                   isViolated && React.createElement('span', {
                     className: 'ml-1 text-red-300'
-                  }, '⚠️')
+                  }, '⚠️'),
+
+                  // Right resize handle
+                  !isEditLocked && React.createElement('div', {
+                    onMouseDown: (e) => handleResizeStart(e, item, 'resize-end'),
+                    className: `absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'bg-white/30 hover:bg-white/50' : 'bg-black/20 hover:bg-black/40'}`,
+                    title: 'Drag to resize end date'
+                  })
                 )
               )
             );
