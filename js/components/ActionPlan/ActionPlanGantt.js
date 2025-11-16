@@ -24,6 +24,8 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
   const [autopilotResult, setAutopilotResult] = React.useState(null);
   const [undoHistory, setUndoHistory] = React.useState([]); // Stack of previous states (max 20)
   const [svgReady, setSvgReady] = React.useState(false);
+  const [itemOrder, setItemOrder] = React.useState([]); // Custom order of items [itemId1, itemId2, ...]
+  const [draggedRowIndex, setDraggedRowIndex] = React.useState(null);
 
   // Force re-render when component mounts to get proper dimensions
   React.useEffect(() => {
@@ -115,6 +117,25 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     });
 
     console.log('[ActionPlanGantt] All items:', items);
+
+    // Initialize itemOrder if empty or items changed
+    if (itemOrder.length === 0 || itemOrder.length !== items.length) {
+      const newOrder = items.map(item => item.itemId);
+      setItemOrder(newOrder);
+    }
+
+    // Sort items based on custom order
+    if (itemOrder.length > 0) {
+      items.sort((a, b) => {
+        const aIndex = itemOrder.indexOf(a.itemId);
+        const bIndex = itemOrder.indexOf(b.itemId);
+        // If item not in order, put it at the end
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        return aIndex - bIndex;
+      });
+    }
+
     return items;
   };
 
@@ -402,13 +423,27 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
       const actionStart = new Date(action.startDate);
       const actionFinish = new Date(action.finishDate);
 
-      // Sort tasks by dependencies (topological sort)
-      const sortedTasks = topologicalSort(action.tasks);
+      // Sort tasks by custom order first, then check dependencies
+      let sortedTasks = action.tasks ? [...action.tasks] : [];
 
-      if (!sortedTasks) {
-        issues.push(`Action "${action.name}" has circular task dependencies`);
-        allFit = false;
-        return;
+      // Apply custom order if available
+      if (itemOrder.length > 0) {
+        sortedTasks.sort((a, b) => {
+          const aIndex = itemOrder.indexOf(a.id);
+          const bIndex = itemOrder.indexOf(b.id);
+          if (aIndex === -1 && bIndex === -1) return 0;
+          if (aIndex === -1) return 1;
+          if (bIndex === -1) return -1;
+          return aIndex - bIndex;
+        });
+      } else {
+        // Fallback to topological sort if no custom order
+        sortedTasks = topologicalSort(action.tasks);
+        if (!sortedTasks) {
+          issues.push(`Action "${action.name}" has circular task dependencies`);
+          allFit = false;
+          return;
+        }
       }
 
       let currentDate = new Date(actionStart);
@@ -438,12 +473,26 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
 
         // Arrange subtasks if any
         if (task.subtasks && task.subtasks.length > 0) {
-          const sortedSubtasks = topologicalSort(task.subtasks);
+          let sortedSubtasks = [...task.subtasks];
 
-          if (!sortedSubtasks) {
-            issues.push(`Task "${task.name}" has circular subtask dependencies`);
-            allFit = false;
-            return;
+          // Apply custom order if available
+          if (itemOrder.length > 0) {
+            sortedSubtasks.sort((a, b) => {
+              const aIndex = itemOrder.indexOf(a.id);
+              const bIndex = itemOrder.indexOf(b.id);
+              if (aIndex === -1 && bIndex === -1) return 0;
+              if (aIndex === -1) return 1;
+              if (bIndex === -1) return -1;
+              return aIndex - bIndex;
+            });
+          } else {
+            // Fallback to topological sort if no custom order
+            sortedSubtasks = topologicalSort(task.subtasks);
+            if (!sortedSubtasks) {
+              issues.push(`Task "${task.name}" has circular subtask dependencies`);
+              allFit = false;
+              return;
+            }
           }
 
           let subtaskDate = new Date(taskStart);
@@ -655,14 +704,20 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
   const typeStyles = {
     action: {
       color: darkMode ? 'bg-blue-600' : 'bg-blue-500',
+      bgTransparent: darkMode ? 'bg-blue-600/20' : 'bg-blue-500/20',
+      border: darkMode ? 'border-blue-600' : 'border-blue-500',
       label: 'Action'
     },
     task: {
       color: darkMode ? 'bg-green-600' : 'bg-green-500',
+      bgTransparent: darkMode ? 'bg-green-600/20' : 'bg-green-500/20',
+      border: darkMode ? 'border-green-600' : 'border-green-500',
       label: 'Task'
     },
     subtask: {
       color: darkMode ? 'bg-purple-600' : 'bg-purple-500',
+      bgTransparent: darkMode ? 'bg-purple-600/20' : 'bg-purple-500/20',
+      border: darkMode ? 'border-purple-600' : 'border-purple-500',
       label: 'Subtask'
     }
   };
@@ -831,14 +886,62 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
             const statusInfo = statuses[item.status || 'not-started'];
             const priorityInfo = priorities[item.priority || 'medium'];
 
+            // Row drag handlers for reordering
+            const handleRowDragStart = (e) => {
+              if (isEditLocked) return;
+              setDraggedRowIndex(index);
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('text/html', e.currentTarget);
+            };
+
+            const handleRowDragOver = (e) => {
+              if (isEditLocked) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+            };
+
+            const handleRowDrop = (e) => {
+              if (isEditLocked) return;
+              e.preventDefault();
+
+              if (draggedRowIndex === null || draggedRowIndex === index) {
+                setDraggedRowIndex(null);
+                return;
+              }
+
+              // Reorder items
+              const newOrder = [...itemOrder];
+              const draggedId = newOrder[draggedRowIndex];
+              newOrder.splice(draggedRowIndex, 1);
+              newOrder.splice(index, 0, draggedId);
+
+              setItemOrder(newOrder);
+              setDraggedRowIndex(null);
+              saveToHistory();
+            };
+
+            const handleRowDragEnd = () => {
+              setDraggedRowIndex(null);
+            };
+
             return React.createElement('div', {
               key: `${item.type}-${item.itemId}`,
-              className: 'flex items-center mb-1 h-10'
+              className: `flex items-center mb-1 h-10 ${draggedRowIndex === index ? 'opacity-50' : ''}`,
+              onDragOver: handleRowDragOver,
+              onDrop: handleRowDrop
             },
               // Item info column
               React.createElement('div', {
                 className: 'w-64 flex-shrink-0 pr-2 flex items-center gap-2'
               },
+                // Order number (drag handle)
+                React.createElement('span', {
+                  draggable: !isEditLocked,
+                  onDragStart: handleRowDragStart,
+                  onDragEnd: handleRowDragEnd,
+                  className: `px-1.5 py-0.5 rounded text-[9px] font-bold ${darkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-200 text-gray-700'} text-center inline-block w-6 ${!isEditLocked ? 'cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-blue-400' : 'cursor-default'}`,
+                  title: !isEditLocked ? 'Drag to reorder' : ''
+                }, index + 1),
                 React.createElement('span', {
                   className: `px-2 py-0.5 rounded text-[9px] font-bold text-white text-center inline-block w-14 ${typeStyle.color}`
                 }, typeStyle.label),
@@ -883,8 +986,9 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                     const rect = e.currentTarget.parentElement.getBoundingClientRect();
                     handleBarDragEnd(e, rect.width, earliest, totalDays);
                   },
-                  className: `group absolute h-6 top-1 ${typeStyle.color} rounded-lg flex items-center justify-center text-white text-[10px] font-semibold transition shadow-sm ${
-                    isViolated ? 'ring-2 ring-red-500' : ''
+                  className: `group absolute h-6 top-1 ${typeStyle.bgTransparent} ${typeStyle.border} border-2 rounded-lg flex items-center justify-center text-[10px] font-semibold transition shadow-sm ${
+                    darkMode ? 'text-gray-200' : 'text-gray-800'
+                  } ${isViolated ? 'ring-2 ring-red-500' : ''
                   } ${!isEditLocked ? 'cursor-move hover:opacity-90 hover:shadow-md' : 'cursor-default'}`,
                   style: {
                     left: position.left,
