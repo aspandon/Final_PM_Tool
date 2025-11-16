@@ -57,7 +57,7 @@ export function MenuBar({
   return React.createElement('div', null,
     // Menu Bar
     React.createElement('div', {
-      className: `mb-4 flex gap-2 shadow-md relative z-50 ${
+      className: `mb-4 flex gap-2 shadow-md relative z-[100] ${
         darkMode
           ? 'glass-dark border-animated-dark'
           : 'glass border-animated'

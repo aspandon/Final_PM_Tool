@@ -11,7 +11,8 @@ const STORAGE_KEYS = {
   SETTINGS: 'pm_tool_settings',
   FILTERS: 'pm_tool_filters',
   ACTIONS: 'action_items_actions',
-  TASKS: 'pmtool_personal_tasks'
+  TASKS: 'pmtool_personal_tasks',
+  SLIDES: 'pm_tool_project_slides'
 };
 
 const SHARED_RECORD_KEY = 'shared_record_id'; // Track the shared record ID
@@ -570,6 +571,139 @@ export const clearAllTasks = async () => {
     return true;
   } catch (error) {
     console.error('Error clearing tasks:', error);
+    return false;
+  }
+};
+
+// ===== PROJECT SLIDES STORAGE =====
+
+/**
+ * Save project slides data to Supabase and localStorage (shared record for all users)
+ * @param {Object} slidesData - Object with project IDs as keys and slide data as values
+ */
+export const saveSlides = async (slidesData) => {
+  try {
+    // Save to localStorage as cache
+    localStorage.setItem(STORAGE_KEYS.SLIDES, JSON.stringify(slidesData));
+
+    // Get or find the shared record
+    let sharedRecordId = localStorage.getItem(`${SHARED_RECORD_KEY}_slides`);
+
+    // If we don't have the shared record ID, try to find it
+    if (!sharedRecordId) {
+      const { data: existingRecords } = await supabase
+        .from('project_slides')
+        .select('id')
+        .order('created_at', { ascending: true })
+        .limit(1);
+
+      if (existingRecords && existingRecords.length > 0) {
+        sharedRecordId = existingRecords[0].id;
+        localStorage.setItem(`${SHARED_RECORD_KEY}_slides`, sharedRecordId);
+      }
+    }
+
+    if (sharedRecordId) {
+      // Update the shared record
+      const { data, error } = await supabase
+        .from('project_slides')
+        .update({ data: slidesData })
+        .eq('id', sharedRecordId)
+        .select();
+
+      if (error) {
+        console.error('Error updating shared project slides record in Supabase:', error);
+        return true; // Still return true since localStorage worked
+      }
+      console.log('Shared project slides record updated in Supabase');
+    } else {
+      // Create the shared record (first time)
+      const { data, error } = await supabase
+        .from('project_slides')
+        .insert([{ data: slidesData }])
+        .select();
+
+      if (error) {
+        console.error('Error creating shared project slides record in Supabase:', error);
+        return true; // Still return true since localStorage worked
+      }
+
+      // Store the shared record ID
+      if (data && data[0]) {
+        localStorage.setItem(`${SHARED_RECORD_KEY}_slides`, data[0].id);
+        console.log('Shared project slides record created in Supabase with ID:', data[0].id);
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error saving project slides:', error);
+    return false;
+  }
+};
+
+/**
+ * Load project slides data from Supabase shared record (or localStorage fallback)
+ * @returns {Object} Object with project IDs as keys and slide data as values
+ */
+export const loadSlides = async () => {
+  try {
+    // Load the shared record (oldest record = first created)
+    const { data, error } = await supabase
+      .from('project_slides')
+      .select('*')
+      .order('created_at', { ascending: true }) // Get oldest first (shared record)
+      .limit(1);
+
+    if (error) {
+      console.error('Error loading shared project slides record from Supabase:', error);
+      // Fallback to localStorage
+      const stored = localStorage.getItem(STORAGE_KEYS.SLIDES);
+      return stored ? JSON.parse(stored) : {};
+    }
+
+    if (data && data.length > 0) {
+      const slidesData = data[0].data;
+      // Cache the shared record ID
+      localStorage.setItem(`${SHARED_RECORD_KEY}_slides`, data[0].id);
+      // Cache slides in localStorage
+      localStorage.setItem(STORAGE_KEYS.SLIDES, JSON.stringify(slidesData));
+      console.log('Shared project slides record loaded from Supabase (ID:', data[0].id, ')');
+      return slidesData;
+    }
+
+    // No data in Supabase, check localStorage
+    const stored = localStorage.getItem(STORAGE_KEYS.SLIDES);
+    return stored ? JSON.parse(stored) : {};
+  } catch (error) {
+    console.error('Error loading project slides:', error);
+    // Fallback to localStorage
+    const stored = localStorage.getItem(STORAGE_KEYS.SLIDES);
+    return stored ? JSON.parse(stored) : {};
+  }
+};
+
+/**
+ * Clear all project slides data from both Supabase and localStorage
+ */
+export const clearAllSlides = async () => {
+  try {
+    // Get Supabase ID
+    const slidesId = localStorage.getItem(`${SHARED_RECORD_KEY}_slides`);
+
+    // Delete from Supabase if exists
+    if (slidesId) {
+      await supabase.from('project_slides').delete().eq('id', slidesId);
+    }
+
+    // Clear localStorage
+    localStorage.removeItem(STORAGE_KEYS.SLIDES);
+    localStorage.removeItem(`${SHARED_RECORD_KEY}_slides`);
+
+    console.log('Project slides cleared from Supabase and localStorage');
+    return true;
+  } catch (error) {
+    console.error('Error clearing project slides:', error);
     return false;
   }
 };

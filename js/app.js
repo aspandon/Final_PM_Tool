@@ -16,6 +16,7 @@ import { Reporting } from './components/Reporting/index.js';
 import { KanbanBoard } from './components/KanbanBoard/index.js';
 import { Actions } from './components/Actions.js';
 import { Tasks } from './components/Tasks/index.js';
+import { Slides } from './components/Slides/index.js';
 
 const { useState, useRef, useMemo, useEffect } = React;
 const { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
@@ -168,6 +169,20 @@ function GanttChart() {
     React.createElement('path', { d: 'M8 16h.01' })
   );
 
+  const Presentation = ({ className }) => React.createElement('svg', {
+    className,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M2 3h20' }),
+    React.createElement('path', { d: 'M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3' }),
+    React.createElement('path', { d: 'm7 21 5-5 5 5' })
+  );
+
   const Lock = ({ className }) => React.createElement('svg', {
     className,
     fill: 'none',
@@ -256,14 +271,18 @@ function GanttChart() {
       try {
         const latestProjects = await loadProjects();
         if (latestProjects && latestProjects.length > 0) {
-          // Check if data has actually changed by comparing JSON strings
-          const currentJSON = JSON.stringify(projects);
-          const latestJSON = JSON.stringify(latestProjects);
+          // Use functional update to get current projects without dependency
+          setProjects(currentProjects => {
+            // Check if data has actually changed by comparing JSON strings
+            const currentJSON = JSON.stringify(currentProjects);
+            const latestJSON = JSON.stringify(latestProjects);
 
-          if (currentJSON !== latestJSON) {
-            console.log('🔄 Auto-refresh: New data detected from Supabase');
-            setProjects(latestProjects);
-          }
+            if (currentJSON !== latestJSON) {
+              console.log('🔄 Auto-refresh: New data detected from Supabase');
+              return latestProjects;
+            }
+            return currentProjects;
+          });
         }
       } catch (error) {
         console.error('Error during auto-refresh:', error);
@@ -272,7 +291,7 @@ function GanttChart() {
 
     // Cleanup interval on unmount
     return () => clearInterval(refreshInterval);
-  }, [projects]);
+  }, []); // Empty dependency array - only set up once
 
   /**
    * Load filters from localStorage on mount
@@ -757,7 +776,7 @@ function GanttChart() {
     return React.createElement('button', {
       key: tabName,
       onClick: () => setActiveTab(tabName),
-      className: `px-4 py-2 text-base font-semibold rounded-t-lg tab-button flex items-center gap-2 ${
+      className: `px-4 py-2 text-base font-semibold rounded-t-lg tab-button flex items-center gap-2 flex-shrink-0 whitespace-nowrap ${
         isActive ? 'active' : ''
       } ${
         isActive
@@ -954,6 +973,16 @@ function GanttChart() {
   };
 
   /**
+   * Render slides view
+   */
+  const renderSlidesView = () => {
+    return React.createElement(Slides, {
+      projects,
+      darkMode
+    });
+  };
+
+  /**
    * Render tasks view
    */
   const renderTasksView = () => {
@@ -1076,7 +1105,11 @@ function GanttChart() {
 
         // Tabs
         React.createElement('div', {
-          className: 'flex gap-2 mb-6 border-b-2 ' + (darkMode ? 'border-slate-700' : 'border-gray-200')
+          className: 'flex gap-2 mb-6 border-b-2 overflow-x-auto scrollbar-thin ' + (darkMode ? 'border-slate-700' : 'border-gray-200'),
+          style: {
+            scrollbarWidth: 'thin',
+            WebkitOverflowScrolling: 'touch'
+          }
         },
           renderTabButton('projects', 'Projects', FolderKanban),
           renderTabButton('planner', 'Planner', Calendar),
@@ -1086,11 +1119,12 @@ function GanttChart() {
           renderTabButton('resources', 'Charts', BarChart),
           renderTabButton('actuals', 'Actuals', TrendingUp),
           renderTabButton('reporting', 'Reporting', FileText),
+          renderTabButton('slides', 'Slides', Presentation),
 
           // Lock/Unlock button - only visible on Projects tab
           activeTab === 'projects' && React.createElement('button', {
             onClick: () => setIsEditLocked(!isEditLocked),
-            className: `ml-auto px-4 py-2 text-base rounded-t-lg lock-button btn-modern flex items-center gap-2 ${
+            className: `ml-auto px-4 py-2 text-base rounded-t-lg lock-button btn-modern flex items-center gap-2 flex-shrink-0 ${
               darkMode
                 ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-b-4 ' + (isEditLocked ? 'border-red-400 glow-red' : 'border-green-400 glow-green')
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-b-4 ' + (isEditLocked ? 'border-red-500 glow-red' : 'border-green-500 glow-green')
@@ -1110,7 +1144,8 @@ function GanttChart() {
           activeTab === 'tasks' && renderTasksView(),
           activeTab === 'resources' && renderResourcesView(),
           activeTab === 'actuals' && renderActualsView(),
-          activeTab === 'reporting' && renderReportingView()
+          activeTab === 'reporting' && renderReportingView(),
+          activeTab === 'slides' && renderSlidesView()
         )
       )
     )
