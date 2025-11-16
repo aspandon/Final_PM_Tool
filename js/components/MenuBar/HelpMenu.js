@@ -37,7 +37,7 @@ export function HelpMenu({
 
     // Help Modal
     showHelpModal && React.createElement('div', {
-      className: 'fixed inset-0 bg-black/50 flex items-start justify-center z-[200] p-4 pt-8 overflow-y-auto',
+      className: 'fixed inset-0 bg-black/50 flex items-start justify-center z-[9999] p-4 pt-8 overflow-y-auto',
       onClick: () => setShowHelpModal(false)
     },
       React.createElement('div', {
