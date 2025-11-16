@@ -8,7 +8,7 @@
 import { ChevronDown, Trash2 } from '../../shared/icons/index.js';
 import { FileMenu } from './FileMenu.js';
 import { SettingsMenu } from './SettingsMenu.js';
-import { HelpMenu } from './HelpMenu.js';
+import { HelpMenu, HelpModal } from './HelpMenu.js';
 
 export function MenuBar({
   addProject,
@@ -145,7 +145,6 @@ export function MenuBar({
           isOpen: helpMenuOpen,
           onClose: () => setHelpMenuOpen(false),
           darkMode,
-          showHelpModal,
           setShowHelpModal
         })
       ),
@@ -237,6 +236,13 @@ export function MenuBar({
           }, 'Yes, Clear All')
         )
       )
-    )
+    ),
+
+    // Help Modal (rendered outside MenuBar for proper z-index)
+    React.createElement(HelpModal, {
+      showHelpModal,
+      setShowHelpModal,
+      darkMode
+    })
   );
 }
