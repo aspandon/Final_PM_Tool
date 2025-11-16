@@ -57,7 +57,8 @@ export function Slides({ projects, darkMode }) {
     }));
   };
 
-  const selectedProject = implementationProjects.find(p => p.id === selectedProjectId);
+  // Use loose equality to handle string/number mismatch from select dropdown
+  const selectedProject = implementationProjects.find(p => p.id == selectedProjectId);
   const selectedSlideData = selectedProjectId ? slidesData[selectedProjectId] : null;
 
   return React.createElement('div', {
