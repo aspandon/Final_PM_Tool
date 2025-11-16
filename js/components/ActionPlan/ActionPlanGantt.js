@@ -839,7 +839,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                 className: 'w-64 flex-shrink-0 pr-2 flex items-center gap-2'
               },
                 React.createElement('span', {
-                  className: `px-2 py-0.5 rounded text-[9px] font-bold text-white ${typeStyle.color}`
+                  className: `px-2 py-0.5 rounded text-[9px] font-bold text-white text-center inline-block w-14 ${typeStyle.color}`
                 }, typeStyle.label),
                 React.createElement('div', { className: 'flex-1 min-w-0' },
                   React.createElement('div', {
