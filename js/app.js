@@ -271,14 +271,18 @@ function GanttChart() {
       try {
         const latestProjects = await loadProjects();
         if (latestProjects && latestProjects.length > 0) {
-          // Check if data has actually changed by comparing JSON strings
-          const currentJSON = JSON.stringify(projects);
-          const latestJSON = JSON.stringify(latestProjects);
+          // Use functional update to get current projects without dependency
+          setProjects(currentProjects => {
+            // Check if data has actually changed by comparing JSON strings
+            const currentJSON = JSON.stringify(currentProjects);
+            const latestJSON = JSON.stringify(latestProjects);
 
-          if (currentJSON !== latestJSON) {
-            console.log('🔄 Auto-refresh: New data detected from Supabase');
-            setProjects(latestProjects);
-          }
+            if (currentJSON !== latestJSON) {
+              console.log('🔄 Auto-refresh: New data detected from Supabase');
+              return latestProjects;
+            }
+            return currentProjects;
+          });
         }
       } catch (error) {
         console.error('Error during auto-refresh:', error);
@@ -287,7 +291,7 @@ function GanttChart() {
 
     // Cleanup interval on unmount
     return () => clearInterval(refreshInterval);
-  }, [projects]);
+  }, []); // Empty dependency array - only set up once
 
   /**
    * Load filters from localStorage on mount
