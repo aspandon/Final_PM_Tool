@@ -117,9 +117,9 @@ export function Slides({ projects, darkMode }) {
                   value: selectedProjectId || '',
                   onChange: (e) => setSelectedProjectId(e.target.value)
                 },
-                  implementationProjects.map(project =>
+                  implementationProjects.map((project, idx) =>
                     React.createElement('option', {
-                      key: project.id,
+                      key: `project-${project.id || idx}`,
                       value: project.id
                     }, project.name)
                   )
