@@ -585,28 +585,8 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
         const y1 = depIndex * 40 + 20; // Center of row
         const y2 = itemIndex * 40 + 20;
 
-        // Calculate smooth curved path
-        const horizontalDistance = Math.abs(x2 - x1);
-        const verticalDistance = Math.abs(y2 - y1);
-
-        // Adaptive control point distance
-        const controlDist = Math.min(horizontalDistance * 0.4, 100);
-
-        let pathData;
-
-        if (Math.abs(y2 - y1) < 5) {
-          // Same row - simple horizontal curve
-          pathData = `M ${x1} ${y1} C ${x1 + controlDist} ${y1}, ${x2 - controlDist} ${y2}, ${x2} ${y2}`;
-        } else if (x2 > x1) {
-          // Forward dependency - smooth S curve
-          const midX = (x1 + x2) / 2;
-          pathData = `M ${x1} ${y1} C ${x1 + controlDist} ${y1}, ${midX - controlDist * 0.5} ${y1}, ${midX} ${(y1 + y2) / 2} S ${x2 - controlDist} ${y2}, ${x2} ${y2}`;
-        } else {
-          // Backward dependency - loop back
-          const loopOut = 30;
-          const midY = (y1 + y2) / 2;
-          pathData = `M ${x1} ${y1} C ${x1 + loopOut} ${y1}, ${x1 + loopOut} ${midY}, ${(x1 + x2) / 2} ${midY} S ${x2 - loopOut} ${y2}, ${x2} ${y2}`;
-        }
+        // Create STRAIGHT line path - simple and clean
+        const pathData = `M ${x1} ${y1} L ${x2} ${y2}`;
 
         paths.push({
           key: `${depItem.itemId}-${item.itemId}`,
@@ -809,7 +789,8 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
             style: {
               width: 'calc(100% - 16rem)',
               height: items.length * 40,
-              overflow: 'visible'
+              overflow: 'visible',
+              zIndex: 10
             },
             preserveAspectRatio: 'none'
           },
@@ -882,40 +863,27 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                 })
               )
             ),
-            // Render curved paths
+            // Render straight line paths
             (renderDependencyLines(items, earliest, totalDays, timelineRef) || []).map(path => {
               const strokeColor = path.isViolated
                 ? (darkMode ? '#ef4444' : '#dc2626')
                 : (darkMode ? '#10b981' : '#059669');
               const markerEnd = path.isViolated ? 'url(#arrowhead-violated)' : 'url(#arrowhead-valid)';
 
-              return React.createElement('g', { key: path.key },
-                // Background/glow path for depth
-                React.createElement('path', {
-                  d: path.pathData,
-                  fill: 'none',
-                  stroke: strokeColor,
-                  strokeWidth: 5,
-                  opacity: 0.15,
-                  strokeLinecap: 'round',
-                  strokeLinejoin: 'round'
-                }),
-                // Main path
-                React.createElement('path', {
-                  d: path.pathData,
-                  fill: 'none',
-                  stroke: strokeColor,
-                  strokeWidth: 2.5,
-                  opacity: 0.85,
-                  strokeLinecap: 'round',
-                  strokeLinejoin: 'round',
-                  markerEnd: markerEnd,
-                  filter: 'url(#dependency-shadow)',
-                  style: {
-                    transition: 'all 0.3s ease'
-                  }
-                })
-              );
+              return React.createElement('path', {
+                key: path.key,
+                d: path.pathData,
+                fill: 'none',
+                stroke: strokeColor,
+                strokeWidth: 2,
+                opacity: 0.9,
+                strokeLinecap: 'round',
+                markerEnd: markerEnd,
+                filter: 'url(#dependency-shadow)',
+                style: {
+                  transition: 'all 0.3s ease'
+                }
+              });
             })
           ),
 
