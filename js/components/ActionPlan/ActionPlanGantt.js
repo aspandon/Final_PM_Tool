@@ -10,6 +10,8 @@
  */
 
 export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, priorities, isEditLocked }) {
+  console.log('📈 [ActionPlanGantt] Component loaded - NEW GANTT VIEW VERSION 2.0');
+
   const [draggedItem, setDraggedItem] = React.useState(null);
   const [dragStartX, setDragStartX] = React.useState(null);
   const [viewFilters, setViewFilters] = React.useState({

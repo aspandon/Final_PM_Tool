@@ -21,6 +21,10 @@ export function ActionPlan({
   darkMode,
   isEditLocked = false
 }) {
+  console.log('🚀 [ActionPlan] Component loaded - VERSION 2.0 with Gantt view');
+  console.log('🚀 [ActionPlan] Project:', project.name);
+  console.log('🚀 [ActionPlan] Action plan data:', project.actionPlan);
+
   // State management
   const [currentView, setCurrentView] = React.useState('list'); // list, board, table, gantt
   const [showTemplates, setShowTemplates] = React.useState(false);

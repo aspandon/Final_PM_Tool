@@ -6,6 +6,8 @@
  */
 
 export function ActionPlanTable({ actionPlan, darkMode, statuses, priorities }) {
+  console.log('📋 [ActionPlanTable] Component loaded - VERSION 2.0');
+
   const [viewFilters, setViewFilters] = React.useState({
     showActions: true,
     showTasks: true,

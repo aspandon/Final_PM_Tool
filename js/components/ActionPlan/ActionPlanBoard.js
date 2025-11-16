@@ -7,6 +7,8 @@
  */
 
 export function ActionPlanBoard({ actionPlan, darkMode, onUpdate, statuses, priorities, isEditLocked }) {
+  console.log('📊 [ActionPlanBoard] Component loaded - VERSION 2.0');
+
   const [draggedItem, setDraggedItem] = React.useState(null);
   const [viewFilters, setViewFilters] = React.useState({
     showActions: true,
