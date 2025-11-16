@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - PM Tool</title>
+
+    <!-- Tailwind CSS -->
+    <script src="./css/tailwind.js"></script>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Modern Effects CSS -->
+    <link rel="stylesheet" href="./css/modern-effects.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+            <p class="mt-4 text-gray-700 font-semibold">Processing...</p>
+        </div>
+    </div>
+
+    <div class="min-h-screen p-6">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6 border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold gradient-text">🔐 Admin Panel</h1>
+                        <p class="text-gray-600 text-sm mt-1">User Management & Access Control</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <a
+                            href="index.html"
+                            class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            ← Back to Hub
+                        </a>
+                        <button
+                            id="signOutBtn"
+                            class="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add User Section -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6 border border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">➕ Add New User</h2>
+                <form id="addUserForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+                        <input
+                            type="text"
+                            id="newUsername"
+                            required
+                            placeholder="e.g., JohnDoe"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                        <input
+                            type="text"
+                            id="newFullName"
+                            placeholder="e.g., John Doe"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                        <input
+                            type="password"
+                            id="newPassword"
+                            required
+                            placeholder="Minimum 6 characters"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                    </div>
+                    <div class="flex items-end">
+                        <button
+                            type="submit"
+                            class="w-full px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-md"
+                        >
+                            Add User
+                        </button>
+                    </div>
+                </form>
+                <div id="addUserMessage" class="mt-4 hidden"></div>
+            </div>
+
+            <!-- Users List -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">👥 Manage Users</h2>
+                <div id="usersContainer" class="space-y-3">
+                    <!-- Users will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { requireAuth, getCurrentUser, signOut } from './js/utils/auth.js';
+        import { supabase } from './js/utils/supabaseClient.js';
+
+        // Check admin authentication
+        (async () => {
+            const isAuth = await requireAuth();
+            if (!isAuth) return;
+
+            // Check if user is admin
+            const user = await getCurrentUser();
+            if (!user || user.email !== 'admin@pmtool.local') {
+                alert('Access Denied: Only Admin can access this panel');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Load users
+            await loadUsers();
+        })();
+
+        // Sign out handler
+        document.getElementById('signOutBtn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to sign out?')) {
+                await signOut();
+            }
+        });
+
+        // Show/hide loading overlay
+        const showLoading = () => {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        };
+
+        const hideLoading = () => {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        };
+
+        // Show message
+        const showMessage = (elementId, message, isError = false) => {
+            const element = document.getElementById(elementId);
+            element.className = `mt-4 p-4 rounded-lg ${isError ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-green-50 border border-green-200 text-green-700'}`;
+            element.textContent = message;
+            element.classList.remove('hidden');
+            setTimeout(() => {
+                element.classList.add('hidden');
+            }, 5000);
+        };
+
+        // Load all users
+        const loadUsers = async () => {
+            try {
+                showLoading();
+
+                // Call admin function to get all users
+                const { data, error } = await supabase.rpc('admin_list_users');
+
+                if (error) {
+                    console.error('Error loading users:', error);
+                    document.getElementById('usersContainer').innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <p>Error loading users. Make sure admin functions are set up in Supabase.</p>
+                        </div>
+                    `;
+                    hideLoading();
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    document.getElementById('usersContainer').innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <p>No users found.</p>
+                        </div>
+                    `;
+                    hideLoading();
+                    return;
+                }
+
+                // Display users
+                const usersHTML = data.map(user => {
+                    const username = user.email.replace('@pmtool.local', '');
+                    const isAdmin = user.email === 'admin@pmtool.local';
+                    const createdDate = new Date(user.created_at).toLocaleDateString();
+                    const fullName = user.raw_user_meta_data?.fullName || user.raw_user_meta_data?.username || username;
+
+                    return `
+                        <div class="fade-in border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow ${isAdmin ? 'bg-indigo-50 border-indigo-300' : 'bg-white'}">
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold">Username</p>
+                                    <p class="font-bold text-gray-800">${username} ${isAdmin ? '👑' : ''}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold">Full Name</p>
+                                    <p class="text-gray-700">${fullName}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold">Email</p>
+                                    <p class="text-gray-700 text-sm">${user.email}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold">Created</p>
+                                    <p class="text-gray-700 text-sm">${createdDate}</p>
+                                </div>
+                                <div class="flex gap-2 justify-end">
+                                    ${!isAdmin ? `
+                                        <button
+                                            onclick="editUser('${user.id}', '${username}', '${fullName}')"
+                                            class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onclick="deleteUser('${user.id}', '${username}')"
+                                            class="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                        >
+                                            Delete
+                                        </button>
+                                    ` : '<span class="text-xs text-indigo-600 font-semibold">Admin Account</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('usersContainer').innerHTML = usersHTML;
+                hideLoading();
+
+            } catch (error) {
+                console.error('Error in loadUsers:', error);
+                hideLoading();
+            }
+        };
+
+        // Add user
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('newUsername').value.trim();
+            const fullName = document.getElementById('newFullName').value.trim();
+            const password = document.getElementById('newPassword').value;
+
+            if (password.length < 6) {
+                showMessage('addUserMessage', 'Password must be at least 6 characters', true);
+                return;
+            }
+
+            try {
+                showLoading();
+
+                const email = `${username.toLowerCase()}@pmtool.local`;
+
+                // Create user via admin function
+                const { data, error } = await supabase.rpc('admin_create_user', {
+                    user_email: email,
+                    user_password: password,
+                    user_metadata: {
+                        username: username,
+                        fullName: fullName || username
+                    }
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                showMessage('addUserMessage', `User "${username}" created successfully!`);
+
+                // Clear form
+                document.getElementById('addUserForm').reset();
+
+                // Reload users
+                await loadUsers();
+
+            } catch (error) {
+                console.error('Error creating user:', error);
+                showMessage('addUserMessage', `Error: ${error.message}`, true);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Edit user (global function)
+        window.editUser = async (userId, username, currentFullName) => {
+            const newPassword = prompt(`Enter new password for "${username}" (leave blank to keep current):`);
+            const newFullName = prompt(`Enter new full name for "${username}":`, currentFullName);
+
+            if (newPassword === null && newFullName === null) return; // User cancelled
+
+            try {
+                showLoading();
+
+                if (newPassword && newPassword.length < 6) {
+                    alert('Password must be at least 6 characters');
+                    hideLoading();
+                    return;
+                }
+
+                // Update user via admin function
+                const updates = {};
+                if (newPassword) updates.user_password = newPassword;
+                if (newFullName) {
+                    updates.user_metadata = {
+                        username: username,
+                        fullName: newFullName
+                    };
+                }
+
+                const { data, error } = await supabase.rpc('admin_update_user', {
+                    user_id: userId,
+                    ...updates
+                });
+
+                if (error) throw error;
+
+                alert(`User "${username}" updated successfully!`);
+                await loadUsers();
+
+            } catch (error) {
+                console.error('Error updating user:', error);
+                alert(`Error: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        };
+
+        // Delete user (global function)
+        window.deleteUser = async (userId, username) => {
+            if (!confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                showLoading();
+
+                // Delete user via admin function
+                const { data, error } = await supabase.rpc('admin_delete_user', {
+                    p_user_id: userId
+                });
+
+                if (error) throw error;
+
+                alert(`User "${username}" deleted successfully!`);
+                await loadUsers();
+
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert(`Error: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        };
+    </script>
+</body>
+</html>

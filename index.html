@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Development Hub</title>
+
+    <!-- Tailwind CSS - Local -->
+    <script src="./css/tailwind.js"></script>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Modern Effects CSS -->
+    <link rel="stylesheet" href="./css/modern-effects.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <div class="container mx-auto px-6 py-12 min-h-screen flex flex-col items-center justify-center">
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <h1 class="text-5xl font-bold gradient-text mb-8">Digital Development Hub</h1>
+            <p class="text-gray-600 text-lg">Project Management & Action Tracking Tools</p>
+        </div>
+
+        <!-- Cards Container -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+            <!-- PM Tool Card -->
+            <a href="pmtool.html" class="card-hover bg-white rounded-2xl shadow-xl p-8 text-center border border-gray-100 group">
+                <div class="mb-6 flex justify-center">
+                    <div class="p-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform">
+                        <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path d="M3 3v18h18"></path>
+                            <path d="M18 17V9"></path>
+                            <path d="M13 17V5"></path>
+                            <path d="M8 17v-3"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">PM Tool</h2>
+                <p class="text-gray-600 mb-6">Project planning and resource management with Gantt timelines, division tracking, and FTE calculations.</p>
+                <div class="inline-flex items-center text-blue-600 font-semibold group-hover:text-indigo-600">
+                    Open PM Tool
+                    <svg class="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Action Items Card -->
+            <a href="actions.html" class="card-hover bg-white rounded-2xl shadow-xl p-8 text-center border border-gray-100 group">
+                <div class="mb-6 flex justify-center">
+                    <div class="p-6 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform">
+                        <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path d="M9 11l3 3L22 4"></path>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Action Items</h2>
+                <p class="text-gray-600 mb-6">Track and manage action items, tasks, and deliverables with collaborative workflows.</p>
+                <div class="inline-flex items-center text-purple-600 font-semibold group-hover:text-pink-600">
+                    Open Action Items
+                    <svg class="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                </div>
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-16 text-center text-gray-500 text-sm">
+            <p>Digital Development Project Management Suite • Version 1.0</p>
+            <div class="flex gap-4 justify-center items-center mt-4">
+                <button
+                    id="logoutButton"
+                    class="px-6 py-2 text-sm text-gray-600 hover:text-indigo-600 hover:underline transition-colors"
+                >
+                    Sign Out
+                </button>
+                <a
+                    id="adminLink"
+                    href="admin.html"
+                    class="hidden px-4 py-2 text-xs text-gray-500 hover:text-purple-600 hover:underline transition-colors"
+                >
+                    🔐 Admin
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Check -->
+    <script type="module">
+        import { requireAuth, signOut, getCurrentUser } from './js/utils/auth.js';
+
+        // Check authentication on page load
+        (async () => {
+            const isAuth = await requireAuth();
+            if (!isAuth) {
+                // User will be redirected by requireAuth
+                return;
+            }
+
+            // Show admin link if user is admin
+            const user = await getCurrentUser();
+            if (user && user.email === 'admin@pmtool.local') {
+                document.getElementById('adminLink').classList.remove('hidden');
+            }
+        })();
+
+        // Handle logout
+        document.getElementById('logoutButton').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to sign out?')) {
+                await signOut();
+            }
+        });
+    </script>
+</body>
+</html>
