@@ -534,11 +534,11 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     return months;
   };
 
-  // Render dependency lines
+  // Render dependency lines with professional curved connectors
   const renderDependencyLines = (allItems, earliest, totalDays, timelineRef) => {
     if (!timelineRef.current) return null;
 
-    const lines = [];
+    const paths = [];
 
     allItems.forEach((item, itemIndex) => {
       if (!item.dependencies || item.dependencies.length === 0) return;
@@ -564,18 +564,37 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
         const y1 = depIndex * 40 + 20;
         const y2 = itemIndex * 40 + 20;
 
-        lines.push({
+        // Calculate control points for smooth bezier curve
+        const horizontalDistance = Math.abs(x2 - x1);
+        const verticalDistance = Math.abs(y2 - y1);
+
+        // Adaptive control point distance based on line length
+        const controlPointDistance = Math.min(horizontalDistance * 0.5, 20);
+
+        // Create a smooth S-curve path
+        let pathData;
+        if (y1 === y2) {
+          // Horizontal line - slight arc
+          pathData = `M ${x1},${y1} C ${x1 + controlPointDistance},${y1} ${x2 - controlPointDistance},${y2} ${x2},${y2}`;
+        } else {
+          // Curved connector for different vertical positions
+          const midY = (y1 + y2) / 2;
+          pathData = `M ${x1},${y1} C ${x1 + controlPointDistance},${y1} ${x1 + controlPointDistance},${midY} ${(x1 + x2) / 2},${midY} S ${x2 - controlPointDistance},${y2} ${x2},${y2}`;
+        }
+
+        paths.push({
           key: `${depItem.itemId}-${item.itemId}`,
+          pathData,
+          isViolated,
           x1,
           y1,
           x2,
-          y2,
-          isViolated
+          y2
         });
       });
     });
 
-    return lines;
+    return paths;
   };
 
   const items = getAllItems();
@@ -761,35 +780,110 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
               height: items.length * 40
             }
           },
-            (renderDependencyLines(items, earliest, totalDays, timelineRef) || []).map(line =>
-              React.createElement('line', {
-                key: line.key,
-                x1: `${line.x1}%`,
-                y1: line.y1,
-                x2: `${line.x2}%`,
-                y2: line.y2,
-                stroke: line.isViolated ? (darkMode ? '#ef4444' : '#dc2626') : (darkMode ? '#10b981' : '#059669'),
-                strokeWidth: 2,
-                markerEnd: 'url(#arrowhead)',
-                opacity: 0.6
-              })
-            ),
-            // Arrow marker
+            // Define filters and markers
             React.createElement('defs', null,
-              React.createElement('marker', {
-                id: 'arrowhead',
-                markerWidth: 10,
-                markerHeight: 10,
-                refX: 9,
-                refY: 3,
-                orient: 'auto'
+              // Drop shadow for depth
+              React.createElement('filter', {
+                id: 'dependency-shadow',
+                x: '-50%',
+                y: '-50%',
+                width: '200%',
+                height: '200%'
               },
-                React.createElement('polygon', {
-                  points: '0 0, 10 3, 0 6',
-                  fill: darkMode ? '#10b981' : '#059669'
+                React.createElement('feGaussianBlur', {
+                  in: 'SourceAlpha',
+                  stdDeviation: 2
+                }),
+                React.createElement('feOffset', {
+                  dx: 0,
+                  dy: 1,
+                  result: 'offsetblur'
+                }),
+                React.createElement('feComponentTransfer', null,
+                  React.createElement('feFuncA', {
+                    type: 'linear',
+                    slope: 0.3
+                  })
+                ),
+                React.createElement('feMerge', null,
+                  React.createElement('feMergeNode'),
+                  React.createElement('feMergeNode', {
+                    in: 'SourceGraphic'
+                  })
+                )
+              ),
+              // Valid dependency arrow (green)
+              React.createElement('marker', {
+                id: 'arrowhead-valid',
+                markerWidth: 12,
+                markerHeight: 12,
+                refX: 11,
+                refY: 6,
+                orient: 'auto',
+                markerUnits: 'userSpaceOnUse'
+              },
+                React.createElement('path', {
+                  d: 'M 0 0 L 12 6 L 0 12 L 3 6 Z',
+                  fill: darkMode ? '#10b981' : '#059669',
+                  stroke: darkMode ? '#10b981' : '#059669',
+                  strokeWidth: 0.5,
+                  strokeLinejoin: 'round'
+                })
+              ),
+              // Violated dependency arrow (red)
+              React.createElement('marker', {
+                id: 'arrowhead-violated',
+                markerWidth: 12,
+                markerHeight: 12,
+                refX: 11,
+                refY: 6,
+                orient: 'auto',
+                markerUnits: 'userSpaceOnUse'
+              },
+                React.createElement('path', {
+                  d: 'M 0 0 L 12 6 L 0 12 L 3 6 Z',
+                  fill: darkMode ? '#ef4444' : '#dc2626',
+                  stroke: darkMode ? '#ef4444' : '#dc2626',
+                  strokeWidth: 0.5,
+                  strokeLinejoin: 'round'
                 })
               )
-            )
+            ),
+            // Render curved paths
+            (renderDependencyLines(items, earliest, totalDays, timelineRef) || []).map(path => {
+              const strokeColor = path.isViolated
+                ? (darkMode ? '#ef4444' : '#dc2626')
+                : (darkMode ? '#10b981' : '#059669');
+              const markerEnd = path.isViolated ? 'url(#arrowhead-violated)' : 'url(#arrowhead-valid)';
+
+              return React.createElement('g', { key: path.key },
+                // Background/glow path for depth
+                React.createElement('path', {
+                  d: path.pathData,
+                  fill: 'none',
+                  stroke: strokeColor,
+                  strokeWidth: 5,
+                  opacity: 0.15,
+                  strokeLinecap: 'round',
+                  strokeLinejoin: 'round'
+                }),
+                // Main path
+                React.createElement('path', {
+                  d: path.pathData,
+                  fill: 'none',
+                  stroke: strokeColor,
+                  strokeWidth: 2.5,
+                  opacity: 0.85,
+                  strokeLinecap: 'round',
+                  strokeLinejoin: 'round',
+                  markerEnd: markerEnd,
+                  filter: 'url(#dependency-shadow)',
+                  style: {
+                    transition: 'all 0.3s ease'
+                  }
+                })
+              );
+            })
           ),
 
           // Item rows
