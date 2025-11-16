@@ -75,14 +75,14 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
       // Header - Project Name
       slide.addText(slideData.projectName || project.name, {
-        x: 0.5, y: 0.3, w: 9, h: 0.5,
-        fontSize: 24, bold: true, color: '0070C0',
+        x: 0.5, y: 0.3, w: 8.5, h: 0.5,
+        fontSize: 20, bold: true, color: '0070C0',
         align: 'left'
       });
 
       // Blue line separator
       slide.addShape('rect', {
-        x: 0.5, y: 0.85, w: 9, h: 0.05,
+        x: 0.5, y: 0.85, w: 9, h: 0.03,
         fill: '0070C0'
       });
 
@@ -93,33 +93,33 @@ export function SlideViewer({ project, slideData, darkMode }) {
       const lineHeight = 0.35;
 
       // Row 1: SAP ID, JIRA ID, PM/BP
-      slide.addText('SAP ID', { x: 0.5, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(slideData.sapId || '-', { x: 0.5, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+      slide.addText('SAP ID', { x: 0.5, y: yPos, w: 2.2, h: 0.25, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.sapId || '-', { x: 0.5, y: yPos + 0.13, w: 2.2, h: 0.25, fontSize: valueFontSize - 1, bold: true });
 
-      slide.addText('JIRA ID', { x: 3.2, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(slideData.jiraId || '-', { x: 3.2, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+      slide.addText('JIRA ID', { x: 2.8, y: yPos, w: 2.2, h: 0.25, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.jiraId || '-', { x: 2.8, y: yPos + 0.13, w: 2.2, h: 0.25, fontSize: valueFontSize - 1, bold: true });
 
-      slide.addText('PM/BP', { x: 5.9, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(slideData.pmBp || '-', { x: 5.9, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+      slide.addText('PM/BP', { x: 5.1, y: yPos, w: 2.2, h: 0.25, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.pmBp || '-', { x: 5.1, y: yPos + 0.13, w: 2.2, h: 0.25, fontSize: valueFontSize - 1, bold: true });
 
-      yPos += 0.6;
+      yPos += 0.5;
 
       // Row 2: Business Owner, Involved Divisions, Baseline Budget
-      slide.addText('Business Owner', { x: 0.5, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(slideData.businessOwner || '-', { x: 0.5, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+      slide.addText('Business Owner', { x: 0.5, y: yPos, w: 2.2, h: 0.25, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.businessOwner || '-', { x: 0.5, y: yPos + 0.13, w: 2.2, h: 0.25, fontSize: valueFontSize - 1, bold: true });
 
-      slide.addText('Involved Divisions', { x: 3.2, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(slideData.involvedDivisions || '-', { x: 3.2, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+      slide.addText('Involved Divisions', { x: 2.8, y: yPos, w: 2.2, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.involvedDivisions || '-', { x: 2.8, y: yPos + 0.13, w: 2.2, h: 0.3, fontSize: 8, bold: true, breakLine: true });
 
-      slide.addText('Baseline Budget', { x: 5.9, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(slideData.baselineBudget || '-', { x: 5.9, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+      slide.addText('Baseline Budget', { x: 5.1, y: yPos, w: 2.2, h: 0.25, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.baselineBudget || '-', { x: 5.1, y: yPos + 0.13, w: 2.2, h: 0.25, fontSize: valueFontSize - 1, bold: true });
 
       // Right column - RAG Status
-      const ragX = 8.6;
+      const ragX = 8.9;
       const ragY = 1.0;
-      const ragW = 0.6;
-      const ragH = 0.3;
-      const ragGap = 0.1;
+      const ragW = 0.5;
+      const ragH = 0.28;
+      const ragGap = 0.08;
 
       ['Overall', 'Schedule', 'Cost', 'Scope'].forEach((category, idx) => {
         const fieldName = `rag${category}`;
@@ -127,8 +127,8 @@ export function SlideViewer({ project, slideData, darkMode }) {
         const yOffset = ragY + (idx * (ragH + ragGap));
 
         slide.addText(category, {
-          x: ragX, y: yOffset - 0.15, w: ragW, h: 0.15,
-          fontSize: 8, bold: true, color: '666666', align: 'center'
+          x: ragX, y: yOffset - 0.13, w: ragW, h: 0.13,
+          fontSize: 7, bold: true, color: '666666', align: 'center'
         });
         slide.addShape('rect', {
           x: ragX, y: yOffset, w: ragW, h: ragH,
@@ -136,164 +136,161 @@ export function SlideViewer({ project, slideData, darkMode }) {
         });
         slide.addText(ragValue.charAt(0), {
           x: ragX, y: yOffset, w: ragW, h: ragH,
-          fontSize: 12, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle'
+          fontSize: 11, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle'
         });
       });
 
       // Right column - Additional Details
-      let rightYPos = 2.5;
-      slide.addText('Project Status', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(slideData.projectStatus || '-', { x: 8.6, y: rightYPos + 0.15, w: 1.3, h: 0.3, fontSize: valueFontSize, bold: true });
+      let rightYPos = 2.4;
+      slide.addText('Project Status', { x: 7.4, y: rightYPos, w: 1.4, h: 0.25, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.projectStatus || '-', { x: 7.4, y: rightYPos + 0.13, w: 1.4, h: 0.25, fontSize: 8, bold: true });
 
-      rightYPos += 0.5;
-      slide.addText('Work Completed (%)', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(String(slideData.workCompleted || '0'), { x: 8.6, y: rightYPos + 0.15, w: 1.3, h: 0.3, fontSize: valueFontSize, bold: true });
+      rightYPos += 0.45;
+      slide.addText('Work Completed (%)', { x: 7.4, y: rightYPos, w: 1.4, h: 0.25, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(String(slideData.workCompleted || '0') + '%', { x: 7.4, y: rightYPos + 0.13, w: 1.4, h: 0.25, fontSize: 8, bold: true });
 
-      rightYPos += 0.5;
-      slide.addText('Planned Finish Date', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(formatDate(slideData.plannedCompletionDate), { x: 8.6, y: rightYPos + 0.15, w: 1.3, h: 0.3, fontSize: valueFontSize, bold: true });
+      rightYPos += 0.45;
+      slide.addText('Planned Finish Date', { x: 7.4, y: rightYPos, w: 1.4, h: 0.25, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(formatDate(slideData.plannedCompletionDate), { x: 7.4, y: rightYPos + 0.13, w: 1.4, h: 0.25, fontSize: 8, bold: true });
 
-      rightYPos += 0.5;
-      slide.addText('Planned Start Date', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
-      slide.addText(formatDate(slideData.plannedStartDate), { x: 8.6, y: rightYPos + 0.15, w: 1.3, h: 0.3, fontSize: valueFontSize, bold: true });
+      rightYPos += 0.45;
+      slide.addText('Planned Start Date', { x: 7.4, y: rightYPos, w: 1.4, h: 0.25, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(formatDate(slideData.plannedStartDate), { x: 7.4, y: rightYPos + 0.13, w: 1.4, h: 0.25, fontSize: 8, bold: true });
 
       // Main content area - 2 columns
-      yPos = 2.5;
+      yPos = 2.4;
       const leftColX = 0.5;
-      const leftColW = 3.8;
-      const rightColX = 4.5;
-      const rightColW = 4.0;
+      const leftColW = 3.5;
+      const rightColX = 4.2;
+      const rightColW = 3.0;
 
       // Project Scope
       slide.addShape('rect', {
-        x: leftColX, y: yPos, w: leftColW, h: 0.35,
+        x: leftColX, y: yPos, w: leftColW, h: 0.3,
         fill: 'D6EAF8'
       });
       slide.addText('Project Scope', {
-        x: leftColX, y: yPos, w: leftColW, h: 0.35,
-        fontSize: 11, bold: true, color: '0070C0', align: 'left', valign: 'middle',
-        margin: [0, 0.1, 0, 0]
+        x: leftColX + 0.05, y: yPos, w: leftColW - 0.1, h: 0.3,
+        fontSize: 10, bold: true, color: '0070C0', align: 'left', valign: 'middle'
       });
-      slide.addText(slideData.projectScope || 'No scope defined', {
-        x: leftColX, y: yPos + 0.4, w: leftColW, h: 0.8,
-        fontSize: 9, color: '000000', align: 'left', valign: 'top',
-        margin: [0.1, 0.1, 0.1, 0.1]
+      slide.addText(stripHtml(slideData.projectScope) || 'No scope defined', {
+        x: leftColX + 0.05, y: yPos + 0.35, w: leftColW - 0.1, h: 0.9,
+        fontSize: 8, color: '000000', align: 'left', valign: 'top'
       });
 
       // Activities Performed
-      yPos += 1.3;
+      yPos += 1.35;
       slide.addShape('rect', {
-        x: leftColX, y: yPos, w: leftColW, h: 0.35,
+        x: leftColX, y: yPos, w: leftColW, h: 0.3,
         fill: 'D5F4E6'
       });
       slide.addText('Activities Performed & Milestones Achieved', {
-        x: leftColX, y: yPos, w: leftColW, h: 0.35,
-        fontSize: 11, bold: true, color: '229954', align: 'left', valign: 'middle',
-        margin: [0, 0.1, 0, 0]
+        x: leftColX + 0.05, y: yPos, w: leftColW - 0.1, h: 0.3,
+        fontSize: 10, bold: true, color: '229954', align: 'left', valign: 'middle'
       });
       slide.addText(stripHtml(slideData.activitiesPerformed) || 'No activities recorded', {
-        x: leftColX, y: yPos + 0.4, w: leftColW, h: 1.2,
-        fontSize: 9, color: '000000', align: 'left', valign: 'top',
-        margin: [0.1, 0.1, 0.1, 0.1]
+        x: leftColX + 0.05, y: yPos + 0.35, w: leftColW - 0.1, h: 1.1,
+        fontSize: 8, color: '000000', align: 'left', valign: 'top'
       });
 
       // Major Action Items
-      yPos += 1.7;
+      yPos += 1.55;
       slide.addShape('rect', {
-        x: leftColX, y: yPos, w: leftColW, h: 0.35,
+        x: leftColX, y: yPos, w: leftColW, h: 0.3,
         fill: 'FEF5E7'
       });
       slide.addText('Major Action Items - Upcoming Activities - Comments', {
-        x: leftColX, y: yPos, w: leftColW, h: 0.35,
-        fontSize: 11, bold: true, color: 'D68910', align: 'left', valign: 'middle',
-        margin: [0, 0.1, 0, 0]
+        x: leftColX + 0.05, y: yPos, w: leftColW - 0.1, h: 0.3,
+        fontSize: 10, bold: true, color: 'D68910', align: 'left', valign: 'middle'
       });
       slide.addText(stripHtml(slideData.majorActions) || 'No actions recorded', {
-        x: leftColX, y: yPos + 0.4, w: leftColW, h: 1.0,
-        fontSize: 9, color: '000000', align: 'left', valign: 'top',
-        margin: [0.1, 0.1, 0.1, 0.1]
+        x: leftColX + 0.05, y: yPos + 0.35, w: leftColW - 0.1, h: 0.9,
+        fontSize: 8, color: '000000', align: 'left', valign: 'top'
       });
 
       // Phases/Milestones Table
-      yPos = 2.5;
+      yPos = 2.4;
       const phaseRows = [
         [
-          { text: 'Phase', options: { bold: true, fontSize: 9, fill: { color: 'E8DAEF' }, color: '000000' } },
-          { text: 'R/A/G', options: { bold: true, fontSize: 9, fill: { color: 'E8DAEF' }, color: '000000' } },
-          { text: 'Est. Delivery', options: { bold: true, fontSize: 9, fill: { color: 'E8DAEF' }, color: '000000' } },
-          { text: 'Remarks', options: { bold: true, fontSize: 9, fill: { color: 'E8DAEF' }, color: '000000' } }
+          { text: 'Phase', options: { bold: true, fontSize: 8, fill: { color: 'E8DAEF' }, color: '000000' } },
+          { text: 'R/A/G', options: { bold: true, fontSize: 8, fill: { color: 'E8DAEF' }, color: '000000' } },
+          { text: 'Est. Delivery', options: { bold: true, fontSize: 8, fill: { color: 'E8DAEF' }, color: '000000' } },
+          { text: 'Remarks', options: { bold: true, fontSize: 8, fill: { color: 'E8DAEF' }, color: '000000' } }
         ]
       ];
 
       if (slideData.phases && slideData.phases.length > 0) {
         slideData.phases.forEach(phase => {
           phaseRows.push([
-            { text: phase.description || '', options: { fontSize: 8 } },
+            { text: phase.description || '', options: { fontSize: 7 } },
             { text: phase.ragStatus?.charAt(0) || 'G', options: { fontSize: 8, bold: true, fill: { color: getRagColor(phase.ragStatus) }, color: 'FFFFFF', align: 'center' } },
-            { text: formatDate(phase.deliveryDate), options: { fontSize: 8 } },
-            { text: phase.remarks || '', options: { fontSize: 8 } }
+            { text: formatDate(phase.deliveryDate), options: { fontSize: 7 } },
+            { text: phase.remarks || '', options: { fontSize: 7 } }
           ]);
         });
       } else {
         phaseRows.push([
-          { text: 'No phases defined', options: { fontSize: 8, color: '999999', colspan: 4 } }
+          { text: 'No phases defined', options: { fontSize: 7, color: '999999' } },
+          { text: '', options: { fontSize: 7 } },
+          { text: '', options: { fontSize: 7 } },
+          { text: '', options: { fontSize: 7 } }
         ]);
       }
 
       slide.addShape('rect', {
-        x: rightColX, y: yPos, w: rightColW, h: 0.35,
+        x: rightColX, y: yPos, w: rightColW, h: 0.3,
         fill: '884EA0'
       });
       slide.addText('Phases/Milestones/Deliverables', {
-        x: rightColX, y: yPos, w: rightColW, h: 0.35,
-        fontSize: 11, bold: true, color: 'FFFFFF', align: 'left', valign: 'middle',
-        margin: [0, 0.1, 0, 0]
+        x: rightColX + 0.05, y: yPos, w: rightColW - 0.1, h: 0.3,
+        fontSize: 10, bold: true, color: 'FFFFFF', align: 'left', valign: 'middle'
       });
 
       slide.addTable(phaseRows, {
-        x: rightColX, y: yPos + 0.4, w: rightColW, h: 2.0,
+        x: rightColX, y: yPos + 0.35, w: rightColW, h: 2.2,
         border: { pt: 1, color: 'CCCCCC' },
-        colW: [1.6, 0.5, 0.9, 1.0]
+        colW: [1.1, 0.4, 0.7, 0.8]
       });
 
       // Risks Table
-      yPos += 2.5;
+      yPos += 2.65;
       const riskRows = [
         [
-          { text: 'Risk', options: { bold: true, fontSize: 9, fill: { color: 'F5B7B1' }, color: '000000' } },
-          { text: 'Assessment', options: { bold: true, fontSize: 9, fill: { color: 'F5B7B1' }, color: '000000' } },
-          { text: 'Control', options: { bold: true, fontSize: 9, fill: { color: 'F5B7B1' }, color: '000000' } }
+          { text: 'Risk', options: { bold: true, fontSize: 8, fill: { color: 'F5B7B1' }, color: '000000' } },
+          { text: 'Assessment', options: { bold: true, fontSize: 8, fill: { color: 'F5B7B1' }, color: '000000' } },
+          { text: 'Control', options: { bold: true, fontSize: 8, fill: { color: 'F5B7B1' }, color: '000000' } }
         ]
       ];
 
       if (slideData.risks && slideData.risks.length > 0) {
         slideData.risks.forEach(risk => {
           riskRows.push([
-            { text: risk.description || '', options: { fontSize: 8 } },
+            { text: risk.description || '', options: { fontSize: 7 } },
             { text: risk.assessment?.charAt(0) || 'L', options: { fontSize: 8, bold: true, fill: { color: getRiskColor(risk.assessment) }, color: 'FFFFFF', align: 'center' } },
-            { text: risk.control || '', options: { fontSize: 8 } }
+            { text: risk.control || '', options: { fontSize: 7 } }
           ]);
         });
       } else {
         riskRows.push([
-          { text: 'No risks defined', options: { fontSize: 8, color: '999999', colspan: 3 } }
+          { text: 'No risks defined', options: { fontSize: 7, color: '999999' } },
+          { text: '', options: { fontSize: 7 } },
+          { text: '', options: { fontSize: 7 } }
         ]);
       }
 
       slide.addShape('rect', {
-        x: rightColX, y: yPos, w: rightColW, h: 0.35,
+        x: rightColX, y: yPos, w: rightColW, h: 0.3,
         fill: 'C0392B'
       });
       slide.addText('Risk', {
-        x: rightColX, y: yPos, w: rightColW, h: 0.35,
-        fontSize: 11, bold: true, color: 'FFFFFF', align: 'left', valign: 'middle',
-        margin: [0, 0.1, 0, 0]
+        x: rightColX + 0.05, y: yPos, w: rightColW - 0.1, h: 0.3,
+        fontSize: 10, bold: true, color: 'FFFFFF', align: 'left', valign: 'middle'
       });
 
       slide.addTable(riskRows, {
-        x: rightColX, y: yPos + 0.4, w: rightColW, h: 1.8,
+        x: rightColX, y: yPos + 0.35, w: rightColW, h: 1.8,
         border: { pt: 1, color: 'CCCCCC' },
-        colW: [1.6, 0.8, 1.6]
+        colW: [1.1, 0.5, 1.4]
       });
 
       // Save the presentation
