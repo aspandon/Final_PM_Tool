@@ -109,68 +109,62 @@ export function Slides({ projects, darkMode }) {
           React.createElement('div', {
             className: `rounded-lg p-4 ${darkMode ? 'bg-slate-800' : 'bg-white'} shadow-md mb-6`
           },
+            // Label
+            React.createElement('label', {
+              className: `block text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+            }, 'Select Project:'),
+            // Project Selector and Buttons on same row
             React.createElement('div', {
-              className: 'flex flex-col md:flex-row md:items-center md:justify-between gap-4'
+              className: 'flex items-center gap-3'
             },
               // Project Selector
-              React.createElement('div', {
-                className: 'flex-1'
+              React.createElement('select', {
+                className: `flex-1 px-4 py-2 rounded-lg border ${
+                  darkMode
+                    ? 'bg-slate-700 border-slate-600 text-gray-200'
+                    : 'bg-white border-gray-300 text-gray-900'
+                } focus:outline-none focus:ring-2 focus:ring-purple-500`,
+                value: selectedProjectId || '',
+                onChange: (e) => setSelectedProjectId(e.target.value)
               },
-                React.createElement('label', {
-                  className: `block text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
-                }, 'Select Project:'),
-                React.createElement('select', {
-                  className: `w-full px-4 py-2 rounded-lg border ${
-                    darkMode
-                      ? 'bg-slate-700 border-slate-600 text-gray-200'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  } focus:outline-none focus:ring-2 focus:ring-purple-500`,
-                  value: selectedProjectId || '',
-                  onChange: (e) => setSelectedProjectId(e.target.value)
-                },
-                  implementationProjects.map((project, idx) =>
-                    React.createElement('option', {
-                      key: `project-${project.id || project.name || idx}`,
-                      value: project.id || project.name
-                    }, project.name)
-                  )
+                implementationProjects.map((project, idx) =>
+                  React.createElement('option', {
+                    key: `project-${project.id || project.name || idx}`,
+                    value: project.id || project.name
+                  }, project.name)
                 )
               ),
 
               // View Mode Toggle
-              React.createElement('div', {
-                className: 'flex gap-2'
+              React.createElement('button', {
+                onClick: () => setViewMode('edit'),
+                className: `px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                  viewMode === 'edit'
+                    ? darkMode
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-purple-500 text-white'
+                    : darkMode
+                    ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`
               },
-                React.createElement('button', {
-                  onClick: () => setViewMode('edit'),
-                  className: `px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
-                    viewMode === 'edit'
-                      ? darkMode
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-purple-500 text-white'
-                      : darkMode
-                      ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`
-                },
-                  React.createElement(Edit, { className: 'w-4 h-4' }),
-                  'Edit'
-                ),
-                React.createElement('button', {
-                  onClick: () => setViewMode('view'),
-                  className: `px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
-                    viewMode === 'view'
-                      ? darkMode
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-purple-500 text-white'
-                      : darkMode
-                      ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`
-                },
-                  React.createElement(Eye, { className: 'w-4 h-4' }),
-                  'View Slide'
-                )
+                React.createElement(Edit, { className: 'w-4 h-4' }),
+                'Edit'
+              ),
+              React.createElement('button', {
+                onClick: () => setViewMode('view'),
+                className: `px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                  viewMode === 'view'
+                    ? darkMode
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-purple-500 text-white'
+                    : darkMode
+                    ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`
+              },
+                React.createElement(Eye, { className: 'w-4 h-4' }),
+                'View Slide'
               )
             )
           ),
@@ -201,9 +195,44 @@ export function Slides({ projects, darkMode }) {
             viewMode === 'view' && React.createElement('div', {
               className: `rounded-lg p-6 ${darkMode ? 'bg-slate-800' : 'bg-gray-100'} shadow-md`
             },
-              React.createElement('h3', {
-                className: `text-xl font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-              }, 'Slide Preview'),
+              // Header with title and export button
+              React.createElement('div', {
+                className: 'flex items-center justify-between mb-4'
+              },
+                React.createElement('h3', {
+                  className: `text-xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+                }, 'Slide Preview'),
+                // Export Button
+                React.createElement('button', {
+                  onClick: () => {
+                    // Call export function from SlideViewer
+                    const event = new CustomEvent('exportPowerPoint', {
+                      detail: { project: selectedProject, slideData: selectedSlideData }
+                    });
+                    window.dispatchEvent(event);
+                  },
+                  className: `px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
+                    darkMode
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  }`
+                },
+                  React.createElement('svg', {
+                    className: 'w-4 h-4',
+                    fill: 'none',
+                    stroke: 'currentColor',
+                    strokeWidth: 2,
+                    viewBox: '0 0 24 24'
+                  },
+                    React.createElement('path', {
+                      strokeLinecap: 'round',
+                      strokeLinejoin: 'round',
+                      d: 'M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                    })
+                  ),
+                  'Export to PowerPoint'
+                )
+              ),
               React.createElement(SlideViewer, {
                 project: selectedProject,
                 slideData: selectedSlideData,
