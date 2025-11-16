@@ -304,13 +304,63 @@ export function SlideViewer({ project, slideData, darkMode }) {
     }
   };
 
-  // Listen for export event
+  const exportToImage = async () => {
+    try {
+      // Check if html2canvas is available
+      if (typeof html2canvas === 'undefined') {
+        console.error('html2canvas library is not loaded');
+        alert('Image export library is not loaded. Please refresh the page and try again.');
+        return;
+      }
+
+      // Find the slide element
+      const slideElement = document.querySelector('[data-slide-container]');
+      if (!slideElement) {
+        alert('Slide element not found. Please try again.');
+        return;
+      }
+
+      // Generate canvas from slide element
+      const canvas = await html2canvas(slideElement, {
+        scale: 2, // Higher quality (2x resolution)
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      });
+
+      // Convert canvas to blob
+      canvas.toBlob((blob) => {
+        // Create download link
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const fileName = `${slideData.projectName || project.name || 'Project'}_Slide.jpg`;
+        link.download = fileName;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        console.log('Image exported successfully!');
+      }, 'image/jpeg', 0.95); // High quality JPEG (95%)
+    } catch (error) {
+      console.error('Error exporting to image:', error);
+      alert('Failed to export to image. Please try again.');
+    }
+  };
+
+  // Listen for export events
   React.useEffect(() => {
-    const handleExportEvent = () => {
+    const handleExportPowerPointEvent = () => {
       exportToPowerPoint();
     };
-    window.addEventListener('exportPowerPoint', handleExportEvent);
-    return () => window.removeEventListener('exportPowerPoint', handleExportEvent);
+    const handleExportImageEvent = () => {
+      exportToImage();
+    };
+    window.addEventListener('exportPowerPoint', handleExportPowerPointEvent);
+    window.addEventListener('exportImage', handleExportImageEvent);
+    return () => {
+      window.removeEventListener('exportPowerPoint', handleExportPowerPointEvent);
+      window.removeEventListener('exportImage', handleExportImageEvent);
+    };
   }, [slideData, project]);
 
   // Slide container (16:9 aspect ratio like PowerPoint)
@@ -319,7 +369,8 @@ export function SlideViewer({ project, slideData, darkMode }) {
   },
     React.createElement('div', {
       className: `relative w-full bg-white shadow-2xl rounded-lg overflow-hidden`,
-      style: { aspectRatio: '16/9' }
+      style: { aspectRatio: '16/9' },
+      'data-slide-container': true
     },
       // Slide content
       React.createElement('div', {
