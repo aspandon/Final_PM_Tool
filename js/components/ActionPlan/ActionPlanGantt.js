@@ -603,6 +603,31 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     return months;
   };
 
+  // Get week labels for detailed timeline
+  const getWeekLabels = (earliest, latest) => {
+    const weeks = [];
+    const current = new Date(earliest);
+
+    // Start from the beginning of the week (Monday)
+    const day = current.getDay();
+    const diff = current.getDate() - day + (day === 0 ? -6 : 1);
+    current.setDate(diff);
+
+    while (current <= latest) {
+      const weekEnd = new Date(current);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      weeks.push({
+        label: `${current.getDate()} ${current.toLocaleDateString('en-US', { month: 'short' })}`,
+        date: new Date(current),
+        endDate: new Date(weekEnd)
+      });
+      current.setDate(current.getDate() + 7);
+    }
+
+    return weeks;
+  };
+
   // Render dependency lines with professional curved connectors - REDESIGNED
   const renderDependencyLines = (allItems, earliest, totalDays, timelineRef) => {
     if (!timelineRef.current || !svgReady) return null;
@@ -712,6 +737,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
   const { earliest, latest } = getDateRange();
   const totalDays = getDaysDiff(earliest, latest);
   const monthLabels = getMonthLabels(earliest, latest);
+  const weekLabels = getWeekLabels(earliest, latest);
 
   // Type-specific styling
   const typeStyles = {
@@ -869,7 +895,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
         className: 'min-w-[1200px]'
       },
         // Month header
-        React.createElement('div', { className: 'flex mb-2' },
+        React.createElement('div', { className: 'flex mb-1' },
           React.createElement('div', { className: 'w-64 flex-shrink-0' }),
           React.createElement('div', {
             className: `flex-1 flex border-b ${darkMode ? 'border-slate-600' : 'border-gray-300'} pb-1`
@@ -880,6 +906,27 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                 className: `flex-1 text-xs ${darkMode ? 'text-gray-200' : 'text-gray-700'} text-center font-semibold`
               }, month.label)
             )
+          )
+        ),
+
+        // Week header with detailed dates
+        React.createElement('div', { className: 'flex mb-2' },
+          React.createElement('div', { className: 'w-64 flex-shrink-0' }),
+          React.createElement('div', {
+            className: `flex-1 relative h-5 ${darkMode ? 'bg-slate-700/30' : 'bg-gray-50'} rounded`
+          },
+            weekLabels.map((week, i) => {
+              const offset = getDaysDiff(earliest, week.date) - 1;
+              const duration = getDaysDiff(week.date, week.endDate);
+              const left = `${(offset / totalDays) * 100}%`;
+              const width = `${(duration / totalDays) * 100}%`;
+
+              return React.createElement('div', {
+                key: i,
+                className: `absolute top-0 bottom-0 flex items-center justify-center text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-medium border-r ${darkMode ? 'border-slate-600' : 'border-gray-300'}`,
+                style: { left, width }
+              }, week.label);
+            })
           )
         ),
 
@@ -945,7 +992,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
             },
               // Item info column
               React.createElement('div', {
-                className: 'w-64 flex-shrink-0 pr-2 flex items-center gap-2'
+                className: 'w-64 flex-shrink-0 pr-2 flex items-center gap-1'
               },
                 // Order number (drag handle)
                 React.createElement('span', {
