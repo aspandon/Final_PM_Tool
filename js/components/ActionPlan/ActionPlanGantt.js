@@ -572,20 +572,23 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
 
         const isViolated = isDependencyViolated(item, allItems);
 
-        // Calculate positions in PIXELS
+        // Calculate bar positions in PIXELS
         const depFinish = new Date(depItem.finishDate || depItem.dueDate);
         const itemStart = new Date(item.startDate);
 
-        const depOffset = getDaysDiff(earliest, depFinish) - 1;
-        const itemOffset = getDaysDiff(earliest, itemStart) - 1;
+        // Get the pixel position at the END of the dependency bar (right edge)
+        const depFinishOffset = getDaysDiff(earliest, depFinish);
+        const x1 = (depFinishOffset / totalDays) * timelineWidth;
 
-        // Convert to pixel positions
-        const x1 = (depOffset / totalDays) * timelineWidth;
-        const x2 = (itemOffset / totalDays) * timelineWidth;
-        const y1 = depIndex * 40 + 20; // Center of row
-        const y2 = itemIndex * 40 + 20;
+        // Get the pixel position at the START of the dependent item bar (left edge)
+        const itemStartOffset = getDaysDiff(earliest, itemStart) - 1;
+        const x2 = (itemStartOffset / totalDays) * timelineWidth;
 
-        // Create STRAIGHT line path - simple and clean
+        // Y positions: bars are h-6 (24px) with top-1 (4px), center is at index * 40 + 16
+        const y1 = depIndex * 40 + 16; // Center of dependency bar
+        const y2 = itemIndex * 40 + 16; // Center of dependent item bar
+
+        // Create STRAIGHT line connecting end of one bar to start of next
         const pathData = `M ${x1} ${y1} L ${x2} ${y2}`;
 
         paths.push({
@@ -598,8 +601,10 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
           y2
         });
 
-        console.log(`[Gantt] Path for ${depItem.itemName} -> ${item.itemName}:`, {
-          x1, y1, x2, y2, pathData: pathData.substring(0, 50) + '...'
+        console.log(`[Gantt] Dependency: ${depItem.itemName} -> ${item.itemName}`, {
+          depFinish: depFinish.toISOString().split('T')[0],
+          itemStart: itemStart.toISOString().split('T')[0],
+          x1: Math.round(x1), y1, x2: Math.round(x2), y2
         });
       });
     });
