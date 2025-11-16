@@ -19,7 +19,8 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
     showActions: true,
     showTasks: true,
     showSubtasks: true,
-    showDependencies: true
+    showDependencies: true,
+    showToday: true
   });
   const [autopilotResult, setAutopilotResult] = React.useState(null);
   const [undoHistory, setUndoHistory] = React.useState([]); // Stack of previous states (max 20)
@@ -658,6 +659,9 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
 
         if (!depItem || !depItem.finishDate || depIndex === -1) return;
 
+        // Skip dependency lines if either item is completed
+        if (item.status === 'completed' || depItem.status === 'completed') return;
+
         const isViolated = isDependencyViolated(item, allItems);
 
         // Calculate bar positions in PIXELS
@@ -811,7 +815,17 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
               ? darkMode ? 'bg-amber-600 text-white' : 'bg-amber-500 text-white'
               : darkMode ? 'bg-slate-700 text-gray-400 hover:bg-slate-600' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-300'
           } cursor-pointer`
-        }, 'Dependencies')
+        }, 'Dependencies'),
+
+        // Today Toggle
+        React.createElement('button', {
+          onClick: () => toggleFilter('showToday'),
+          className: `px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            viewFilters.showToday
+              ? darkMode ? 'bg-red-600 text-white' : 'bg-red-500 text-white'
+              : darkMode ? 'bg-slate-700 text-gray-400 hover:bg-slate-600' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-300'
+          } cursor-pointer`
+        }, 'Today')
       ),
 
       // Right side buttons
@@ -946,6 +960,16 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
             const statusInfo = statuses[item.status || 'not-started'];
             const priorityInfo = priorities[item.priority || 'medium'];
 
+            // Calculate progress for Actions and Tasks
+            let progressPercent = 0;
+            if (item.type === 'action' && item.tasks && item.tasks.length > 0) {
+              const completedTasks = item.tasks.filter(t => t.status === 'completed').length;
+              progressPercent = Math.round((completedTasks / item.tasks.length) * 100);
+            } else if (item.type === 'task' && item.subtasks && item.subtasks.length > 0) {
+              const completedSubtasks = item.subtasks.filter(s => s.status === 'completed').length;
+              progressPercent = Math.round((completedSubtasks / item.subtasks.length) * 100);
+            }
+
             // Row drag handlers for reordering
             const handleRowDragStart = (e) => {
               if (isEditLocked) return;
@@ -1026,17 +1050,6 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
               React.createElement('div', {
                 className: `gantt-timeline-area flex-1 relative h-8 ${darkMode ? 'bg-slate-700/30 border-slate-600' : 'bg-gray-50 border-gray-200'} rounded border`
               },
-                // Month grid lines
-                monthLabels.map((month, i) => {
-                  const offset = getDaysDiff(earliest, month.date) - 1;
-                  const leftPosition = (offset / totalDays) * 100;
-                  return React.createElement('div', {
-                    key: i,
-                    className: `absolute top-0 bottom-0 w-px ${darkMode ? 'bg-slate-600' : 'bg-gray-300'}`,
-                    style: { left: `${leftPosition}%` }
-                  });
-                }),
-
                 // Bar
                 position.visible && React.createElement('div', {
                   draggable: !isEditLocked,
@@ -1046,9 +1059,10 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                     const rect = e.currentTarget.parentElement.getBoundingClientRect();
                     handleBarDragEnd(e, rect.width, earliest, totalDays);
                   },
-                  className: `group absolute h-6 top-1 ${typeStyle.bgTransparent} ${typeStyle.border} border-2 rounded-lg flex items-center justify-center text-[10px] font-semibold transition shadow-sm ${
+                  className: `group absolute h-6 top-1 ${item.status === 'completed' ? 'bg-gray-400/40 border-gray-500' : `${typeStyle.bgTransparent} ${typeStyle.border}`} border-2 rounded-lg flex items-center justify-center text-[10px] font-semibold transition shadow-sm ${
                     darkMode ? 'text-gray-200' : 'text-gray-800'
                   } ${isViolated ? 'ring-2 ring-red-500' : ''
+                  } ${item.status === 'completed' ? 'line-through opacity-60' : ''
                   } ${!isEditLocked ? 'cursor-move hover:opacity-90 hover:shadow-md' : 'cursor-default'}`,
                   style: {
                     left: position.left,
@@ -1063,10 +1077,19 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                     title: 'Drag to resize start date'
                   }),
 
+                  // Progress bar background (for Actions and Tasks)
+                  progressPercent > 0 && React.createElement('div', {
+                    className: `absolute left-0 top-0 bottom-0 ${typeStyle.color} opacity-40 rounded-l-md`,
+                    style: { width: `${progressPercent}%` }
+                  }),
+
                   // Bar content
-                  React.createElement('span', null, `${position.duration}d`),
+                  React.createElement('span', { className: 'relative z-10' }, `${position.duration}d`),
+                  progressPercent > 0 && React.createElement('span', {
+                    className: 'ml-1 text-[9px] font-bold relative z-10'
+                  }, `${progressPercent}%`),
                   isViolated && React.createElement('span', {
-                    className: 'ml-1 text-red-300'
+                    className: 'ml-1 text-red-300 relative z-10'
                   }, '⚠️'),
 
                   // Right resize handle
@@ -1183,7 +1206,34 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                 }
               });
             })
-          )
+          ),
+
+          // Today line - vertical red line showing today's date
+          viewFilters.showToday && (() => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Check if today is within the timeline range
+            if (today >= earliest && today <= latest) {
+              const todayOffset = getDaysDiff(earliest, today);
+              const leftPosition = (todayOffset / totalDays) * 100;
+
+              return React.createElement('div', {
+                className: 'absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none',
+                style: {
+                  left: `calc(16rem + ${leftPosition}%)`,
+                  zIndex: 20
+                },
+                title: `Today: ${today.toLocaleDateString()}`
+              },
+                // Label at top
+                React.createElement('div', {
+                  className: `absolute -top-5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-[9px] font-bold text-white bg-red-500 whitespace-nowrap`
+                }, 'Today')
+              );
+            }
+            return null;
+          })()
         )
       )
     ),
