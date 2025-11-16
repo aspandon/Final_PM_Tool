@@ -35,10 +35,302 @@ export function SlideViewer({ project, slideData, darkMode }) {
     }
   };
 
+  const getRagColor = (rag) => {
+    switch (rag) {
+      case 'Green': return '00B050';
+      case 'Amber': return 'FFC000';
+      case 'Red': return 'FF0000';
+      default: return '808080';
+    }
+  };
+
+  const getRiskColor = (assessment) => {
+    switch (assessment) {
+      case 'Low': return '00B050';
+      case 'Medium': return 'FFC000';
+      case 'High': return 'FF0000';
+      default: return '808080';
+    }
+  };
+
+  const stripHtml = (html) => {
+    if (!html) return '';
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+  };
+
+  const exportToPowerPoint = async () => {
+    try {
+      const pptx = new PptxGenJS();
+      const slide = pptx.addSlide();
+
+      // Header - Project Name
+      slide.addText(slideData.projectName || project.name, {
+        x: 0.5, y: 0.3, w: 9, h: 0.5,
+        fontSize: 24, bold: true, color: '0070C0',
+        align: 'left'
+      });
+
+      // Blue line separator
+      slide.addShape(pptx.ShapeType.rect, {
+        x: 0.5, y: 0.85, w: 9, h: 0.05,
+        fill: { color: '0070C0' }
+      });
+
+      // Left column - Project Info
+      let yPos = 1.0;
+      const labelFontSize = 9;
+      const valueFontSize = 10;
+      const lineHeight = 0.35;
+
+      // Row 1: SAP ID, JIRA ID, PM/BP
+      slide.addText('SAP ID', { x: 0.5, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.sapId || '-', { x: 0.5, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+
+      slide.addText('JIRA ID', { x: 3.2, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.jiraId || '-', { x: 3.2, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+
+      slide.addText('PM/BP', { x: 5.9, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.pmBp || '-', { x: 5.9, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+
+      yPos += 0.6;
+
+      // Row 2: Business Owner, Involved Divisions, Project Status
+      slide.addText('Business Owner', { x: 0.5, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.businessOwner || '-', { x: 0.5, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+
+      slide.addText('Involved Divisions', { x: 3.2, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.involvedDivisions || '-', { x: 3.2, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+
+      slide.addText('Project Status', { x: 5.9, y: yPos, w: 2.5, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.projectStatus || '-', { x: 5.9, y: yPos + 0.15, w: 2.5, h: 0.3, fontSize: valueFontSize, bold: true });
+
+      // Right column - RAG Status
+      const ragX = 8.6;
+      const ragY = 1.0;
+      const ragW = 0.6;
+      const ragH = 0.3;
+      const ragGap = 0.1;
+
+      ['Overall', 'Schedule', 'Cost', 'Scope'].forEach((category, idx) => {
+        const fieldName = `rag${category}`;
+        const ragValue = slideData[fieldName] || 'Green';
+        const yOffset = ragY + (idx * (ragH + ragGap));
+
+        slide.addText(category, {
+          x: ragX, y: yOffset - 0.15, w: ragW, h: 0.15,
+          fontSize: 8, bold: true, color: '666666', align: 'center'
+        });
+        slide.addShape(pptx.ShapeType.rect, {
+          x: ragX, y: yOffset, w: ragW, h: ragH,
+          fill: { color: getRagColor(ragValue) }
+        });
+        slide.addText(ragValue.charAt(0), {
+          x: ragX, y: yOffset, w: ragW, h: ragH,
+          fontSize: 12, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle'
+        });
+      });
+
+      // Right column - Additional Details
+      let rightYPos = 2.5;
+      slide.addText('Baseline Budget', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(slideData.baselineBudget || '-', { x: 8.6, y: rightYPos + 0.15, w: 1.3, h: 0.3, fontSize: valueFontSize, bold: true });
+
+      rightYPos += 0.5;
+      slide.addText('Work Completed (%)', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(String(slideData.workCompleted || '0'), { x: 8.6, y: rightYPos + 0.15, w: 1.3, h: 0.3, fontSize: valueFontSize, bold: true });
+
+      rightYPos += 0.5;
+      slide.addText('Planned Finish Date', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(formatDate(slideData.plannedCompletionDate), { x: 8.6, y: rightYPos + 0.15, w: 1.3, h: 0.3, fontSize: valueFontSize, bold: true });
+
+      rightYPos += 0.5;
+      slide.addText('Planned Start Date', { x: 8.6, y: rightYPos, w: 1.3, h: 0.3, fontSize: labelFontSize, bold: true, color: '666666' });
+      slide.addText(formatDate(slideData.plannedStartDate), { x: 8.6, y: rightYPos + 0.15, w: 1.3, h: 0.3, fontSize: valueFontSize, bold: true });
+
+      // Main content area - 2 columns
+      yPos = 2.5;
+      const leftColX = 0.5;
+      const leftColW = 3.8;
+      const rightColX = 4.5;
+      const rightColW = 4.0;
+
+      // Project Scope
+      slide.addShape(pptx.ShapeType.rect, {
+        x: leftColX, y: yPos, w: leftColW, h: 0.35,
+        fill: { color: 'D6EAF8' }
+      });
+      slide.addText('Project Scope', {
+        x: leftColX, y: yPos, w: leftColW, h: 0.35,
+        fontSize: 11, bold: true, color: '0070C0', align: 'left', valign: 'middle',
+        margin: [0, 0.1, 0, 0]
+      });
+      slide.addText(slideData.projectScope || 'No scope defined', {
+        x: leftColX, y: yPos + 0.4, w: leftColW, h: 0.8,
+        fontSize: 9, color: '000000', align: 'left', valign: 'top',
+        margin: [0.1, 0.1, 0.1, 0.1]
+      });
+
+      // Activities Performed
+      yPos += 1.3;
+      slide.addShape(pptx.ShapeType.rect, {
+        x: leftColX, y: yPos, w: leftColW, h: 0.35,
+        fill: { color: 'D5F4E6' }
+      });
+      slide.addText('Activities Performed & Milestones Achieved', {
+        x: leftColX, y: yPos, w: leftColW, h: 0.35,
+        fontSize: 11, bold: true, color: '229954', align: 'left', valign: 'middle',
+        margin: [0, 0.1, 0, 0]
+      });
+      slide.addText(stripHtml(slideData.activitiesPerformed) || 'No activities recorded', {
+        x: leftColX, y: yPos + 0.4, w: leftColW, h: 1.2,
+        fontSize: 9, color: '000000', align: 'left', valign: 'top',
+        margin: [0.1, 0.1, 0.1, 0.1]
+      });
+
+      // Major Action Items
+      yPos += 1.7;
+      slide.addShape(pptx.ShapeType.rect, {
+        x: leftColX, y: yPos, w: leftColW, h: 0.35,
+        fill: { color: 'FEF5E7' }
+      });
+      slide.addText('Major Action Items - Upcoming Activities - Comments', {
+        x: leftColX, y: yPos, w: leftColW, h: 0.35,
+        fontSize: 11, bold: true, color: 'D68910', align: 'left', valign: 'middle',
+        margin: [0, 0.1, 0, 0]
+      });
+      slide.addText(stripHtml(slideData.majorActions) || 'No actions recorded', {
+        x: leftColX, y: yPos + 0.4, w: leftColW, h: 1.0,
+        fontSize: 9, color: '000000', align: 'left', valign: 'top',
+        margin: [0.1, 0.1, 0.1, 0.1]
+      });
+
+      // Phases/Milestones Table
+      yPos = 2.5;
+      const phaseRows = [
+        [
+          { text: 'Phase', options: { bold: true, fontSize: 9, fill: 'E8DAEF', color: '000000' } },
+          { text: 'R/A/G', options: { bold: true, fontSize: 9, fill: 'E8DAEF', color: '000000' } },
+          { text: 'Est. Delivery', options: { bold: true, fontSize: 9, fill: 'E8DAEF', color: '000000' } },
+          { text: 'Remarks', options: { bold: true, fontSize: 9, fill: 'E8DAEF', color: '000000' } }
+        ]
+      ];
+
+      if (slideData.phases && slideData.phases.length > 0) {
+        slideData.phases.forEach(phase => {
+          phaseRows.push([
+            { text: phase.description || '', options: { fontSize: 8 } },
+            { text: phase.ragStatus?.charAt(0) || 'G', options: { fontSize: 8, bold: true, fill: getRagColor(phase.ragStatus), color: 'FFFFFF', align: 'center' } },
+            { text: formatDate(phase.deliveryDate), options: { fontSize: 8 } },
+            { text: phase.remarks || '', options: { fontSize: 8 } }
+          ]);
+        });
+      } else {
+        phaseRows.push([
+          { text: 'No phases defined', options: { fontSize: 8, color: '999999', colspan: 4 } }
+        ]);
+      }
+
+      slide.addShape(pptx.ShapeType.rect, {
+        x: rightColX, y: yPos, w: rightColW, h: 0.35,
+        fill: { color: '884EA0' }
+      });
+      slide.addText('Phases/Milestones/Deliverables', {
+        x: rightColX, y: yPos, w: rightColW, h: 0.35,
+        fontSize: 11, bold: true, color: 'FFFFFF', align: 'left', valign: 'middle',
+        margin: [0, 0.1, 0, 0]
+      });
+
+      slide.addTable(phaseRows, {
+        x: rightColX, y: yPos + 0.4, w: rightColW, h: 2.0,
+        border: { pt: 1, color: 'CCCCCC' },
+        colW: [1.6, 0.5, 0.9, 1.0]
+      });
+
+      // Risks Table
+      yPos += 2.5;
+      const riskRows = [
+        [
+          { text: 'Risk', options: { bold: true, fontSize: 9, fill: 'F5B7B1', color: '000000' } },
+          { text: 'Assessment', options: { bold: true, fontSize: 9, fill: 'F5B7B1', color: '000000' } },
+          { text: 'Control', options: { bold: true, fontSize: 9, fill: 'F5B7B1', color: '000000' } }
+        ]
+      ];
+
+      if (slideData.risks && slideData.risks.length > 0) {
+        slideData.risks.forEach(risk => {
+          riskRows.push([
+            { text: risk.description || '', options: { fontSize: 8 } },
+            { text: risk.assessment?.charAt(0) || 'L', options: { fontSize: 8, bold: true, fill: getRiskColor(risk.assessment), color: 'FFFFFF', align: 'center' } },
+            { text: risk.control || '', options: { fontSize: 8 } }
+          ]);
+        });
+      } else {
+        riskRows.push([
+          { text: 'No risks defined', options: { fontSize: 8, color: '999999', colspan: 3 } }
+        ]);
+      }
+
+      slide.addShape(pptx.ShapeType.rect, {
+        x: rightColX, y: yPos, w: rightColW, h: 0.35,
+        fill: { color: 'C0392B' }
+      });
+      slide.addText('Risk', {
+        x: rightColX, y: yPos, w: rightColW, h: 0.35,
+        fontSize: 11, bold: true, color: 'FFFFFF', align: 'left', valign: 'middle',
+        margin: [0, 0.1, 0, 0]
+      });
+
+      slide.addTable(riskRows, {
+        x: rightColX, y: yPos + 0.4, w: rightColW, h: 1.8,
+        border: { pt: 1, color: 'CCCCCC' },
+        colW: [1.6, 0.8, 1.6]
+      });
+
+      // Save the presentation
+      const fileName = `${slideData.projectName || project.name || 'Project'}_Slide.pptx`;
+      await pptx.writeFile({ fileName });
+
+      console.log('PowerPoint exported successfully!');
+    } catch (error) {
+      console.error('Error exporting to PowerPoint:', error);
+      alert('Failed to export to PowerPoint. Please try again.');
+    }
+  };
+
   // Slide container (16:9 aspect ratio like PowerPoint)
   return React.createElement('div', {
-    className: 'w-full max-w-6xl mx-auto'
+    className: 'w-full max-w-6xl mx-auto space-y-4'
   },
+    // Export Button
+    React.createElement('div', {
+      className: 'flex justify-end'
+    },
+      React.createElement('button', {
+        onClick: exportToPowerPoint,
+        className: `px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
+          darkMode
+            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+            : 'bg-blue-500 hover:bg-blue-600 text-white'
+        }`
+      },
+        React.createElement('svg', {
+          className: 'w-5 h-5',
+          fill: 'none',
+          stroke: 'currentColor',
+          strokeWidth: 2,
+          viewBox: '0 0 24 24'
+        },
+          React.createElement('path', {
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+            d: 'M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+          })
+        ),
+        'Export to PowerPoint'
+      )
+    ),
     React.createElement('div', {
       className: `relative w-full bg-white shadow-2xl rounded-lg overflow-hidden`,
       style: { aspectRatio: '16/9' }
