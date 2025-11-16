@@ -11,6 +11,7 @@ import { getStatuses, getPriorities } from '../../config/actionPlanConstants.js'
 import { ActionPlanList } from './ActionPlanList.js';
 import { ActionPlanBoard } from './ActionPlanBoard.js';
 import { ActionPlanTable } from './ActionPlanTable.js';
+import { ActionPlanGantt } from './ActionPlanGantt.js';
 import { ActionPlanFilters } from './ActionPlanFilters.js';
 
 export function ActionPlan({
@@ -395,6 +396,17 @@ export function ActionPlan({
     React.createElement('path', { d: 'M3 3h18v18H3V3zm0 6h18M9 3v18' })
   );
 
+  const GanttIcon = () => React.createElement('svg', {
+    className: 'w-4 h-4',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    viewBox: '0 0 24 24'
+  },
+    React.createElement('path', { d: 'M3 3h18v18H3V3z' }),
+    React.createElement('path', { d: 'M9 9h6M9 15h10' })
+  );
+
   const SaveIcon = () => React.createElement('svg', {
     className: 'w-4 h-4',
     fill: 'none',
@@ -422,7 +434,8 @@ export function ActionPlan({
     const views = [
       { id: 'list', label: 'List', icon: ListIcon },
       { id: 'board', label: 'Board', icon: BoardIcon },
-      { id: 'table', label: 'Table', icon: TableIcon }
+      { id: 'table', label: 'Table', icon: TableIcon },
+      { id: 'gantt', label: 'Gantt', icon: GanttIcon }
     ];
 
     return React.createElement('div', {
@@ -563,37 +576,46 @@ export function ActionPlan({
             statuses: STATUSES,
             priorities: PRIORITIES
           })
-        : // List view (default)
-          React.createElement('div', { className: 'space-y-4' },
-            React.createElement(ActionPlanList, {
+        : currentView === 'gantt'
+          ? React.createElement(ActionPlanGantt, {
               actionPlan,
               darkMode,
+              onUpdate: updateActionPlan,
               statuses: STATUSES,
               priorities: PRIORITIES,
-              isEditLocked,
-              updateItem,
-              deleteItem,
-              addTask,
-              addSubtask,
-              allItems: getAllItems(),
-              addDependency,
-              removeDependency,
-              calculateProgress,
-              handleActionDragStart,
-              handleActionDragOver,
-              handleActionDrop,
-              deleteConfirm,
-              setDeleteConfirm
-            }),
-            // Add Action button
-            !isEditLocked && React.createElement('button', {
-              onClick: addAction,
-              className: `w-full py-4 rounded-xl border-2 border-dashed font-bold transition-all shadow-sm hover:shadow-md ${
-                darkMode
-                  ? 'border-sky-400/50 bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:border-sky-400'
-                  : 'border-sky-400 bg-sky-50 hover:bg-sky-100 text-sky-700 hover:border-sky-500'
-              }`
-            }, '+ Add Action')
-          )
+              isEditLocked
+            })
+          : // List view (default)
+            React.createElement('div', { className: 'space-y-4' },
+              React.createElement(ActionPlanList, {
+                actionPlan,
+                darkMode,
+                statuses: STATUSES,
+                priorities: PRIORITIES,
+                isEditLocked,
+                updateItem,
+                deleteItem,
+                addTask,
+                addSubtask,
+                allItems: getAllItems(),
+                addDependency,
+                removeDependency,
+                calculateProgress,
+                handleActionDragStart,
+                handleActionDragOver,
+                handleActionDrop,
+                deleteConfirm,
+                setDeleteConfirm
+              }),
+              // Add Action button
+              !isEditLocked && React.createElement('button', {
+                onClick: addAction,
+                className: `w-full py-4 rounded-xl border-2 border-dashed font-bold transition-all shadow-sm hover:shadow-md ${
+                  darkMode
+                    ? 'border-sky-400/50 bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:border-sky-400'
+                    : 'border-sky-400 bg-sky-50 hover:bg-sky-100 text-sky-700 hover:border-sky-500'
+                }`
+              }, '+ Add Action')
+            )
   );
 }
