@@ -304,13 +304,63 @@ export function SlideViewer({ project, slideData, darkMode }) {
     }
   };
 
-  // Listen for export event
+  const exportToImage = async () => {
+    try {
+      // Check if html2canvas is available
+      if (typeof html2canvas === 'undefined') {
+        console.error('html2canvas library is not loaded');
+        alert('Image export library is not loaded. Please refresh the page and try again.');
+        return;
+      }
+
+      // Find the slide element
+      const slideElement = document.querySelector('[data-slide-container]');
+      if (!slideElement) {
+        alert('Slide element not found. Please try again.');
+        return;
+      }
+
+      // Generate canvas from slide element
+      const canvas = await html2canvas(slideElement, {
+        scale: 2, // Higher quality (2x resolution)
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      });
+
+      // Convert canvas to blob
+      canvas.toBlob((blob) => {
+        // Create download link
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const fileName = `${slideData.projectName || project.name || 'Project'}_Slide.jpg`;
+        link.download = fileName;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        console.log('Image exported successfully!');
+      }, 'image/jpeg', 0.95); // High quality JPEG (95%)
+    } catch (error) {
+      console.error('Error exporting to image:', error);
+      alert('Failed to export to image. Please try again.');
+    }
+  };
+
+  // Listen for export events
   React.useEffect(() => {
-    const handleExportEvent = () => {
+    const handleExportPowerPointEvent = () => {
       exportToPowerPoint();
     };
-    window.addEventListener('exportPowerPoint', handleExportEvent);
-    return () => window.removeEventListener('exportPowerPoint', handleExportEvent);
+    const handleExportImageEvent = () => {
+      exportToImage();
+    };
+    window.addEventListener('exportPowerPoint', handleExportPowerPointEvent);
+    window.addEventListener('exportImage', handleExportImageEvent);
+    return () => {
+      window.removeEventListener('exportPowerPoint', handleExportPowerPointEvent);
+      window.removeEventListener('exportImage', handleExportImageEvent);
+    };
   }, [slideData, project]);
 
   // Slide container (16:9 aspect ratio like PowerPoint)
@@ -319,7 +369,8 @@ export function SlideViewer({ project, slideData, darkMode }) {
   },
     React.createElement('div', {
       className: `relative w-full bg-white shadow-2xl rounded-lg overflow-hidden`,
-      style: { aspectRatio: '16/9' }
+      style: { aspectRatio: '16/9' },
+      'data-slide-container': true
     },
       // Slide content
       React.createElement('div', {
@@ -380,9 +431,10 @@ export function SlideViewer({ project, slideData, darkMode }) {
                 const fieldName = `rag${category}`;
                 const ragValue = slideData[fieldName] || 'Green';
                 return React.createElement('div', { key: category, className: 'text-center' },
-                  React.createElement('div', { className: 'text-xs font-semibold text-gray-600 mb-1' }, category),
+                  React.createElement('div', { className: 'text-xs font-semibold text-gray-600 mb-1 flex items-center justify-center' }, category),
                   React.createElement('div', {
-                    className: `px-2 py-1 rounded font-bold text-sm ${ragColorClass(ragValue)}`
+                    className: `px-2 py-1 rounded font-bold text-sm flex items-center justify-center ${ragColorClass(ragValue)}`,
+                    style: { minHeight: '24px' }
                   }, ragValue.charAt(0))
                 );
               })
@@ -491,28 +543,28 @@ export function SlideViewer({ project, slideData, darkMode }) {
                   className: 'bg-purple-100'
                 },
                   React.createElement('tr', null,
-                    React.createElement('th', { className: 'border border-gray-300 px-1 py-0.5 text-left font-semibold' }, 'Phase'),
-                    React.createElement('th', { className: 'border border-gray-300 px-1 py-0.5 text-center font-semibold w-12' }, 'R/A/G'),
-                    React.createElement('th', { className: 'border border-gray-300 px-1 py-0.5 text-left font-semibold w-20' }, 'Est. Delivery'),
-                    React.createElement('th', { className: 'border border-gray-300 px-1 py-0.5 text-left font-semibold' }, 'Remarks')
+                    React.createElement('th', { className: 'border border-gray-300 px-1 py-1 text-left font-semibold align-middle' }, 'Phase'),
+                    React.createElement('th', { className: 'border border-gray-300 px-1 py-1 text-center font-semibold w-12 align-middle' }, 'R/A/G'),
+                    React.createElement('th', { className: 'border border-gray-300 px-1 py-1 text-left font-semibold w-20 align-middle' }, 'Est. Delivery'),
+                    React.createElement('th', { className: 'border border-gray-300 px-1 py-1 text-left font-semibold align-middle' }, 'Remarks')
                   )
                 ),
                 React.createElement('tbody', null,
                   slideData.phases && slideData.phases.length > 0
                     ? slideData.phases.map((phase, index) =>
                         React.createElement('tr', { key: index },
-                          React.createElement('td', { className: 'border border-gray-300 px-1 py-0.5' }, phase.description),
+                          React.createElement('td', { className: 'border border-gray-300 px-1 py-1 align-middle' }, phase.description),
                           React.createElement('td', {
-                            className: `border border-gray-300 px-1 py-0.5 text-center font-bold ${ragColorClass(phase.ragStatus)}`
+                            className: `border border-gray-300 px-1 py-1 text-center font-bold align-middle ${ragColorClass(phase.ragStatus)}`
                           }, phase.ragStatus.charAt(0)),
-                          React.createElement('td', { className: 'border border-gray-300 px-1 py-0.5' }, formatDate(phase.deliveryDate)),
-                          React.createElement('td', { className: 'border border-gray-300 px-1 py-0.5' }, phase.remarks)
+                          React.createElement('td', { className: 'border border-gray-300 px-1 py-1 align-middle' }, formatDate(phase.deliveryDate)),
+                          React.createElement('td', { className: 'border border-gray-300 px-1 py-1 align-middle' }, phase.remarks)
                         )
                       )
                     : React.createElement('tr', null,
                         React.createElement('td', {
                           colSpan: 4,
-                          className: 'border border-gray-300 px-1 py-2 text-center text-gray-500'
+                          className: 'border border-gray-300 px-1 py-2 text-center text-gray-500 align-middle'
                         }, 'No phases defined')
                       )
                 )
@@ -533,26 +585,26 @@ export function SlideViewer({ project, slideData, darkMode }) {
                   className: 'bg-red-100'
                 },
                   React.createElement('tr', null,
-                    React.createElement('th', { className: 'border border-gray-300 px-1 py-0.5 text-left font-semibold' }, 'Risk'),
-                    React.createElement('th', { className: 'border border-gray-300 px-1 py-0.5 text-center font-semibold w-16' }, 'Assessment'),
-                    React.createElement('th', { className: 'border border-gray-300 px-1 py-0.5 text-left font-semibold' }, 'Control')
+                    React.createElement('th', { className: 'border border-gray-300 px-1 py-1 text-left font-semibold align-middle' }, 'Risk'),
+                    React.createElement('th', { className: 'border border-gray-300 px-1 py-1 text-center font-semibold w-16 align-middle' }, 'Assessment'),
+                    React.createElement('th', { className: 'border border-gray-300 px-1 py-1 text-left font-semibold align-middle' }, 'Control')
                   )
                 ),
                 React.createElement('tbody', null,
                   slideData.risks && slideData.risks.length > 0
                     ? slideData.risks.map((risk, index) =>
                         React.createElement('tr', { key: index },
-                          React.createElement('td', { className: 'border border-gray-300 px-1 py-0.5' }, risk.description),
+                          React.createElement('td', { className: 'border border-gray-300 px-1 py-1 align-middle' }, risk.description),
                           React.createElement('td', {
-                            className: `border border-gray-300 px-1 py-0.5 text-center font-bold ${riskColorClass(risk.assessment)}`
+                            className: `border border-gray-300 px-1 py-1 text-center font-bold align-middle ${riskColorClass(risk.assessment)}`
                           }, risk.assessment.charAt(0)),
-                          React.createElement('td', { className: 'border border-gray-300 px-1 py-0.5' }, risk.control)
+                          React.createElement('td', { className: 'border border-gray-300 px-1 py-1 align-middle' }, risk.control)
                         )
                       )
                     : React.createElement('tr', null,
                         React.createElement('td', {
                           colSpan: 3,
-                          className: 'border border-gray-300 px-1 py-2 text-center text-gray-500'
+                          className: 'border border-gray-300 px-1 py-2 text-center text-gray-500 align-middle'
                         }, 'No risks defined')
                       )
                 )

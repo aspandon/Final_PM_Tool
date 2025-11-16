@@ -26,18 +26,28 @@ export function RichTextEditor({ value, onChange, darkMode, placeholder = 'Enter
 
   const execCommand = (command, value = null) => {
     // Ensure editor has focus before executing command
-    editorRef.current?.focus();
+    if (!editorRef.current) return;
 
-    // Execute the command
-    document.execCommand(command, false, value);
+    editorRef.current.focus();
 
-    // For list commands, ensure focus is maintained
+    // For list commands, use a more reliable approach
     if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
+      // Execute the command
+      const success = document.execCommand(command, false, value);
+
+      // Force update after a short delay to ensure the DOM is updated
       setTimeout(() => {
-        editorRef.current?.focus();
-        handleInput();
-      }, 0);
+        if (editorRef.current) {
+          editorRef.current.focus();
+          // Trigger input event to save changes
+          const event = new Event('input', { bubbles: true });
+          editorRef.current.dispatchEvent(event);
+          handleInput();
+        }
+      }, 10);
     } else {
+      // Execute the command
+      document.execCommand(command, false, value);
       handleInput();
     }
   };
