@@ -18,7 +18,8 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
   const [viewFilters, setViewFilters] = React.useState({
     showActions: true,
     showTasks: true,
-    showSubtasks: true
+    showSubtasks: true,
+    showDependencies: true
   });
   const [autopilotResult, setAutopilotResult] = React.useState(null);
   const [undoHistory, setUndoHistory] = React.useState([]); // Stack of previous states (max 20)
@@ -705,7 +706,17 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
               ? darkMode ? 'bg-purple-600 text-white' : 'bg-purple-500 text-white'
               : darkMode ? 'bg-slate-700 text-gray-400 hover:bg-slate-600' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-300'
           } cursor-pointer`
-        }, 'Subtasks')
+        }, 'Subtasks'),
+
+        // Dependencies Toggle
+        React.createElement('button', {
+          onClick: () => toggleFilter('showDependencies'),
+          className: `px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            viewFilters.showDependencies
+              ? darkMode ? 'bg-amber-600 text-white' : 'bg-amber-500 text-white'
+              : darkMode ? 'bg-slate-700 text-gray-400 hover:bg-slate-600' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-300'
+          } cursor-pointer`
+        }, 'Dependencies')
       ),
 
       // Right side buttons
@@ -805,8 +816,107 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
 
         // Items
         React.createElement('div', { className: 'relative' },
-          // Dependency lines (SVG overlay)
-          React.createElement('svg', {
+          // Item rows (rendered FIRST to establish layout)
+          items.map((item, index) => {
+            const position = getBarPosition(
+              item.startDate,
+              item.finishDate || item.dueDate,
+              earliest,
+              totalDays
+            );
+
+            const isViolated = isDependencyViolated(item, items);
+            const typeStyle = typeStyles[item.type];
+            const statusInfo = statuses[item.status || 'not-started'];
+            const priorityInfo = priorities[item.priority || 'medium'];
+
+            return React.createElement('div', {
+              key: `${item.type}-${item.itemId}`,
+              className: 'flex items-center mb-1 h-10'
+            },
+              // Item info column
+              React.createElement('div', {
+                className: 'w-64 flex-shrink-0 pr-2 flex items-center gap-2'
+              },
+                React.createElement('span', {
+                  className: `px-2 py-0.5 rounded text-[9px] font-bold text-white ${typeStyle.color}`
+                }, typeStyle.label),
+                React.createElement('div', { className: 'flex-1 min-w-0' },
+                  React.createElement('div', {
+                    className: `text-[11px] font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'} truncate`,
+                    title: item.itemName
+                  }, item.itemName),
+                  item.type === 'task' && React.createElement('div', {
+                    className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} truncate`
+                  }, item.actionName),
+                  item.type === 'subtask' && React.createElement('div', {
+                    className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} truncate`
+                  }, `${item.taskName}`)
+                ),
+                item.priority && React.createElement('span', {
+                  className: `${priorityInfo.text} text-xs`
+                }, priorityInfo.icon)
+              ),
+
+              // Timeline area
+              React.createElement('div', {
+                className: `gantt-timeline-area flex-1 relative h-8 ${darkMode ? 'bg-slate-700/30 border-slate-600' : 'bg-gray-50 border-gray-200'} rounded border`
+              },
+                // Month grid lines
+                monthLabels.map((month, i) => {
+                  const offset = getDaysDiff(earliest, month.date) - 1;
+                  const leftPosition = (offset / totalDays) * 100;
+                  return React.createElement('div', {
+                    key: i,
+                    className: `absolute top-0 bottom-0 w-px ${darkMode ? 'bg-slate-600' : 'bg-gray-300'}`,
+                    style: { left: `${leftPosition}%` }
+                  });
+                }),
+
+                // Bar
+                position.visible && React.createElement('div', {
+                  draggable: !isEditLocked,
+                  onDragStart: (e) => handleBarDragStart(e, item),
+                  onDrag: handleBarDrag,
+                  onDragEnd: (e) => {
+                    const rect = e.currentTarget.parentElement.getBoundingClientRect();
+                    handleBarDragEnd(e, rect.width, earliest, totalDays);
+                  },
+                  className: `group absolute h-6 top-1 ${typeStyle.color} rounded-lg flex items-center justify-center text-white text-[10px] font-semibold transition shadow-sm ${
+                    isViolated ? 'ring-2 ring-red-500' : ''
+                  } ${!isEditLocked ? 'cursor-move hover:opacity-90 hover:shadow-md' : 'cursor-default'}`,
+                  style: {
+                    left: position.left,
+                    width: position.width
+                  },
+                  title: `${item.itemName}\n${item.startDate} to ${item.finishDate || item.dueDate}\nDuration: ${position.duration} days${isViolated ? '\n⚠️ Dependency violation!' : ''}`
+                },
+                  // Left resize handle
+                  !isEditLocked && React.createElement('div', {
+                    onMouseDown: (e) => handleResizeStart(e, item, 'resize-start'),
+                    className: `absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'bg-white/30 hover:bg-white/50' : 'bg-black/20 hover:bg-black/40'}`,
+                    title: 'Drag to resize start date'
+                  }),
+
+                  // Bar content
+                  React.createElement('span', null, `${position.duration}d`),
+                  isViolated && React.createElement('span', {
+                    className: 'ml-1 text-red-300'
+                  }, '⚠️'),
+
+                  // Right resize handle
+                  !isEditLocked && React.createElement('div', {
+                    onMouseDown: (e) => handleResizeStart(e, item, 'resize-end'),
+                    className: `absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'bg-white/30 hover:bg-white/50' : 'bg-black/20 hover:bg-black/40'}`,
+                    title: 'Drag to resize end date'
+                  })
+                )
+              )
+            );
+          }),
+
+          // Dependency lines (SVG overlay) - rendered LAST after items are laid out
+          viewFilters.showDependencies && React.createElement('svg', {
             className: 'absolute top-0 left-64 pointer-events-none',
             style: {
               width: 'calc(100% - 16rem)',
@@ -908,106 +1018,7 @@ export function ActionPlanGantt({ actionPlan, darkMode, onUpdate, statuses, prio
                 }
               });
             })
-          ),
-
-          // Item rows
-          items.map((item, index) => {
-            const position = getBarPosition(
-              item.startDate,
-              item.finishDate || item.dueDate,
-              earliest,
-              totalDays
-            );
-
-            const isViolated = isDependencyViolated(item, items);
-            const typeStyle = typeStyles[item.type];
-            const statusInfo = statuses[item.status || 'not-started'];
-            const priorityInfo = priorities[item.priority || 'medium'];
-
-            return React.createElement('div', {
-              key: `${item.type}-${item.itemId}`,
-              className: 'flex items-center mb-1 h-10'
-            },
-              // Item info column
-              React.createElement('div', {
-                className: 'w-64 flex-shrink-0 pr-2 flex items-center gap-2'
-              },
-                React.createElement('span', {
-                  className: `px-2 py-0.5 rounded text-[9px] font-bold text-white ${typeStyle.color}`
-                }, typeStyle.label),
-                React.createElement('div', { className: 'flex-1 min-w-0' },
-                  React.createElement('div', {
-                    className: `text-[11px] font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'} truncate`,
-                    title: item.itemName
-                  }, item.itemName),
-                  item.type === 'task' && React.createElement('div', {
-                    className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} truncate`
-                  }, item.actionName),
-                  item.type === 'subtask' && React.createElement('div', {
-                    className: `text-[9px] ${darkMode ? 'text-gray-400' : 'text-gray-600'} truncate`
-                  }, `${item.taskName}`)
-                ),
-                item.priority && React.createElement('span', {
-                  className: `${priorityInfo.text} text-xs`
-                }, priorityInfo.icon)
-              ),
-
-              // Timeline area
-              React.createElement('div', {
-                className: `gantt-timeline-area flex-1 relative h-8 ${darkMode ? 'bg-slate-700/30 border-slate-600' : 'bg-gray-50 border-gray-200'} rounded border`
-              },
-                // Month grid lines
-                monthLabels.map((month, i) => {
-                  const offset = getDaysDiff(earliest, month.date) - 1;
-                  const leftPosition = (offset / totalDays) * 100;
-                  return React.createElement('div', {
-                    key: i,
-                    className: `absolute top-0 bottom-0 w-px ${darkMode ? 'bg-slate-600' : 'bg-gray-300'}`,
-                    style: { left: `${leftPosition}%` }
-                  });
-                }),
-
-                // Bar
-                position.visible && React.createElement('div', {
-                  draggable: !isEditLocked,
-                  onDragStart: (e) => handleBarDragStart(e, item),
-                  onDrag: handleBarDrag,
-                  onDragEnd: (e) => {
-                    const rect = e.currentTarget.parentElement.getBoundingClientRect();
-                    handleBarDragEnd(e, rect.width, earliest, totalDays);
-                  },
-                  className: `group absolute h-6 top-1 ${typeStyle.color} rounded-lg flex items-center justify-center text-white text-[10px] font-semibold transition shadow-sm ${
-                    isViolated ? 'ring-2 ring-red-500' : ''
-                  } ${!isEditLocked ? 'cursor-move hover:opacity-90 hover:shadow-md' : 'cursor-default'}`,
-                  style: {
-                    left: position.left,
-                    width: position.width
-                  },
-                  title: `${item.itemName}\n${item.startDate} to ${item.finishDate || item.dueDate}\nDuration: ${position.duration} days${isViolated ? '\n⚠️ Dependency violation!' : ''}`
-                },
-                  // Left resize handle
-                  !isEditLocked && React.createElement('div', {
-                    onMouseDown: (e) => handleResizeStart(e, item, 'resize-start'),
-                    className: `absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'bg-white/30 hover:bg-white/50' : 'bg-black/20 hover:bg-black/40'}`,
-                    title: 'Drag to resize start date'
-                  }),
-
-                  // Bar content
-                  React.createElement('span', null, `${position.duration}d`),
-                  isViolated && React.createElement('span', {
-                    className: 'ml-1 text-red-300'
-                  }, '⚠️'),
-
-                  // Right resize handle
-                  !isEditLocked && React.createElement('div', {
-                    onMouseDown: (e) => handleResizeStart(e, item, 'resize-end'),
-                    className: `absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'bg-white/30 hover:bg-white/50' : 'bg-black/20 hover:bg-black/40'}`,
-                    title: 'Drag to resize end date'
-                  })
-                )
-              )
-            );
-          })
+          )
         )
       )
     ),
