@@ -50,6 +50,9 @@ export function ProjectBudgetSection({
     const remainingYear4 = totalYear4 - invoicedYear4;
     const remainingYear5 = totalYear5 - invoicedYear5;
 
+    const totalInvoiced = invoicedYear1 + invoicedYear2 + invoicedYear3 + invoicedYear4 + invoicedYear5;
+    const totalRemainingBudget = totalBudget - totalInvoiced;
+
     return {
       totalCapex,
       totalOpex,
@@ -63,7 +66,9 @@ export function ProjectBudgetSection({
       remainingYear2,
       remainingYear3,
       remainingYear4,
-      remainingYear5
+      remainingYear5,
+      totalInvoiced,
+      totalRemainingBudget
     };
   };
 
@@ -206,7 +211,7 @@ export function ProjectBudgetSection({
 
       // Summary Totals
       React.createElement('div', {
-        className: `mt-3 pt-3 border-t ${darkMode ? 'border-slate-600' : 'border-sky-200'} grid grid-cols-4 gap-3`
+        className: `mt-3 pt-3 border-t ${darkMode ? 'border-slate-600' : 'border-sky-200'} grid grid-cols-5 gap-3`
       },
         // First Year Selector
         React.createElement('div', {
@@ -273,6 +278,31 @@ export function ProjectBudgetSection({
           React.createElement('div', {
             className: `text-xl font-bold ${darkMode ? 'text-purple-400' : 'text-sky-800'}`
           }, budgetTotals.totalBudget.toFixed(2))
+        ),
+
+        // Total Remaining Budget
+        React.createElement('div', {
+          className: `p-2 rounded ${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700' : 'bg-sky-50/20'} border-2 ${
+            budgetTotals.totalRemainingBudget < 0
+              ? darkMode ? 'border-red-500' : 'border-red-400'
+              : darkMode ? 'border-emerald-500' : 'border-emerald-400'
+          }`
+        },
+          React.createElement('div', {
+            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1 flex items-center gap-1`
+          },
+            React.createElement(DollarSign, {
+              className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
+            }),
+            'TOTAL REMAINING BUDGET'
+          ),
+          React.createElement('div', {
+            className: `text-xl font-bold ${
+              budgetTotals.totalRemainingBudget < 0
+                ? darkMode ? 'text-red-400' : 'text-red-700'
+                : darkMode ? 'text-emerald-400' : 'text-emerald-700'
+            }`
+          }, budgetTotals.totalRemainingBudget.toFixed(2))
         )
       )
     )
