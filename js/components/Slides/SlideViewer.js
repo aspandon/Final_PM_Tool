@@ -62,7 +62,15 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
   const exportToPowerPoint = async () => {
     try {
-      const pptx = new pptxgen();
+      // Check if PptxGenJS is available
+      if (typeof PptxGenJS === 'undefined' && typeof window.PptxGenJS === 'undefined') {
+        console.error('PptxGenJS library is not loaded');
+        alert('PowerPoint library is not loaded. Please refresh the page and try again.');
+        return;
+      }
+
+      const PptxGen = window.PptxGenJS || PptxGenJS;
+      const pptx = new PptxGen();
       const slide = pptx.addSlide();
 
       // Header - Project Name

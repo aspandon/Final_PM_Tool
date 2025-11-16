@@ -26,7 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- PptxGenJS - PowerPoint generation -->
-    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
     <!-- Lucide Icons - Local -->
     <script src="./css/lucide.js"></script>
@@ -260,6 +260,9 @@
             console.log('Recharts:', typeof Recharts);
             console.log('window.Recharts:', typeof window.Recharts);
             console.log('XLSX:', typeof XLSX);
+            console.log('PptxGenJS:', typeof PptxGenJS);
+            console.log('pptxgen:', typeof pptxgen);
+            console.log('window.PptxGenJS:', typeof window.PptxGenJS);
 
             if (typeof React === 'undefined') missing.push('React');
             if (typeof ReactDOM === 'undefined') missing.push('ReactDOM');
