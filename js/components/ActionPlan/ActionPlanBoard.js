@@ -262,6 +262,9 @@ export function ActionPlanBoard({ actionPlan, darkMode, onUpdate, statuses, prio
               const subtaskProgress = item.type === 'task' && item.subtasks && item.subtasks.length > 0
                 ? Math.round((item.subtasks.filter(s => s.status === 'completed').length / item.subtasks.length) * 100)
                 : 0;
+              const taskProgress = item.type === 'action' && item.tasks && item.tasks.length > 0
+                ? Math.round((item.tasks.filter(t => t.status === 'completed').length / item.tasks.length) * 100)
+                : 0;
 
               return React.createElement('div', {
                 key: `${item.type}-${item.id}`,
@@ -330,6 +333,28 @@ export function ActionPlanBoard({ actionPlan, darkMode, onUpdate, statuses, prio
                     React.createElement('span', {
                       className: `text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
                     }, item.owner || item.assignees[0])
+                  )
+                ),
+
+                // Progress Bar (if action has tasks)
+                item.type === 'action' && item.tasks && item.tasks.length > 0 && React.createElement('div', {
+                  className: 'mt-2'
+                },
+                  React.createElement('div', {
+                    className: `flex items-center gap-2 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+                  },
+                    React.createElement('span', null, `${item.tasks.filter(t => t.status === 'completed').length}/${item.tasks.length} tasks`),
+                    React.createElement('span', {
+                      className: 'ml-auto font-semibold'
+                    }, `${taskProgress}%`)
+                  ),
+                  React.createElement('div', {
+                    className: `w-full h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`
+                  },
+                    React.createElement('div', {
+                      className: `h-full transition-all duration-300 bg-gradient-to-r ${statusInfo.gradient}`,
+                      style: { width: `${taskProgress}%` }
+                    })
                   )
                 ),
 
