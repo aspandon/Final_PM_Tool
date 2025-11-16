@@ -201,24 +201,9 @@ export function Slides({ projects, darkMode }) {
             viewMode === 'view' && React.createElement('div', {
               className: `rounded-lg p-6 ${darkMode ? 'bg-slate-800' : 'bg-gray-100'} shadow-md`
             },
-              React.createElement('div', {
-                className: 'mb-4 flex items-center justify-between'
-              },
-                React.createElement('h3', {
-                  className: `text-xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-                }, 'Slide Preview'),
-                React.createElement('button', {
-                  onClick: () => {
-                    // Future: Add export to PowerPoint functionality
-                    alert('Export to PowerPoint feature coming soon!');
-                  },
-                  className: `px-4 py-2 rounded-lg font-semibold transition-colors ${
-                    darkMode
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-green-500 text-white hover:bg-green-600'
-                  }`
-                }, 'Export to PowerPoint')
-              ),
+              React.createElement('h3', {
+                className: `text-xl font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+              }, 'Slide Preview'),
               React.createElement(SlideViewer, {
                 project: selectedProject,
                 slideData: selectedSlideData,

@@ -62,7 +62,7 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
   const exportToPowerPoint = async () => {
     try {
-      const pptx = new PptxGenJS();
+      const pptx = new pptxgen();
       const slide = pptx.addSlide();
 
       // Header - Project Name
@@ -73,9 +73,9 @@ export function SlideViewer({ project, slideData, darkMode }) {
       });
 
       // Blue line separator
-      slide.addShape(pptx.ShapeType.rect, {
+      slide.addShape('rect', {
         x: 0.5, y: 0.85, w: 9, h: 0.05,
-        fill: { color: '0070C0' }
+        fill: '0070C0'
       });
 
       // Left column - Project Info
@@ -122,9 +122,9 @@ export function SlideViewer({ project, slideData, darkMode }) {
           x: ragX, y: yOffset - 0.15, w: ragW, h: 0.15,
           fontSize: 8, bold: true, color: '666666', align: 'center'
         });
-        slide.addShape(pptx.ShapeType.rect, {
+        slide.addShape('rect', {
           x: ragX, y: yOffset, w: ragW, h: ragH,
-          fill: { color: getRagColor(ragValue) }
+          fill: getRagColor(ragValue)
         });
         slide.addText(ragValue.charAt(0), {
           x: ragX, y: yOffset, w: ragW, h: ragH,
@@ -157,9 +157,9 @@ export function SlideViewer({ project, slideData, darkMode }) {
       const rightColW = 4.0;
 
       // Project Scope
-      slide.addShape(pptx.ShapeType.rect, {
+      slide.addShape('rect', {
         x: leftColX, y: yPos, w: leftColW, h: 0.35,
-        fill: { color: 'D6EAF8' }
+        fill: 'D6EAF8'
       });
       slide.addText('Project Scope', {
         x: leftColX, y: yPos, w: leftColW, h: 0.35,
@@ -174,9 +174,9 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
       // Activities Performed
       yPos += 1.3;
-      slide.addShape(pptx.ShapeType.rect, {
+      slide.addShape('rect', {
         x: leftColX, y: yPos, w: leftColW, h: 0.35,
-        fill: { color: 'D5F4E6' }
+        fill: 'D5F4E6'
       });
       slide.addText('Activities Performed & Milestones Achieved', {
         x: leftColX, y: yPos, w: leftColW, h: 0.35,
@@ -191,9 +191,9 @@ export function SlideViewer({ project, slideData, darkMode }) {
 
       // Major Action Items
       yPos += 1.7;
-      slide.addShape(pptx.ShapeType.rect, {
+      slide.addShape('rect', {
         x: leftColX, y: yPos, w: leftColW, h: 0.35,
-        fill: { color: 'FEF5E7' }
+        fill: 'FEF5E7'
       });
       slide.addText('Major Action Items - Upcoming Activities - Comments', {
         x: leftColX, y: yPos, w: leftColW, h: 0.35,
@@ -210,10 +210,10 @@ export function SlideViewer({ project, slideData, darkMode }) {
       yPos = 2.5;
       const phaseRows = [
         [
-          { text: 'Phase', options: { bold: true, fontSize: 9, fill: 'E8DAEF', color: '000000' } },
-          { text: 'R/A/G', options: { bold: true, fontSize: 9, fill: 'E8DAEF', color: '000000' } },
-          { text: 'Est. Delivery', options: { bold: true, fontSize: 9, fill: 'E8DAEF', color: '000000' } },
-          { text: 'Remarks', options: { bold: true, fontSize: 9, fill: 'E8DAEF', color: '000000' } }
+          { text: 'Phase', options: { bold: true, fontSize: 9, fill: { color: 'E8DAEF' }, color: '000000' } },
+          { text: 'R/A/G', options: { bold: true, fontSize: 9, fill: { color: 'E8DAEF' }, color: '000000' } },
+          { text: 'Est. Delivery', options: { bold: true, fontSize: 9, fill: { color: 'E8DAEF' }, color: '000000' } },
+          { text: 'Remarks', options: { bold: true, fontSize: 9, fill: { color: 'E8DAEF' }, color: '000000' } }
         ]
       ];
 
@@ -221,7 +221,7 @@ export function SlideViewer({ project, slideData, darkMode }) {
         slideData.phases.forEach(phase => {
           phaseRows.push([
             { text: phase.description || '', options: { fontSize: 8 } },
-            { text: phase.ragStatus?.charAt(0) || 'G', options: { fontSize: 8, bold: true, fill: getRagColor(phase.ragStatus), color: 'FFFFFF', align: 'center' } },
+            { text: phase.ragStatus?.charAt(0) || 'G', options: { fontSize: 8, bold: true, fill: { color: getRagColor(phase.ragStatus) }, color: 'FFFFFF', align: 'center' } },
             { text: formatDate(phase.deliveryDate), options: { fontSize: 8 } },
             { text: phase.remarks || '', options: { fontSize: 8 } }
           ]);
@@ -232,9 +232,9 @@ export function SlideViewer({ project, slideData, darkMode }) {
         ]);
       }
 
-      slide.addShape(pptx.ShapeType.rect, {
+      slide.addShape('rect', {
         x: rightColX, y: yPos, w: rightColW, h: 0.35,
-        fill: { color: '884EA0' }
+        fill: '884EA0'
       });
       slide.addText('Phases/Milestones/Deliverables', {
         x: rightColX, y: yPos, w: rightColW, h: 0.35,
@@ -252,9 +252,9 @@ export function SlideViewer({ project, slideData, darkMode }) {
       yPos += 2.5;
       const riskRows = [
         [
-          { text: 'Risk', options: { bold: true, fontSize: 9, fill: 'F5B7B1', color: '000000' } },
-          { text: 'Assessment', options: { bold: true, fontSize: 9, fill: 'F5B7B1', color: '000000' } },
-          { text: 'Control', options: { bold: true, fontSize: 9, fill: 'F5B7B1', color: '000000' } }
+          { text: 'Risk', options: { bold: true, fontSize: 9, fill: { color: 'F5B7B1' }, color: '000000' } },
+          { text: 'Assessment', options: { bold: true, fontSize: 9, fill: { color: 'F5B7B1' }, color: '000000' } },
+          { text: 'Control', options: { bold: true, fontSize: 9, fill: { color: 'F5B7B1' }, color: '000000' } }
         ]
       ];
 
@@ -262,7 +262,7 @@ export function SlideViewer({ project, slideData, darkMode }) {
         slideData.risks.forEach(risk => {
           riskRows.push([
             { text: risk.description || '', options: { fontSize: 8 } },
-            { text: risk.assessment?.charAt(0) || 'L', options: { fontSize: 8, bold: true, fill: getRiskColor(risk.assessment), color: 'FFFFFF', align: 'center' } },
+            { text: risk.assessment?.charAt(0) || 'L', options: { fontSize: 8, bold: true, fill: { color: getRiskColor(risk.assessment) }, color: 'FFFFFF', align: 'center' } },
             { text: risk.control || '', options: { fontSize: 8 } }
           ]);
         });
@@ -272,9 +272,9 @@ export function SlideViewer({ project, slideData, darkMode }) {
         ]);
       }
 
-      slide.addShape(pptx.ShapeType.rect, {
+      slide.addShape('rect', {
         x: rightColX, y: yPos, w: rightColW, h: 0.35,
-        fill: { color: 'C0392B' }
+        fill: 'C0392B'
       });
       slide.addText('Risk', {
         x: rightColX, y: yPos, w: rightColW, h: 0.35,
@@ -410,8 +410,23 @@ export function SlideViewer({ project, slideData, darkMode }) {
                   React.createElement('div', { className: 'text-sm font-bold' }, slideData.baselineBudget || '-')
                 ),
                 React.createElement('div', null,
-                  React.createElement('div', { className: 'text-xs font-semibold text-gray-600' }, 'Work Completed (%)'),
-                  React.createElement('div', { className: 'text-sm font-bold' }, slideData.workCompleted || '0')
+                  React.createElement('div', { className: 'text-xs font-semibold text-gray-600 mb-1' }, 'Work Completed (%)'),
+                  React.createElement('div', { className: 'flex items-center gap-2' },
+                    // Progress bar background
+                    React.createElement('div', {
+                      className: 'flex-1 h-4 bg-gray-200 rounded-full overflow-hidden'
+                    },
+                      // Progress bar fill
+                      React.createElement('div', {
+                        className: 'h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300',
+                        style: { width: `${Math.min(100, Math.max(0, slideData.workCompleted || 0))}%` }
+                      })
+                    ),
+                    // Percentage text
+                    React.createElement('div', { className: 'text-sm font-bold text-blue-700 min-w-[2.5rem] text-right' },
+                      `${slideData.workCompleted || 0}%`
+                    )
+                  )
                 )
               ),
               React.createElement('div', { className: 'grid grid-cols-2 gap-2' },
