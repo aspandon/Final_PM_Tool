@@ -9,7 +9,13 @@ import {
   ShoppingCart,
   Settings,
   Flask,
-  PartyPopper
+  PartyPopper,
+  FolderKanban,
+  TrendingUp,
+  Target,
+  Activity,
+  Users,
+  User
 } from '../../shared/icons/index.js';
 
 /**
@@ -32,7 +38,7 @@ import {
 /**
  * KPI Card Component
  */
-export function KPICard({ title, value, percentage, color, icon, filterType, onClick, selectedKPIFilter, darkMode }) {
+export function KPICard({ title, value, percentage, color, Icon, filterType, onClick, selectedKPIFilter, darkMode }) {
   const isSelected = selectedKPIFilter === filterType;
 
   return React.createElement('div', {
@@ -53,9 +59,9 @@ export function KPICard({ title, value, percentage, color, icon, filterType, onC
           className: `text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
         }, `${percentage}% of total`)
       ),
-      React.createElement('div', {
-        className: `text-3xl opacity-20`
-      }, icon)
+      Icon && React.createElement(Icon, {
+        className: `w-12 h-12 opacity-20 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+      })
     )
   );
 }
@@ -63,46 +69,49 @@ export function KPICard({ title, value, percentage, color, icon, filterType, onC
 /**
  * Risk Alert Card Component
  */
-export function RiskAlertCard({ title, value, severity, icon, alertType, onClick, selectedRiskAlert, darkMode }) {
+export function RiskAlertCard({ title, value, severity, Icon, alertType, onClick, selectedRiskAlert, darkMode }) {
   const isSelected = selectedRiskAlert === alertType;
   const isCritical = alertType === 'critical';
 
   // Define severity styles
   const severityStyles = {
+    overdue: {
+      border: 'border-red-700',
+      bg: darkMode ? 'bg-red-950/40' : 'bg-red-100',
+      text: darkMode ? 'text-red-200' : 'text-red-800',
+      pulse: 'animate-pulse'
+    },
     critical: {
       border: 'border-red-600',
       bg: darkMode ? 'bg-red-900/30' : 'bg-red-50',
       text: darkMode ? 'text-red-300' : 'text-red-700',
-      icon: '🚨',
       pulse: 'animate-pulse'
     },
     high: {
       border: 'border-red-500',
       bg: darkMode ? 'bg-red-900/20' : 'bg-red-50/70',
       text: darkMode ? 'text-red-400' : 'text-red-600',
-      icon: '🔴',
       pulse: ''
     },
     medium: {
       border: 'border-orange-500',
       bg: darkMode ? 'bg-orange-900/20' : 'bg-orange-50',
       text: darkMode ? 'text-orange-400' : 'text-orange-600',
-      icon: '⚠️',
       pulse: ''
     },
     low: {
       border: 'border-yellow-500',
       bg: darkMode ? 'bg-yellow-900/20' : 'bg-yellow-50',
       text: darkMode ? 'text-yellow-400' : 'text-yellow-600',
-      icon: '⏸️',
       pulse: ''
     }
   };
 
   const style = severityStyles[severity];
+  const isOverdue = alertType === 'overdue';
 
   return React.createElement('div', {
-    className: `rounded-lg p-4 ${style.bg} border-2 ${style.border} shadow-lg cursor-pointer transition-all transform hover:scale-105 hover:shadow-2xl ${isSelected ? 'ring-4 ring-blue-500 scale-105' : ''} ${isCritical && !isSelected ? style.pulse : ''}`,
+    className: `rounded-lg p-4 ${style.bg} border-2 ${style.border} shadow-lg cursor-pointer transition-all transform hover:scale-105 hover:shadow-2xl ${isSelected ? 'ring-4 ring-blue-500 scale-105' : ''} ${(isCritical || isOverdue) && !isSelected ? style.pulse : ''}`,
     onClick: () => onClick(alertType)
   },
     React.createElement('div', {
@@ -119,9 +128,9 @@ export function RiskAlertCard({ title, value, severity, icon, alertType, onClick
           className: `text-3xl font-bold ${style.text}`
         }, value)
       ),
-      React.createElement('div', {
-        className: `text-4xl ${isCritical ? style.pulse : ''}`
-      }, style.icon)
+      Icon && React.createElement(Icon, {
+        className: `w-12 h-12 ${style.text} ${(isCritical || isOverdue) ? style.pulse : ''}`
+      })
     )
   );
 }
@@ -240,7 +249,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       title: 'Total Projects',
       value: analyticsData.totalProjects,
       color: 'border-blue-500',
-      icon: '📊',
+      Icon: FolderKanban,
       filterType: 'total',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -251,7 +260,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       value: analyticsData.redCount,
       percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.redCount / analyticsData.totalProjects) * 100) : 0,
       color: 'border-red-500',
-      icon: '🔴',
+      Icon: Target,
       filterType: 'red',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -262,7 +271,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       value: analyticsData.amberCount,
       percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.amberCount / analyticsData.totalProjects) * 100) : 0,
       color: 'border-yellow-500',
-      icon: '🟡',
+      Icon: Target,
       filterType: 'amber',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -273,7 +282,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       value: analyticsData.greenCount,
       percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.greenCount / analyticsData.totalProjects) * 100) : 0,
       color: 'border-green-500',
-      icon: '🟢',
+      Icon: CheckSquare,
       filterType: 'green',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -284,7 +293,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       value: analyticsData.onHoldCount,
       percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.onHoldCount / analyticsData.totalProjects) * 100) : 0,
       color: 'border-orange-500',
-      icon: '⏸️',
+      Icon: PauseCircle,
       filterType: 'onhold',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -295,7 +304,7 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
       value: analyticsData.completedCount,
       percentage: analyticsData.totalProjects > 0 ? Math.round((analyticsData.completedCount / analyticsData.totalProjects) * 100) : 0,
       color: 'border-emerald-500',
-      icon: '✅',
+      Icon: CheckSquare,
       filterType: 'completed',
       onClick: handleKPICardClick,
       selectedKPIFilter,
@@ -309,40 +318,54 @@ export function KPICardsGrid({ analyticsData, selectedKPIFilter, handleKPICardCl
  */
 export function RiskAlertCardsGrid({ analyticsData, selectedRiskAlert, handleRiskAlertClick, darkMode }) {
   return React.createElement('div', {
-    className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'
+    className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6'
   },
     React.createElement(RiskAlertCard, {
-      title: 'Expiring ≤ 7 Days',
+      title: 'Past Deadline',
+      value: analyticsData.overdueRiskCount,
+      severity: 'overdue',
+      Icon: Activity,
+      alertType: 'overdue',
+      onClick: handleRiskAlertClick,
+      selectedRiskAlert,
+      darkMode
+    }),
+    React.createElement(RiskAlertCard, {
+      title: '0-4 Days',
       value: analyticsData.criticalRiskCount,
       severity: 'critical',
+      Icon: Target,
       alertType: 'critical',
       onClick: handleRiskAlertClick,
       selectedRiskAlert,
       darkMode
     }),
     React.createElement(RiskAlertCard, {
-      title: 'All Red Projects',
+      title: '5-14 Days',
       value: analyticsData.highRiskCount,
       severity: 'high',
+      Icon: Target,
       alertType: 'high',
       onClick: handleRiskAlertClick,
       selectedRiskAlert,
       darkMode
     }),
     React.createElement(RiskAlertCard, {
-      title: 'All Amber Projects',
+      title: '10-15 Days',
       value: analyticsData.mediumRiskCount,
       severity: 'medium',
+      Icon: Target,
       alertType: 'medium',
       onClick: handleRiskAlertClick,
       selectedRiskAlert,
       darkMode
     }),
     React.createElement(RiskAlertCard, {
-      title: 'On Hold Projects',
-      value: analyticsData.onHoldRiskCount,
+      title: 'On Hold + 16-21 Days',
+      value: analyticsData.lowRiskCount,
       severity: 'low',
-      alertType: 'onhold',
+      Icon: PauseCircle,
+      alertType: 'low',
       onClick: handleRiskAlertClick,
       selectedRiskAlert,
       darkMode
@@ -374,6 +397,82 @@ export function PipelineStatusCardsGrid({
         selectedPipelineStatus,
         darkMode
       })
+    )
+  );
+}
+
+/**
+ * Team Member Card Component (for BP/PM in Active Projects section)
+ * Similar to Pipeline cards but smaller
+ */
+export function TeamMemberCard({
+  name,
+  count,
+  projects,
+  totalActive,
+  type,
+  isSelected,
+  onClick,
+  darkMode
+}) {
+  const Icon = type === 'bp' ? Users : User;
+  const gradient = type === 'bp' ? 'from-blue-500 to-blue-600' : 'from-purple-500 to-purple-600';
+  const borderColor = type === 'bp' ? 'border-blue-500' : 'border-purple-500';
+
+  return React.createElement('div', {
+    className: `relative rounded-lg p-4 ${darkMode ? 'bg-slate-700' : 'bg-white'} border-2 ${borderColor} shadow-md cursor-pointer transition-all transform hover:scale-105 hover:shadow-xl ${isSelected ? 'ring-4 ring-blue-500 scale-105' : ''}`,
+    onClick
+  },
+    // Icon badge
+    React.createElement('div', {
+      className: `absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center shadow-lg`
+    },
+      React.createElement(Icon, { className: 'w-5 h-5 text-white' })
+    ),
+
+    // Main content
+    React.createElement('div', {
+      className: 'mb-3'
+    },
+      React.createElement('div', {
+        className: `text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-1 truncate pr-8`
+      }, name),
+      React.createElement('div', {
+        className: `text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`
+      }, count),
+      React.createElement('div', {
+        className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`
+      }, `${Math.round((count / totalActive) * 100)}% of active`)
+    ),
+
+    // Progress bar
+    React.createElement('div', {
+      className: 'mb-3'
+    },
+      React.createElement('div', {
+        className: `w-full h-1.5 ${darkMode ? 'bg-slate-600' : 'bg-gray-200'} rounded-full overflow-hidden`
+      },
+        React.createElement('div', {
+          className: `h-full bg-gradient-to-r ${gradient} transition-all duration-500`,
+          style: { width: `${Math.min((count / totalActive) * 100, 100)}%` }
+        })
+      )
+    ),
+
+    // Project previews
+    projects && projects.length > 0 && React.createElement('div', {
+      className: 'space-y-1'
+    },
+      projects.slice(0, 2).map((project, idx) =>
+        React.createElement('div', {
+          key: idx,
+          className: `text-xs px-2 py-1 rounded ${darkMode ? 'bg-slate-600 text-gray-300' : 'bg-gray-100 text-gray-700'} truncate`,
+          title: project.name
+        }, `• ${project.name}`)
+      ),
+      projects.length > 2 && React.createElement('div', {
+        className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'} pl-2`
+      }, `+${projects.length - 2} more...`)
     )
   );
 }
