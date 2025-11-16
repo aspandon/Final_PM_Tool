@@ -611,12 +611,7 @@ export function SlideViewer({ project, slideData, darkMode }) {
               )
             )
           )
-        ),
-
-        // Footer - Slide number
-        React.createElement('div', {
-          className: 'absolute bottom-2 right-4 text-xs text-gray-500'
-        }, '1/1')
+        )
       )
     )
   );
