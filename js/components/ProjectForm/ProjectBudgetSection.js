@@ -251,10 +251,10 @@ export function ProjectBudgetSection({
           className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white/30'} border ${darkMode ? 'border-slate-600' : 'border-sky-200'}`
         },
           React.createElement('div', {
-            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1`
+            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1 text-center`
           }, 'Total CAPEX'),
           React.createElement('div', {
-            className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-sky-700'}`
+            className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-sky-700'} text-center`
           }, formatNumber(budgetTotals.totalCapex))
         ),
 
@@ -263,10 +263,10 @@ export function ProjectBudgetSection({
           className: `p-2 rounded ${darkMode ? 'bg-slate-800' : 'bg-white/30'} border ${darkMode ? 'border-slate-600' : 'border-sky-200'}`
         },
           React.createElement('div', {
-            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1`
+            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1 text-center`
           }, 'Total OPEX'),
           React.createElement('div', {
-            className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-sky-700'}`
+            className: `text-lg font-bold ${darkMode ? 'text-purple-300' : 'text-sky-700'} text-center`
           }, formatNumber(budgetTotals.totalOpex))
         ),
 
@@ -275,7 +275,7 @@ export function ProjectBudgetSection({
           className: `p-2 rounded ${darkMode ? 'bg-gradient-to-br from-slate-800 to-slate-700' : 'bg-sky-50/20'} border-2 ${darkMode ? 'border-purple-500' : 'border-sky-300'}`
         },
           React.createElement('div', {
-            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1 flex items-center gap-1`
+            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1 flex items-center justify-center gap-1`
           },
             React.createElement(Euro, {
               className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
@@ -283,7 +283,7 @@ export function ProjectBudgetSection({
             'TOTAL BUDGET'
           ),
           React.createElement('div', {
-            className: `text-xl font-bold ${darkMode ? 'text-purple-400' : 'text-sky-800'}`
+            className: `text-xl font-bold ${darkMode ? 'text-purple-400' : 'text-sky-800'} text-center`
           }, formatNumber(budgetTotals.totalBudget))
         ),
 
@@ -296,7 +296,7 @@ export function ProjectBudgetSection({
           }`
         },
           React.createElement('div', {
-            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1 flex items-center gap-1`
+            className: `text-xs font-bold ${darkMode ? 'text-purple-300' : 'text-sky-900'} mb-1 flex items-center justify-center gap-1`
           },
             React.createElement(Euro, {
               className: `w-3 h-3 ${darkMode ? 'text-purple-400' : 'text-sky-600'}`
@@ -308,7 +308,7 @@ export function ProjectBudgetSection({
               budgetTotals.totalRemainingBudget < 0
                 ? darkMode ? 'text-red-400' : 'text-red-700'
                 : darkMode ? 'text-emerald-400' : 'text-emerald-700'
-            }`
+            } text-center`
           }, formatNumber(budgetTotals.totalRemainingBudget))
         )
       )
