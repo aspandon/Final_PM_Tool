@@ -974,7 +974,6 @@ function GanttChart() {
   const renderSlidesView = () => {
     return React.createElement(Slides, {
       projects,
-      onUpdateProject: handleUpdateProject,
       darkMode
     });
   };

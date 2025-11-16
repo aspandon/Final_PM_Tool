@@ -10,7 +10,7 @@ const { useState, useEffect, useMemo } = React;
  * Slides Component
  * Manages slide creation and viewing for projects under Implementation status
  */
-export function Slides({ projects, onUpdateProject, darkMode }) {
+export function Slides({ projects, darkMode }) {
   const [slidesData, setSlidesData] = useState({});
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [viewMode, setViewMode] = useState('edit'); // 'edit' or 'view'
