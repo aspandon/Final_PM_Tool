@@ -12,7 +12,7 @@ import {
   PipelineStatusCardsGrid,
   TeamMemberCard
 } from './ReportingSummary.js';
-import { Target, TrendingUp, Users } from '../../shared/icons/index.js';
+import { Target, TrendingUp, Users, User } from '../../shared/icons/index.js';
 
 /**
  * Calculate RAG status based on finish date
@@ -956,63 +956,171 @@ export function Reporting({
         className: `mb-6 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
       }, `Showing ${analyticsData.activeProjects.length} active projects currently being worked on (excluding On Hold, Backlog, and Done)`),
 
-      // Grid with BP and PM columns using pipeline-style cards
+      // Project Managers Section
       React.createElement('div', {
-        className: 'grid grid-cols-1 lg:grid-cols-2 gap-6'
+        className: 'mb-8'
       },
-        // Business Partners Column
-        React.createElement('div', null,
-          React.createElement('h4', {
-            className: `text-lg font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-          }, 'By Business Partner'),
-          React.createElement('div', {
-            className: 'grid grid-cols-1 md:grid-cols-2 gap-4'
-          },
-            analyticsData.bpSummary.length > 0
-              ? analyticsData.bpSummary.map((bp, idx) =>
-                  React.createElement(TeamMemberCard, {
-                    key: idx,
-                    name: bp.name,
-                    count: bp.count,
-                    projects: bp.projects,
-                    totalActive: analyticsData.activeProjects.length,
-                    type: 'bp',
-                    isSelected: selectedBPorPM?.type === 'bp' && selectedBPorPM?.name === bp.name,
-                    onClick: () => setSelectedBPorPM(selectedBPorPM?.type === 'bp' && selectedBPorPM?.name === bp.name ? null : { type: 'bp', name: bp.name }),
-                    darkMode
-                  })
-                )
-              : React.createElement('div', {
-                  className: `text-center py-8 col-span-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
-                }, 'No active projects assigned to Business Partners')
-          )
-        ),
+        React.createElement('h4', {
+          className: `text-lg font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+        }, 'By Project Manager'),
+        React.createElement('div', {
+          className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+        },
+          analyticsData.pmSummary.length > 0
+            ? analyticsData.pmSummary.map((pm, idx) =>
+                React.createElement(TeamMemberCard, {
+                  key: idx,
+                  name: pm.name,
+                  count: pm.count,
+                  projects: pm.projects,
+                  totalActive: analyticsData.activeProjects.length,
+                  type: 'pm',
+                  isSelected: selectedBPorPM?.type === 'pm' && selectedBPorPM?.name === pm.name,
+                  onClick: () => setSelectedBPorPM(selectedBPorPM?.type === 'pm' && selectedBPorPM?.name === pm.name ? null : { type: 'pm', name: pm.name }),
+                  darkMode
+                })
+              )
+            : React.createElement('div', {
+                className: `text-center py-8 col-span-full ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+              }, 'No active projects assigned to Project Managers')
+        )
+      ),
 
-        // Project Managers Column
-        React.createElement('div', null,
-          React.createElement('h4', {
-            className: `text-lg font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
-          }, 'By Project Manager'),
+      // Business Partners Section
+      React.createElement('div', {
+        className: 'mb-8'
+      },
+        React.createElement('h4', {
+          className: `text-lg font-bold mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+        }, 'By Business Partner'),
+        React.createElement('div', {
+          className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+        },
+          analyticsData.bpSummary.length > 0
+            ? analyticsData.bpSummary.map((bp, idx) =>
+                React.createElement(TeamMemberCard, {
+                  key: idx,
+                  name: bp.name,
+                  count: bp.count,
+                  projects: bp.projects,
+                  totalActive: analyticsData.activeProjects.length,
+                  type: 'bp',
+                  isSelected: selectedBPorPM?.type === 'bp' && selectedBPorPM?.name === bp.name,
+                  onClick: () => setSelectedBPorPM(selectedBPorPM?.type === 'bp' && selectedBPorPM?.name === bp.name ? null : { type: 'bp', name: bp.name }),
+                  darkMode
+                })
+              )
+            : React.createElement('div', {
+                className: `text-center py-8 col-span-full ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+              }, 'No active projects assigned to Business Partners')
+        )
+      ),
+
+      // Summary Cards Section
+      React.createElement('div', {
+        className: 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6'
+      },
+        // All Projects by Project Manager Card
+        React.createElement('div', {
+          className: `rounded-lg p-6 ${darkMode ? 'bg-slate-700' : 'bg-white'} border-2 border-purple-500 shadow-lg`
+        },
           React.createElement('div', {
-            className: 'grid grid-cols-1 md:grid-cols-2 gap-4'
+            className: 'flex items-center gap-3 mb-4'
+          },
+            React.createElement('div', {
+              className: 'w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center'
+            },
+              React.createElement(User, { className: 'w-6 h-6 text-white' })
+            ),
+            React.createElement('div', null,
+              React.createElement('h5', {
+                className: `text-lg font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+              }, 'All Projects by Project Manager'),
+              React.createElement('p', {
+                className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+              }, `${analyticsData.pmSummary.length} Project Managers managing ${analyticsData.activeProjects.length} active projects`)
+            )
+          ),
+          React.createElement('div', {
+            className: 'space-y-2 max-h-64 overflow-y-auto'
           },
             analyticsData.pmSummary.length > 0
               ? analyticsData.pmSummary.map((pm, idx) =>
-                  React.createElement(TeamMemberCard, {
+                  React.createElement('div', {
                     key: idx,
-                    name: pm.name,
-                    count: pm.count,
-                    projects: pm.projects,
-                    totalActive: analyticsData.activeProjects.length,
-                    type: 'pm',
-                    isSelected: selectedBPorPM?.type === 'pm' && selectedBPorPM?.name === pm.name,
-                    onClick: () => setSelectedBPorPM(selectedBPorPM?.type === 'pm' && selectedBPorPM?.name === pm.name ? null : { type: 'pm', name: pm.name }),
-                    darkMode
-                  })
+                    className: `p-3 rounded-lg ${darkMode ? 'bg-slate-600' : 'bg-gray-100'} flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-purple-500 transition-all`,
+                    onClick: () => setSelectedBPorPM({ type: 'pm', name: pm.name })
+                  },
+                    React.createElement('div', {
+                      className: 'flex-1'
+                    },
+                      React.createElement('div', {
+                        className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+                      }, pm.name),
+                      React.createElement('div', {
+                        className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`
+                      }, pm.projects.slice(0, 2).map(p => p.name).join(', ') + (pm.projects.length > 2 ? ` +${pm.projects.length - 2} more` : ''))
+                    ),
+                    React.createElement('div', {
+                      className: `text-2xl font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
+                    }, pm.count)
+                  )
                 )
               : React.createElement('div', {
-                  className: `text-center py-8 col-span-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
-                }, 'No active projects assigned to Project Managers')
+                  className: `text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+                }, 'No Project Managers assigned')
+          )
+        ),
+
+        // All Projects by Business Partner Card
+        React.createElement('div', {
+          className: `rounded-lg p-6 ${darkMode ? 'bg-slate-700' : 'bg-white'} border-2 border-blue-500 shadow-lg`
+        },
+          React.createElement('div', {
+            className: 'flex items-center gap-3 mb-4'
+          },
+            React.createElement('div', {
+              className: 'w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center'
+            },
+              React.createElement(Users, { className: 'w-6 h-6 text-white' })
+            ),
+            React.createElement('div', null,
+              React.createElement('h5', {
+                className: `text-lg font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+              }, 'All Projects by Business Partner'),
+              React.createElement('p', {
+                className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+              }, `${analyticsData.bpSummary.length} Business Partners managing ${analyticsData.activeProjects.length} active projects`)
+            )
+          ),
+          React.createElement('div', {
+            className: 'space-y-2 max-h-64 overflow-y-auto'
+          },
+            analyticsData.bpSummary.length > 0
+              ? analyticsData.bpSummary.map((bp, idx) =>
+                  React.createElement('div', {
+                    key: idx,
+                    className: `p-3 rounded-lg ${darkMode ? 'bg-slate-600' : 'bg-gray-100'} flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all`,
+                    onClick: () => setSelectedBPorPM({ type: 'bp', name: bp.name })
+                  },
+                    React.createElement('div', {
+                      className: 'flex-1'
+                    },
+                      React.createElement('div', {
+                        className: `font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`
+                      }, bp.name),
+                      React.createElement('div', {
+                        className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`
+                      }, bp.projects.slice(0, 2).map(p => p.name).join(', ') + (bp.projects.length > 2 ? ` +${bp.projects.length - 2} more` : ''))
+                    ),
+                    React.createElement('div', {
+                      className: `text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+                    }, bp.count)
+                  )
+                )
+              : React.createElement('div', {
+                  className: `text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+                }, 'No Business Partners assigned')
           )
         )
       ),
