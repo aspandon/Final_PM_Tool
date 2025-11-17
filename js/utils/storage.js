@@ -5,6 +5,7 @@
  */
 
 import { supabase } from './supabaseClient.js';
+import { getCurrentUser } from './auth.js';
 
 const STORAGE_KEYS = {
   PROJECTS: 'pm_tool_projects',
@@ -252,7 +253,9 @@ export const clearAllData = async () => {
     // Get shared record IDs
     const projectsId = localStorage.getItem(SHARED_RECORD_KEY);
     const actionsId = localStorage.getItem(`${SHARED_RECORD_KEY}_actions`);
-    const tasksId = localStorage.getItem(`${SHARED_RECORD_KEY}_tasks`);
+
+    // Get current user for user-specific tasks
+    const user = await getCurrentUser();
 
     // Delete from Supabase if exists
     if (projectsId) {
@@ -261,8 +264,9 @@ export const clearAllData = async () => {
     if (actionsId) {
       await supabase.from('actions').delete().eq('id', actionsId);
     }
-    if (tasksId) {
-      await supabase.from('tasks').delete().eq('id', tasksId);
+    // Delete user-specific tasks
+    if (user) {
+      await supabase.from('tasks').delete().eq('user_id', user.id);
     }
 
     // Clear localStorage
@@ -271,7 +275,12 @@ export const clearAllData = async () => {
     });
     localStorage.removeItem(SHARED_RECORD_KEY);
     localStorage.removeItem(`${SHARED_RECORD_KEY}_actions`);
-    localStorage.removeItem(`${SHARED_RECORD_KEY}_tasks`);
+
+    // Clear user-specific tasks from localStorage
+    if (user) {
+      const userTasksKey = `${STORAGE_KEYS.TASKS}_${user.id}`;
+      localStorage.removeItem(userTasksKey);
+    }
 
     console.log('All data cleared from Supabase and localStorage');
     return true;
@@ -442,64 +451,65 @@ export const clearAllActions = async () => {
   }
 };
 
-// ===== PERSONAL TASKS STORAGE =====
+// ===== PERSONAL TASKS STORAGE (USER-SPECIFIC) =====
 
 /**
- * Save tasks to Supabase and localStorage (shared record for all users)
+ * Save tasks to Supabase (user-specific record) and localStorage
  * @param {Array} tasks - Array of task objects
  */
 export const saveTasks = async (tasks) => {
   try {
-    // Save to localStorage as cache
-    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
-
-    // Get or find the shared record
-    let sharedRecordId = localStorage.getItem(`${SHARED_RECORD_KEY}_tasks`);
-
-    // If we don't have the shared record ID, try to find it
-    if (!sharedRecordId) {
-      const { data: existingRecords } = await supabase
-        .from('tasks')
-        .select('id')
-        .order('created_at', { ascending: true })
-        .limit(1);
-
-      if (existingRecords && existingRecords.length > 0) {
-        sharedRecordId = existingRecords[0].id;
-        localStorage.setItem(`${SHARED_RECORD_KEY}_tasks`, sharedRecordId);
-      }
+    // Get current user
+    const user = await getCurrentUser();
+    if (!user) {
+      console.error('No authenticated user - cannot save tasks');
+      return false;
     }
 
-    if (sharedRecordId) {
-      // Update the shared record
+    const userId = user.id;
+
+    // Save to localStorage as cache (user-specific key)
+    const userTasksKey = `${STORAGE_KEYS.TASKS}_${userId}`;
+    localStorage.setItem(userTasksKey, JSON.stringify(tasks));
+
+    // Check if user already has a tasks record in Supabase
+    const { data: existingRecords } = await supabase
+      .from('tasks')
+      .select('id')
+      .eq('user_id', userId)
+      .limit(1);
+
+    if (existingRecords && existingRecords.length > 0) {
+      // Update existing user record
       const { data, error } = await supabase
         .from('tasks')
-        .update({ data: tasks })
-        .eq('id', sharedRecordId)
+        .update({
+          data: tasks,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
         .select();
 
       if (error) {
-        console.error('Error updating shared tasks record in Supabase:', error);
+        console.error('Error updating user tasks in Supabase:', error);
         return true; // Still return true since localStorage worked
       }
-      console.log('Shared tasks record updated in Supabase');
+      console.log(`User tasks updated in Supabase (user: ${user.email})`);
     } else {
-      // Create the shared record (first time)
+      // Create new user-specific record
       const { data, error } = await supabase
         .from('tasks')
-        .insert([{ data: tasks }])
+        .insert([{
+          user_id: userId,
+          data: tasks
+        }])
         .select();
 
       if (error) {
-        console.error('Error creating shared tasks record in Supabase:', error);
+        console.error('Error creating user tasks in Supabase:', error);
         return true; // Still return true since localStorage worked
       }
-
-      // Store the shared record ID
-      if (data && data[0]) {
-        localStorage.setItem(`${SHARED_RECORD_KEY}_tasks`, data[0].id);
-        console.log('Shared tasks record created in Supabase with ID:', data[0].id);
-      }
+      console.log(`User tasks created in Supabase (user: ${user.email})`);
     }
 
     return true;
@@ -510,64 +520,94 @@ export const saveTasks = async (tasks) => {
 };
 
 /**
- * Load tasks from Supabase shared record (or localStorage fallback)
+ * Load tasks from Supabase (user-specific record) or localStorage fallback
  * @returns {Array} Array of task objects or empty array
  */
 export const loadTasks = async () => {
   try {
-    // Load the shared record (oldest record = first created)
+    // Get current user
+    const user = await getCurrentUser();
+    if (!user) {
+      console.error('No authenticated user - cannot load tasks');
+      return [];
+    }
+
+    const userId = user.id;
+    const userTasksKey = `${STORAGE_KEYS.TASKS}_${userId}`;
+
+    // Load user-specific tasks from Supabase
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
-      .order('created_at', { ascending: true }) // Get oldest first (shared record)
+      .eq('user_id', userId)
       .limit(1);
 
     if (error) {
-      console.error('Error loading shared tasks record from Supabase:', error);
+      console.error('Error loading user tasks from Supabase:', error);
       // Fallback to localStorage
-      const stored = localStorage.getItem(STORAGE_KEYS.TASKS);
+      const stored = localStorage.getItem(userTasksKey);
       return stored ? JSON.parse(stored) : [];
     }
 
     if (data && data.length > 0) {
-      const tasks = data[0].data;
-      // Cache the shared record ID
-      localStorage.setItem(`${SHARED_RECORD_KEY}_tasks`, data[0].id);
+      const tasks = data[0].data || [];
       // Cache tasks in localStorage
-      localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
-      console.log('Shared tasks record loaded from Supabase (ID:', data[0].id, ')');
+      localStorage.setItem(userTasksKey, JSON.stringify(tasks));
+      console.log(`User tasks loaded from Supabase (user: ${user.email}, count: ${tasks.length})`);
       return tasks;
     }
 
     // No data in Supabase, check localStorage
-    const stored = localStorage.getItem(STORAGE_KEYS.TASKS);
-    return stored ? JSON.parse(stored) : [];
+    const stored = localStorage.getItem(userTasksKey);
+    if (stored) {
+      const tasks = JSON.parse(stored);
+      console.log(`User tasks loaded from localStorage cache (user: ${user.email}, count: ${tasks.length})`);
+      return tasks;
+    }
+
+    return [];
   } catch (error) {
     console.error('Error loading tasks:', error);
     // Fallback to localStorage
-    const stored = localStorage.getItem(STORAGE_KEYS.TASKS);
-    return stored ? JSON.parse(stored) : [];
+    const user = await getCurrentUser();
+    if (user) {
+      const userTasksKey = `${STORAGE_KEYS.TASKS}_${user.id}`;
+      const stored = localStorage.getItem(userTasksKey);
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
   }
 };
 
 /**
- * Clear all personal tasks data from both Supabase and localStorage
+ * Clear current user's personal tasks from both Supabase and localStorage
  */
 export const clearAllTasks = async () => {
   try {
-    // Get Supabase ID
-    const tasksId = localStorage.getItem(`${SHARED_RECORD_KEY}_tasks`);
-
-    // Delete from Supabase if exists
-    if (tasksId) {
-      await supabase.from('tasks').delete().eq('id', tasksId);
+    // Get current user
+    const user = await getCurrentUser();
+    if (!user) {
+      console.error('No authenticated user - cannot clear tasks');
+      return false;
     }
 
-    // Clear localStorage
-    localStorage.removeItem(STORAGE_KEYS.TASKS);
-    localStorage.removeItem(`${SHARED_RECORD_KEY}_tasks`);
+    const userId = user.id;
+    const userTasksKey = `${STORAGE_KEYS.TASKS}_${userId}`;
 
-    console.log('Tasks cleared from Supabase and localStorage');
+    // Delete user's tasks from Supabase
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error clearing user tasks from Supabase:', error);
+    }
+
+    // Clear user's tasks from localStorage
+    localStorage.removeItem(userTasksKey);
+
+    console.log(`User tasks cleared (user: ${user.email})`);
     return true;
   } catch (error) {
     console.error('Error clearing tasks:', error);
